@@ -1,0 +1,33 @@
+language: android
+android:
+ components:
+  - android-23
+  - build-tools
+  - platform-tools
+  - tools
+addons:
+ apt:
+  packages:
+   - sshpass
+
+before_install:
+ - . $HOME/.nvm/nvm.sh
+ - nvm install 4.2
+ - nvm use 4.2
+
+install:
+ - npm install --production
+ - npm install browserify node-lessify uglifyify svg-to-png
+ - npm install cordova -g
+
+script:
+ - npm run merge
+ - sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $DEPLOY_USER@$DEPLOY_HOST mkdir -p $DEPLOY_PATH
+ - sshpass -e scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null dist/allin1.html $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+ - npm run cordova
+ - cd cordova
+ - cordova platform add android
+ - cordova build android --release
+ - cd platforms/android/build/outputs/apk
+ - mv android-release-unsigned.apk app.apk
+ - sshpass -e scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null app.apk $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
