@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="com.red_folder.phonegap.plugin.backgroundservice.sample"
+        id="com.lalalic.wetravel"
         version="2.0.0">
 
-    <name>photo taken position</name>
+    <name>Photo taken position</name>
 
     <description>
-        content observer to get photo taken position
+        Photo taken position
     </description>
 
     <license>Apache 2.0</license>
@@ -36,7 +36,7 @@
             
         </config-file>
         
-        <source-file src="src/com/lalalic/wetravel/PhotoPos.java" target-dir="src/com/lalalic/wetravel" />
+        <source-file src="src/android/com/lalalic/wetravel/PhotoPos.java" target-dir="src/com/lalalic/wetravel" />
     </platform>
 	
 </plugin>

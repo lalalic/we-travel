@@ -17,6 +17,7 @@
         <variable name="APP_ID" value="xx" />
     </plugin>
     <plugin name="cordova-plugin-bgs" spec="https://github.com/Red-Folder/bgs-core.git#master" />
+	<plugin name="cordova-plugin-photo-taken-position" spec="../plugins/photoPos" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
