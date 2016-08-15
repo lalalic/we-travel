@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="lalalic.superdaddy" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>超级奶爸</name>
+<widget id="lalalic.wetravel" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>we-travel</name>
     <description>
-        陪娃娃快乐成长
+        生命是一趟旅程
     </description>
     <author email="lalalic@139.com">
         lalalic
@@ -16,6 +16,7 @@
     <plugin name="cordova-plugin-wechat">
         <variable name="APP_ID" value="xx" />
     </plugin>
+    <plugin name="cordova-plugin-bgs" spce="https://github.com/Red-Folder/bgs-core.git" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -30,6 +31,5 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <icon src="res/icon.png"/>
-	<hook type="before_prepare" src="../scripts/icon.js" />
+    <icon src="res/icon.png" />
 </widget>
