@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        id="com.lalalic.wetravel"
-        version="2.0.0">
+        id="photopos"
+        version="1.0.0">
 
     <name>Photo taken position</name>
 
@@ -16,27 +16,45 @@
         <engine name="cordova" version=">=3.0.0"/>
     </engines>
 
-	<!-- Load in the core background service -->
-	<dependency id="com.red_folder.phonegap.plugin.backgroundservice" url="https://github.com/Red-Folder/bgs-core.git"/>
-
     <!-- android -->
     <platform name="android">
 
 		<js-module src="www/photoPos.js" name="PhotoPos">
 			<clobbers target="PhotoPos" />
 		</js-module>
-
-        <config-file target="AndroidManifest.xml" parent="/manifest/application">
-  
-            <service android:name="com.lalalic.wetravel.PhotoPos">
-                <intent-filter>         
-                    <action android:name="com.lalalic.wetravel.PhotoPos"/> 
-                </intent-filter>     
-            </service>
-            
+		
+		<config-file target="res/xml/config.xml" parent="/*">
+            <feature name="PhotoPosPlugin">
+                <param name="android-package" value="com.lalalic.wetravel.PhotoPosPlugin"/>
+				<param name="onload" value="true" />
+            </feature>
         </config-file>
-        
+		
+		<config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+        </config-file>
+
+		
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <receiver android:name="com.lalalic.wetravel.PhotoPos">
+                <intent-filter>     
+                    <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                </intent-filter>
+				<intent-filter>
+					<action android:name="com.lalalic.wetravel.PhotoPos" />
+				</intent-filter>				
+            </receiver>
+			<service android:name="com.lalalic.wetravel.PhotoObserver"/>
+        </config-file>
+		
+		
+		
+		
+		
+		
         <source-file src="src/android/com/lalalic/wetravel/PhotoPos.java" target-dir="src/com/lalalic/wetravel" />
+		<source-file src="src/android/com/lalalic/wetravel/PhotoPosPlugin.java" target-dir="src/com/lalalic/wetravel" />
+		<source-file src="src/android/com/lalalic/wetravel/PhotoObserver.java" target-dir="src/com/lalalic/wetravel" />
     </platform>
 	
 </plugin>
