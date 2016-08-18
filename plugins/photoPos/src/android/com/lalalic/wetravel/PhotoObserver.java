@@ -72,7 +72,7 @@ public class PhotoObserver extends Service{
 			try{
 				ExifInterface exifInterface = new ExifInterface(file);
 				String time=exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
-				float[] loc=new float[2]
+				float[] loc=new float[2];
 				exifInterface.getLatLong(loc);
 				return file+";"+time+";"+loc[0]+";"+loc[1];//+";"+area;
 			}catch(Exception ex){

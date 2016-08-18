@@ -142,43 +142,73 @@ class Journey extends Component{
 		]
 	}
 	render(){
-		let {startedAt,name}=this.props.journey
+		let {startedAt}=this.props.journey
 		let {footprints}=this.state
 		let currentDate=null, all=[];
 		
-		footprints.forEach(({when,photo,note})=>{
+		footprints.forEach(footprint=>{
+			const {when,photo,note}=footprint
 			if(currentDate==null || !when.isSameDate(currentDate)){
 				currentDate=when
 				let day=currentDate.relative(startedAt)+1
-				all.push(<Step key={day} disabled={false}>
-						<StepLabel icon={`${day}`}>
-							{currentDate.smartFormat("今天")}
-						</StepLabel>
-					</Step>)
+				all.push(<Day key={day} day={day} date={currentDate}/>)
 			}
-			all.push(
-				<Step key={when} completed={true} active={true}>
-					<StepLabel icon={"."}>
-						<div>
-							<time>{when.format('HH:mm')}</time>-
-							<span>{note}</span>
-						</div>
-					</StepLabel>
-					<StepContent>
-						<p>
-							<img style={{height:250}} src={photo}/>
-						</p>
-					</StepContent>
-				</Step>
-			)
+			all.push(<Footprint key={when} data={footprint}/>)
 		})
 		return (
 			<Stepper orientation="vertical">
-				<Step>
-					<StepLabel icon=" ">{name}</StepLabel>
-				</Step>
+				<Title journey={this.props.journey}/>
 				{all}
 			</Stepper>
+		)
+	}
+}
+
+import IconButton from 'material-ui/IconButton';
+import IconMore from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
+class Title extends Component{
+	render(){
+		const {name}=this.props.journey
+		return (
+			<Step>
+				<StepLabel icon="*">
+					<span>{name}</span><IconMore/>
+				</StepLabel>
+			</Step>
+		)
+	}
+}
+
+class Day extends Component{
+	render(){
+		const {day,date}=this.props
+		return (
+			<Step disabled={false}>
+				<StepLabel icon={`${day}`}>
+					{date.smartFormat("今天")}
+				</StepLabel>
+			</Step>
+		)
+	}
+}
+
+class Footprint extends Component{
+	render(){
+		const {when,photo,note}=this.props.data
+		return  (
+			<Step completed={true} active={true}>
+				<StepLabel icon={"."}>
+					<div>
+						<time>{when.format('HH:mm')}</time>-
+						<span>{note}</span>
+					</div>
+				</StepLabel>
+				<StepContent>
+					<p>
+						<img style={{height:250}} src={photo}/>
+					</p>
+				</StepContent>
+			</Step>
 		)
 	}
 }
