@@ -44,6 +44,7 @@ import ProfileUI from "qili-app/lib/user-profile"
 import LifeUI from "./life"
 import ExploreUI from "./explore"
 import PublishUI from "./publish"
+import JourneyUI from "./journey"
  
 Main.render(
 <Route path="/" component={Main}>
@@ -56,6 +57,11 @@ Main.render(
 	</Route>
 	
 	<Route path="publish" component={PublishUI}/>
+	
+	<Route path="journey">
+		<Route path="_new" component={JourneyUI.Creator}/>
+		<Route path=":id" component={JourneyUI}/>
+	</Route>
 </Route>
 )
 
@@ -74,7 +80,9 @@ Object.assign(Date.prototype,{
 	relative(d){
 		return Math.floor((this.toDate().getTime()-d.toDate().getTime())/(24*60*60*1000))
 	},
-	
+	relativeDate(days){
+		return new Date(this.getTime()+24*60*60*1000*days)
+	},
 	format(tmpl="y-M-d"){
 		let value={
 			y:this.getFullYear(),

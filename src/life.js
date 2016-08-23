@@ -1,17 +1,18 @@
 import React, {Component, PropTypes} from 'react'
 import {UI} from "qili-app"
 
-import {FloatingActionButton} from "material-ui"
-import {
-  Step,
-  Stepper,
-  StepLabel,
-  StepContent,
-} from 'material-ui/Stepper'
+import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog} from "material-ui"
+import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
+
 import Logo from 'material-ui/svg-icons/maps/directions-walk'
 import IconPublish from "material-ui/svg-icons/image/camera-roll"
+import IconMore from 'material-ui/svg-icons/navigation/more-horiz'
+import IconAdd from 'material-ui/svg-icons/content/add'
 
-const {Empty}=UI
+import {Journey as JourneyDB, Footprint as FootprintDB} from "./db"
+import Chipper from "./components/chipper"
+
+const {Empty, Photo}=UI
 
 export default class extends Component{
 	state={
@@ -33,15 +34,23 @@ export default class extends Component{
 		if(memory.length || active.length){
 			publisher=(
 				<FloatingActionButton 
-					className="floating sticky top right"
+					className="floating sticky bottom right"
 					mini={true} onClick={e=>this.context.router.push("publish",{journey:active[0]})}>
 					<IconPublish/>$
 				</FloatingActionButton>
 			)
 		}
+		
 		return (
 		<div>
 			{publisher}
+			
+			<FloatingActionButton 
+				className="floating sticky top right"
+				mini={true} onClick={e=>this.context.router.push("journey/_new")}>
+				<IconAdd/>
+			</FloatingActionButton>
+			
 			{showHistory && memory.length && (
 				<Stepper orientation="vertical" activeStep={-1}>
 				{
@@ -56,13 +65,12 @@ export default class extends Component{
 			
 			{active.length && (
 				active.map(journey=>(
-					<Journey journey={journey}/>
+					<Journey key={journey} journey={journey}/>
 				))
 			)||null}
 			
 			{wish.length && (
 				<div>
-					<Empty icon={<Logo/>}>go, more journey</Empty>
 					<Stepper orientation="vertical" activeStep={-1} linear={false}>
 					{
 						wish.map(({name, startedAt})=>(
@@ -129,8 +137,6 @@ export default class extends Component{
 	}
 }
 
-import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card'
-import {FlatButton} from "material-ui"
 class Journey extends Component{
 	state={
 		itinerary:[],
@@ -143,49 +149,146 @@ class Journey extends Component{
 	}
 	render(){
 		let {startedAt}=this.props.journey
-		let {footprints}=this.state
-		let currentDate=null, all=[];
+		let {footprints, editing}=this.state
+		let currentDate=null, lastDay=0, all=[];
 		
 		footprints.forEach(footprint=>{
 			const {when,photo,note}=footprint
 			if(currentDate==null || !when.isSameDate(currentDate)){
 				currentDate=when
 				let day=currentDate.relative(startedAt)+1
-				all.push(<Day key={day} day={day} date={currentDate}/>)
+				while(lastDay<day){
+					lastDay++
+					let date=startedAt.relativeDate(lastDay-1)
+					all.push(<Day key={lastDay} day={lastDay} 
+						date={date}
+						onEdit={a=>this.setState({editing:{when:date}})}/>)
+				}
 			}
-			all.push(<Footprint key={when} data={footprint}/>)
+			all.push(<Footprint key={when} data={footprint} 
+				onEdit={a=>this.setState({editing:footprint})}/>)
 		})
 		return (
-			<Stepper orientation="vertical">
-				<Title journey={this.props.journey}/>
-				{all}
-			</Stepper>
+			<div>
+				<Stepper orientation="vertical">
+					<Title journey={this.props.journey}/>
+					{all}
+				</Stepper>
+				{editing && (<Editor footprint={editing} 
+					onSave={a=>this.onSave(a)} 
+					onCancel={a=>this.setState({editing:undefined})}/>)}
+			</div>
 		)
+	}
+	
+	onSave(footprint){
+		const {journey}=this.props
+		JourneyDB.upsert(footprint)
+			.then(a=>{
+				JourneyDB.emit("footprint.changed")
+			})
 	}
 }
 
-import IconButton from 'material-ui/IconButton';
-import IconMore from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
+
+class Editor extends Component{
+	render(){
+		const {footprint, onSave, onCancel}=this.props
+		const actions = [
+			  <FlatButton
+				label="关闭"
+				primary={false}
+				onTouchTap={onCancel}
+			  />,
+			  <FlatButton
+				label="保存"
+				primary={true}
+				onTouchTap={onSave}
+			  />,
+			];
+
+		var {note, photos=[]}=footprint,
+            styles={iconRatio:2/3, iconSize:{width:50, height:50}},
+            i=0,
+            uiPhotos=photos.map(function(photo){
+                return (<Photo key={photo} {...styles}
+                    onPhoto={(url)=>this.onPhoto(url,i++)}
+                    src={photo}/>)
+            })
+
+        if(uiPhotos.length<9)
+            uiPhotos.push((<Photo {...styles} onPhoto={this.onPhoto.bind(this)} key={Date.now()}/>))
+		
+		return (
+			<Dialog title={footprint.when.smartFormat()}
+				actions={actions}
+				modal={false}
+				open={true}
+				onRequestClose={onCancel}>
+				<div className="section">
+					<div style={{textAlign:"center"}}>{uiPhotos}</div>
+					<textarea
+						style={{width:"100%",border:0,height:100, fontSize:12, paddingTop:5, borderTop:"1px dotted lightgray"}}
+						placeholder="这一刻的想法"
+						defaultValue={footprint.note}/>
+					<Chipper chips={[
+						"早餐","午餐","晚餐","购物","门票","公交","飞机","的士",
+						{label:"特色交通"},
+						{label:"特色吃的"},
+						{label:"花销",type:"number"}
+						]}/>
+						
+					<Chipper chips={[
+						"太美了","无法呼吸","太壮观了","喜欢这里"
+						]}/>
+				</div>
+			</Dialog>
+		)
+	}
+	
+	onPhoto(url, index){
+        var {footprint}=this.props
+        if(footprint.photos.indexOf(url)!=-1){
+            this.forceUpdate()
+            return
+        }
+
+        if(index!=undefined)
+            footprint.photos.splice(index,1,url)
+        else{
+            footprint.photos.push(url)
+            this.forceUpdate()
+        }
+    }
+}
+
 class Title extends Component{
 	render(){
-		const {name}=this.props.journey
+		const {journey,onEdit}=this.props
+		const {name,_id}=journey
 		return (
 			<Step>
-				<StepLabel icon="*">
-					<span>{name}</span><IconMore/>
+				<StepLabel icon="*" onTouchTap={e=>this.context.router.push(`journey/${_id}`,{journey})}>
+					<span>{name}</span>
+					<IconMore/>
 				</StepLabel>
 			</Step>
 		)
+	}
+		
+	static contextTypes={
+		router: PropTypes.object
 	}
 }
 
 class Day extends Component{
 	render(){
-		const {day,date}=this.props
+		const {day,date, onEdit}=this.props
 		return (
 			<Step disabled={false}>
-				<StepLabel icon={`${day}`}>
-					{date.smartFormat("今天")}
+				<StepLabel icon={`${day}`} onTouchTap={onEdit}>
+					<span>{date.smartFormat("今天")}</span>
+					<IconMore/>
 				</StepLabel>
 			</Step>
 		)
@@ -194,14 +297,13 @@ class Day extends Component{
 
 class Footprint extends Component{
 	render(){
-		const {when,photo,note}=this.props.data
+		const {data: {when,photo,note}, onEdit}=this.props
 		return  (
 			<Step completed={true} active={true}>
-				<StepLabel icon={"."}>
-					<div>
-						<time>{when.format('HH:mm')}</time>-
-						<span>{note}</span>
-					</div>
+				<StepLabel icon={"."} onTouchTap={onEdit}>
+					<time>{when.format('HH:mm')}&nbsp;</time>
+					<span>{note}</span>
+					<IconMore/>
 				</StepLabel>
 				<StepContent>
 					<p>
