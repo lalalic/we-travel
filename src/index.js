@@ -45,8 +45,11 @@ import LifeUI from "./life"
 import ExploreUI from "./explore"
 import PublishUI from "./publish"
 import JourneyUI from "./journey"
- 
-Main.render(
+
+document.addEventListener('deviceready', function() {
+  alert(1)
+  debugger
+  Main.render(
 <Route path="/" component={Main}>
 	<IndexRoute component={LifeUI}/>
 	<Route path="explore" component={ExploreUI}/>
@@ -64,6 +67,8 @@ Main.render(
 	</Route>
 </Route>
 )
+});
+
 
 Object.assign(Date.prototype,{
 	toDate(){

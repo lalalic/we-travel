@@ -39,10 +39,15 @@ export default class Journey extends Component{
 				
 				<UI.CommandBar className="footbar"
                     items={["Back", 
+						{action:"Extract", label:"提取", onSelect: e=>this.extract(), icon:IconSave},
 						{action:"Save", label:"保存", onSelect:e=>this.add(), icon:IconSave}
 						]}/>
 			</div>
 		)
+	}
+	
+	extract(){
+		extractPosFromPhotos(alert)
 	}
 	
 	add(){

@@ -20,8 +20,6 @@ import android.content.Intent;
 import android.media.ExifInterface;
 
 public class PhotoObserver extends Service{
-	private final String TAG="we.travel";
-	
 	@Override
 	public void onCreate(){
 		super.onCreate();
@@ -47,7 +45,7 @@ public class PhotoObserver extends Service{
 		public Observer(Context context) {
 			super(null);
 			this.context=context;
-			Log.d(TAG, "PhotoObserver is started");
+			Log.d(PhotoPosPlugin.TAG, "PhotoObserver is started");
 		}
 
 		@Override
@@ -55,31 +53,18 @@ public class PhotoObserver extends Service{
 			super.onChange(selfChange);
 			
 			Cursor cursor = this.context.getContentResolver()
-				.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null,
-					null, "date_added DESC");
+				.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+						new String[]{MediaColumns.DATA,MediaColumns.MIME_TYPE,MediaStore.Images.ImageColumns.DATE_TAKEN},
+						null,
+						null,
+						"datetaken DESC");
 			if (cursor.moveToNext()) {
-				int dataColumn = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
-				String filePath = cursor.getString(dataColumn);
-				int mimeTypeColumn = cursor
-						.getColumnIndexOrThrow(MediaColumns.MIME_TYPE);
-				String mimeType = cursor.getString(mimeTypeColumn);
-				Log.d(TAG, "photo taken: "+this.readExif(filePath));
+				String filePath = cursor.getString(0);
+				String mimeType = cursor.getString(1);
+				int taken=cursor.getInt(2);
+				Log.d(PhotoPosPlugin.TAG, "photo taken: "+PhotoPosPlugin.readPosInExif(filePath));
 			}
 			cursor.close();
-		}
-		
-		private String readExif(String file){
-			try{
-				ExifInterface exifInterface = new ExifInterface(file);
-				String time=exifInterface.getAttribute(ExifInterface.TAG_DATETIME);
-				float[] loc=new float[2];
-				exifInterface.getLatLong(loc);
-				return file+";"+time+";"+loc[0]+";"+loc[1];//+";"+area;
-			}catch(Exception ex){
-				 ex.printStackTrace();
-				 Log.e(TAG, ex.getMessage());
-				 return file;
-			}
 		}
 	}
 }
