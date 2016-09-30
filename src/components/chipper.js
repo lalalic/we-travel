@@ -1,16 +1,46 @@
 import React, {Component, PropTypes} from "react"
 
-import {Chip, Avatar} from "material-ui"
+import {Chip, Avatar,Subheader} from "material-ui"
 import IconCheck from 'material-ui/svg-icons/navigation/check'
+import IconMore from 'material-ui/svg-icons/navigation/expand-more'
+import IconLess from 'material-ui/svg-icons/navigation/expand-less'
 
 export default class Chipper extends Component{
+	constructor(){
+		super(...arguments)
+		this.state={
+			open:this.props.autoOpen
+		}
+	}
 	render(){
-		const {chips=[], children, ...others}=this.props
+		const {chips=[], children, title, autoOpen=true, ...others}=this.props
+		const {open}=this.state
+		
+		let style={display: 'flex',flexWrap: 'wrap'}
+		let header=null, icon
+		
+		if(title){
+			if(!autoOpen){
+				let onClick=e=>this.setState({open:!this.state.open})
+				if(open)
+					icon=(<IconLess viewBox="0 0 24 12" color="lightgray" onClick={onClick}/>)
+				else
+					icon=(<IconMore viewBox="0 0 24 12" color="lightgray" onClick={onClick}/>)
+			}
+				
+			header=(<div style={{color:"lightgray"}}>{icon}{title}</div>)
+			
+			if(!open)
+				style.display="none"
+		}
 		
 		return (
-			<div style={{display: 'flex',flexWrap: 'wrap'}} {...others}>
-				{chips.map(chip=>this.achip(chip))}
-				{children}
+			<div>
+				{header}
+				<div style={style} {...others}>
+					{chips.map(chip=>this.achip(chip))}
+					{children}
+				</div>
 			</div>
 		)
 	}

@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from "react"
 import {UI} from "qili-app"
 
-import {TextField, DatePicker, Chip, Avatar} from "material-ui"
+import {TextField, DatePicker, Avatar, Divider} from "material-ui"
 
 import IconSave from "material-ui/svg-icons/file/cloud-done"
 import IconMap from "material-ui/svg-icons/maps/map"
@@ -23,10 +23,17 @@ export default class Journey extends Component{
 		return (
 			<div>
 				<div style={{padding:5}}>
-					<TextField hintText="名字" fullWidth={true}/>
-					<DatePicker ref="from" hintText="开始日期"/>
-					<DatePicker ref="to" hintText="结束日期"/>
+					<TextField ref="title" hintText="名字" fullWidth={true}/>
+					
+					<DatePicker ref="from" hintText="开始日期" autoOk={true}/>
+					
+					<DatePicker ref="to" hintText="结束日期" autoOk={true}/>
+					
+					<div><TextFieldWithIcon icon={<IconMap/>}/></div>
+					<br/>
 					<Chipper 
+						title="更多信息"
+						autoOpen={false}
 						chips={[
 								"徒步","自驾","自行车",
 								"挑战","放松","家庭","商务",
@@ -35,13 +42,9 @@ export default class Journey extends Component{
 								"海滩","人文","山水","都市","会友",
 								"蜜月","生日","周年庆"
 							]}/>
-					<TextFieldWithIcon fullWidth={true} 
-						value={waypoints.length}
-						icon={<IconMap/>}/>
+					<br/>
 					
-					<Chip style={{margin:4}}>住宿</Chip>
-					
-					<Search hintText="search"/>
+					<Search hintText="查找:看看大侠们的足迹好好规划一下" fullWidth={true}/>	
 				</div>
 				
 				<UI.CommandBar className="footbar"
