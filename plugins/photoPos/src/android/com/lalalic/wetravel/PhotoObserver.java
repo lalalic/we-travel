@@ -45,7 +45,7 @@ public class PhotoObserver extends Service{
 		public Observer(Context context) {
 			super(null);
 			this.context=context;
-			Log.d(PhotoPosPlugin.TAG, "PhotoObserver is started");
+			Log.i(PhotoPosPlugin.TAG, "PhotoPosObserver is started");
 		}
 
 		@Override
@@ -54,15 +54,29 @@ public class PhotoObserver extends Service{
 			
 			Cursor cursor = this.context.getContentResolver()
 				.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-						new String[]{MediaColumns.DATA,MediaColumns.MIME_TYPE,MediaStore.Images.ImageColumns.DATE_TAKEN},
-						null,
-						null,
+						new String[]{
+								MediaStore.MediaColumns.DATA
+								,MediaStore.Images.ImageColumns.DATE_TAKEN
+								,MediaStore.Images.ImageColumns.LATITUDE
+								,MediaStore.Images.ImageColumns.LONGITUDE
+						},
+						"mime_type=? and _data like ?",
+						new String[]{"image/jpeg","%DCIM/Camera%"},
 						"datetaken DESC");
 			if (cursor.moveToNext()) {
-				String filePath = cursor.getString(0);
-				String mimeType = cursor.getString(1);
-				int taken=cursor.getInt(2);
-				Log.d(PhotoPosPlugin.TAG, "photo taken: "+PhotoPosPlugin.readPosInExif(filePath));
+				int i=0;
+				String filePath = cursor.getString(i++);
+				long taken=cursor.getLong(i++);
+				float lat=cursor.getFloat(i++);
+				float lng=cursor.getFloat(i++);
+				float[] loc=null;
+				if(lat!=0 || lng!=0)
+					loc=new float[]{lat,lng};
+				else
+					loc=PhotoPosPlugin.readPosInExif(filePath);
+
+				if(loc!=null)
+					PhotoPosPlugin.save(this.context, loc, taken, filePath);
 			}
 			cursor.close();
 		}

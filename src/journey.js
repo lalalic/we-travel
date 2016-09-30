@@ -11,15 +11,21 @@ import TextFieldWithIcon from "./components/textFieldWithIcon"
 import Search from "./components/searchTextField"
 
 export default class Journey extends Component{
+	constructor(){
+		super(...arguments)
+		this.state={
+			waypoints:[]
+		}
+	}
 	render(){
 		const {journey}=this.props
-		
+		const {waypoints}=this.state
 		return (
 			<div>
 				<div style={{padding:5}}>
 					<TextField hintText="名字" fullWidth={true}/>
-					<DatePicker hintText="开始日期"/>
-					<DatePicker hintText="结束日期"/>
+					<DatePicker ref="from" hintText="开始日期"/>
+					<DatePicker ref="to" hintText="结束日期"/>
 					<Chipper 
 						chips={[
 								"徒步","自驾","自行车",
@@ -30,6 +36,7 @@ export default class Journey extends Component{
 								"蜜月","生日","周年庆"
 							]}/>
 					<TextFieldWithIcon fullWidth={true} 
+						value={waypoints.length}
 						icon={<IconMap/>}/>
 					
 					<Chip style={{margin:4}}>住宿</Chip>
@@ -47,7 +54,22 @@ export default class Journey extends Component{
 	}
 	
 	extract(){
-		extractPosFromPhotos(alert)
+		var waypoints=[],last
+		const {from,to}=this.refs
+		extractPosFromPhotos(from.getDate(), to.getDate(), waypoint=>{
+			switch(waypoint){
+			case 0:
+				this.setState({waypoints})
+				break
+			default:
+				if(last && last.lat==waypoint.lat && last.lng==waypoint.lng){
+					last.photos.push(waypoint.photos[0])
+				}else{
+					waypoints.push(last=waypoint);
+					(waypoints.length%100)==0 && this.setState({waypoints})
+				}
+			}
+		})
 	}
 	
 	add(){

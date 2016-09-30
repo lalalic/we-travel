@@ -22,43 +22,68 @@ import java.util.Date;
 public class PhotoPosPlugin extends CordovaPlugin{
 	public final static String TAG="we.travel";
 	
-	public String getServiceName(){
-		return "photoPos";
-	}
 	protected void pluginInitialize(){
 		this.cordova.getActivity().sendBroadcast(new Intent("com.lalalic.wetravel.PhotoPos"));
-		Log.d(TAG,"photoPos plugin initialized");
+		Log.i(TAG,"photoPos plugin initialized");
 	}
 
 	@Override
 	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
 		if("extract".equals(action)){
 			final Context context=this.cordova.getActivity().getApplicationContext();
-			final String from="0";
-			final String to= String.valueOf(new Date().getTime());
+			final long from=args.getLong(0);
+			final long to= args.getLong(1);
 			cordova.getThreadPool().execute(new Runnable() {
 				@Override
 				public void run() {
 					int counter=0;
-					Cursor cursor=context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-							new String[]{MediaStore.MediaColumns.DATA, MediaStore.MediaColumns.MIME_TYPE,MediaStore.Images.ImageColumns.DATE_TAKEN},
-							"datetaken>=? AND datetaken<=?",
-							new String[]{from,to},
-							"datetaken ASC");
-					while(cursor.moveToNext()){
-						String filePath = cursor.getString(0);
-						String mimeType = cursor.getString(1);
-						int taken=cursor.getInt(2);
-						String loc=PhotoPosPlugin.readPosInExif(filePath);
-						Log.e(TAG, "checking a photo");
-						if(loc.length()>0) {
-							Log.e(TAG+".GPS", "a photo taken at " + loc + " on " + taken);
-							counter++;
+					Cursor cursor=context.getContentResolver().query(
+							MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+							,new String[]{
+									MediaStore.MediaColumns.DATA
+									,MediaStore.Images.ImageColumns.DATE_TAKEN
+									,MediaStore.Images.ImageColumns.LATITUDE
+									,MediaStore.Images.ImageColumns.LONGITUDE
+							}
+							,"datetaken>=? AND datetaken<=? AND mime_type=? and _data like ?"
+							,new String[]{String.valueOf(from),String.valueOf(to),"image/jpeg", "%DCIM/Camera%"}
+							,null);
+					try{
+						while(cursor.moveToNext()){
+							int i=0;
+							String filePath = cursor.getString(i++);
+							long taken=cursor.getLong(i++);
+							float lat=cursor.getFloat(i++);
+							float lng=cursor.getFloat(i++);
+							float[] loc=null;
+							if(lat!=0 || lng!=0)
+								loc=new float[]{lat,lng};
+							else
+								loc=PhotoPosPlugin.readPosInExif(filePath);
+
+							if(loc!=null) {
+								Log.i(TAG+".GPS", "a photo taken at " + loc[0]+","+loc[1] + " on " + taken);
+								counter++;
+								PluginResult r=new PluginResult(PluginResult.Status.OK,new JSONObject()
+										.put("photos",new JSONArray().put(new JSONObject()
+											.put("file",filePath)
+											.put("taken",taken)))
+										.put("lat",loc[0])
+										.put("lng",loc[1]));
+								r.setKeepCallback(true);
+								callbackContext.sendPluginResult(r);
+							}
 						}
+						Log.d(TAG+".GPS", "found "+counter+" photos with position information");
+						callbackContext.success(0);
+					}catch(Exception ex){
+						Log.e(TAG,ex.getMessage(), ex);
+						callbackContext.error(ex.getMessage());
+					}finally{
+						cursor.close();
 					}
-					cursor.close();
-					Log.e(TAG+".GPS", "found "+counter);
-					callbackContext.success("found "+counter+" photos with latlng");
+					
+					
 				}
 			});
 			return true;
@@ -66,20 +91,20 @@ public class PhotoPosPlugin extends CordovaPlugin{
 		return false;
 	}
 
-
-	public static String readPosInExif(String file){
+	public static float[] readPosInExif(String file){
 		try{
 			ExifInterface exifInterface = new ExifInterface(file);
 			float[] loc=new float[2];
 			exifInterface.getLatLong(loc);
-			if(loc.length>0)
-				return file+";"+loc[0]+";"+loc[1];//+";"+area;
-			else
-				return "";
+			if(loc.length>0 && (loc[0]!=0 || loc[1]!=0))
+				return loc;
 		}catch(Exception ex){
-			ex.printStackTrace();
-			Log.e(TAG, ex.getMessage());
-			return file;
+			Log.e(TAG, ex.getMessage(),ex);
 		}
+		return null;
+	}
+
+	public static int save(Context ctx, float[] loc, long takentime, String filePath){
+		return 0;
 	}
 }

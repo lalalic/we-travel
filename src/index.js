@@ -47,26 +47,24 @@ import PublishUI from "./publish"
 import JourneyUI from "./journey"
 
 document.addEventListener('deviceready', function() {
-  alert(1)
-  debugger
   Main.render(
-<Route path="/" component={Main}>
-	<IndexRoute component={LifeUI}/>
-	<Route path="explore" component={ExploreUI}/>
-	<Route path="my">
-		<IndexRoute component={MyUI}/>
-		<Route path="setting" component={SettingUI} />
-		<Route path="profile" component={ProfileUI}/>
+	<Route path="/" component={Main}>
+		<IndexRoute component={LifeUI}/>
+		<Route path="explore" component={ExploreUI}/>
+		<Route path="my">
+			<IndexRoute component={MyUI}/>
+			<Route path="setting" component={SettingUI} />
+			<Route path="profile" component={ProfileUI}/>
+		</Route>
+		
+		<Route path="publish" component={PublishUI}/>
+		
+		<Route path="journey">
+			<Route path="_new" component={JourneyUI.Creator}/>
+			<Route path=":id" component={JourneyUI}/>
+		</Route>
 	</Route>
-	
-	<Route path="publish" component={PublishUI}/>
-	
-	<Route path="journey">
-		<Route path="_new" component={JourneyUI.Creator}/>
-		<Route path=":id" component={JourneyUI}/>
-	</Route>
-</Route>
-)
+	)
 });
 
 
