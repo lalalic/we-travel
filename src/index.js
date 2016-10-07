@@ -8,6 +8,7 @@ import IconExplore from 'material-ui/svg-icons/action/explore'
 import IconLife from 'material-ui/svg-icons/maps/person-pin-circle'
 
 import {QiliApp, UI} from "qili-app"
+import {init,User} from "./db"
 const {CommandBar}=UI
 
 class Main extends QiliApp{
@@ -15,13 +16,13 @@ class Main extends QiliApp{
 		appId:"we-travel",
 		title:"travel along life"
 	})
-	
+
 	renderContent(){
 		let {pathname}=this.props.children.props.location
 		return (
 			<div>
 				{this.props.children}
-				<CommandBar className="footbar" style={{zIndex:8}} 
+				<CommandBar className="footbar" style={{zIndex:8}}
 					onSelect={cmd=>this.context.router.push(cmd.toLowerCase())}
 					primary={pathname=="/" ? "/" : pathname.split("/")[1]}
 					items={[
@@ -32,10 +33,32 @@ class Main extends QiliApp{
 			</div>
 		)
 	}
-	
-	static contextTypes={
-		router: PropTypes.object
-	}
+
+	static defaultProps=Object.assign(QiliApp.defaultProps,{
+		init:a=>{
+			init()
+
+			if(typeof(extractPosFromPhotos)=='undefined')
+				return;
+
+			let waypoints=[]
+			let extracting=lastTimeExtractingPosFromPhoto=>extractPosFromPhotos(lastTimeExtractingPosFromPhoto,null,waypoint=>{
+				switch(typeof waypoint){
+				case 'number':
+					console.info(`发现${waypoint}个地址信息`)
+					LocationDB.upsert(waypoints)
+						.then(a=>{
+							User.localStorage.setItem('lastTimeExtractingPosFromPhoto',new Date())
+						})
+				break
+				default:
+					waypoints.push(waypoint)
+				break
+				}
+			})
+			User.localStorage.getItem('lastTimeExtractingPosFromPhoto',null).then(startTime=>extracting)
+		}
+	})
 }
 
 import MyUI from "./my"
@@ -56,12 +79,12 @@ document.addEventListener('deviceready', function() {
 			<Route path="setting" component={SettingUI} />
 			<Route path="profile" component={ProfileUI}/>
 		</Route>
-		
+
 		<Route path="publish" component={PublishUI}/>
-		
+
 		<Route path="journey">
 			<Route path="_new" component={JourneyUI.Creator}/>
-			<Route path=":id" component={JourneyUI}/>
+			<Route path=":_id" component={JourneyUI}/>
 		</Route>
 	</Route>
 	)

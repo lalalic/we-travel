@@ -21,7 +21,7 @@ import java.util.Date;
 
 public class PhotoPosPlugin extends CordovaPlugin{
 	public final static String TAG="we.travel";
-	
+
 	protected void pluginInitialize(){
 		this.cordova.getActivity().sendBroadcast(new Intent("com.lalalic.wetravel.PhotoPos"));
 		Log.i(TAG,"photoPos plugin initialized");
@@ -65,25 +65,26 @@ public class PhotoPosPlugin extends CordovaPlugin{
 								Log.i(TAG+".GPS", "a photo taken at " + loc[0]+","+loc[1] + " on " + taken);
 								counter++;
 								PluginResult r=new PluginResult(PluginResult.Status.OK,new JSONObject()
-										.put("photos",new JSONArray().put(new JSONObject()
-											.put("file",filePath)
-											.put("taken",taken)))
-										.put("lat",loc[0])
-										.put("lng",loc[1]));
+									.put("_id",taken)
+									.put("when",taken)
+									.put("loc",new JSONObject()
+											.put("type","Point")
+											.put("coordinates",new JSONArray().put(loc[0]).put(loc[1])))
+									.put("photo",filePath));
 								r.setKeepCallback(true);
 								callbackContext.sendPluginResult(r);
 							}
 						}
 						Log.d(TAG+".GPS", "found "+counter+" photos with position information");
-						callbackContext.success(0);
+						callbackContext.success(counter);
 					}catch(Exception ex){
 						Log.e(TAG,ex.getMessage(), ex);
 						callbackContext.error(ex.getMessage());
 					}finally{
 						cursor.close();
 					}
-					
-					
+
+
 				}
 			});
 			return true;

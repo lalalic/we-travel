@@ -1,8 +1,10 @@
 window.extractPosFromPhotos=function(from, to, success, fail){
 	cordova.exec(function(waypoint){
-		if(waypoint){
-			var photo=waypoint.photos[0]
-			photo.taken=new Date(photo.taken)
+		switch(typeof waypoint){
+		case 'number':
+		break
+		default:
+			waypoint.taken=new Date(taken)
 		}
 		success(waypoint)
 	},fail,"PhotoPosPlugin","extract",[
