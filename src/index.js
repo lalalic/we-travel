@@ -7,8 +7,8 @@ import IconAccount from 'material-ui/svg-icons/action/account-box'
 import IconExplore from 'material-ui/svg-icons/action/explore'
 import IconLife from 'material-ui/svg-icons/maps/person-pin-circle'
 
-import {QiliApp, UI} from "qili-app"
-import {init,User} from "./db"
+import {QiliApp, UI, User} from "qili-app"
+import {init, Location as LocationDB} from "./db"
 const {CommandBar}=UI
 
 class Main extends QiliApp{
@@ -37,26 +37,29 @@ class Main extends QiliApp{
 	static defaultProps=Object.assign(QiliApp.defaultProps,{
 		init:a=>{
 			init()
-
 			if(typeof(extractPosFromPhotos)=='undefined')
 				return;
-
+			
+			alert(1)
+			debugger
 			let waypoints=[]
 			let extracting=lastTimeExtractingPosFromPhoto=>extractPosFromPhotos(lastTimeExtractingPosFromPhoto,null,waypoint=>{
 				switch(typeof waypoint){
 				case 'number':
-					console.info(`发现${waypoint}个地址信息`)
-					LocationDB.upsert(waypoints)
-						.then(a=>{
+					if(waypoint>0){
+						console.info(`发现${waypoint}个地址信息`)
+						LocationDB.upsert(waypoints, a=>{
 							User.localStorage.setItem('lastTimeExtractingPosFromPhoto',new Date())
-						})
+						}, console.error)
+					}
 				break
 				default:
 					waypoints.push(waypoint)
 				break
 				}
 			})
-			User.localStorage.getItem('lastTimeExtractingPosFromPhoto',null).then(startTime=>extracting)
+			User.localStorage.getItem('lastTimeExtractingPosFromPhoto',null)
+				.then(startTime=>extracting(startTime))
 		}
 	})
 }
@@ -94,10 +97,7 @@ document.addEventListener('deviceready', function() {
 Object.assign(Date.prototype,{
 	toDate(){
 		let d=new Date(this.getTime())
-		d.setHours(0)
-		d.setMinutes(0)
-		d.setSeconds(0)
-		d.setMilliseconds(0)
+		d.setHours(0,0,0,0)
 		return d
 	},
 	isSameDate(d){

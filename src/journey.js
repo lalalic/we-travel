@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from "react"
 import {UI} from "qili-app"
 
-import {TextField, DatePicker, Avatar, Divider} from "material-ui"
+import {TextField, DatePicker, Avatar, Divider, Dialog} from "material-ui"
 
 import IconSave from "material-ui/svg-icons/file/cloud-done"
 import IconMap from "material-ui/svg-icons/maps/map"
@@ -12,7 +12,7 @@ import TextFieldWithIcon from "./components/textFieldWithIcon"
 import Search from "./components/searchTextField"
 import Map from "./components/map"
 
-import {Journey as JourneyDB,Location as LocationDB} from "./db"
+import {Journey as JourneyDB} from "./db"
 
 const {Loading}=UI
 export default class Journey extends Component{
@@ -20,6 +20,9 @@ export default class Journey extends Component{
 
 	getData(_id){
 		JourneyDB.findOne({_id},entity=>{
+			entity.startedAt && (entity.startedAt=new Date(entity.startedAt));
+			entity.endedAt && (entity.endedAt=new Date(entity.endedAt));
+		
 			this.setState({entity})
 		})
 	}
@@ -38,7 +41,7 @@ export default class Journey extends Component{
 
 		if(!journey)
 			return (<Loading/>)
-
+		
 		return (
 			<div>
 				<div style={{padding:5}}>
@@ -50,9 +53,9 @@ export default class Journey extends Component{
 
 					<TextField ref="name" hintText="名字" fullWidth={true} defaultValue={journey.name}/>
 
-					<DatePicker ref="startedAt" hintText="开始日期" autoOk={true}/>
+					<DatePicker ref="startedAt" hintText="开始日期" autoOk={true} defaultDate={journey.startedAt}/>
 
-					<DatePicker ref="endedAt" hintText="结束日期" autoOk={true}/>
+					<DatePicker ref="endedAt" hintText="结束日期" autoOk={true} defaultDate={journey.endedAt}/>
 
 					<br/>
 					<Chipper
@@ -77,22 +80,15 @@ export default class Journey extends Component{
 	}
 
 	static Creator=class JourneyCreator extends Journey{
-		state={startedAt:null}
 		render(){
-			const {startedAt}=this.state
-			let others={}
-			if(startedAt)
-				others.startedAt=startedAt
-
 			return (
 				<div>
 					<div style={{padding:5}}>
 						<TextField ref="name" hintText="名字" fullWidth={true}/>
 
-						<DatePicker ref="startedAt" hintText="开始日期" autoOk={true}
-							onChange={e=>this.setState({startedAt:this.refs.startedAt.getDate()})}/>
+						<DatePicker ref="startedAt" hintText="开始日期" autoOk={true}/>
 
-						<DatePicker ref="endedAt" hintText="结束日期" autoOk={true} {...others}/>
+						<DatePicker ref="endedAt" hintText="结束日期" autoOk={true}/>
 					</div>
 
 					<UI.CommandBar className="footbar"
@@ -119,14 +115,10 @@ export default class Journey extends Component{
 }
 
 class TextScheduler extends Component{
-	constructor(){
-		super(...arguments)
-		this.state={
-			waypoints: null,
-			map:false
-		}
+	state={
+		waypoints: null,
+		needMap:false
 	}
-
 	componentDidMount(){
 		JourneyDB.getWaypoints(this.props.journey)
 			.then(waypoints=>this.setState({waypoints}))
@@ -134,7 +126,7 @@ class TextScheduler extends Component{
 
 	render(){
 		const {journey, others}=this.props
-		const {waypoints, map}=this.state
+		const {waypoints, needMap}=this.state
 		if(waypoints && waypoints.length){
 			return (
 				<div className="grid">
@@ -144,7 +136,9 @@ class TextScheduler extends Component{
 					<div style={{width:24,verticalAlign:"bottom"}}>
 						<IconMap color="lightblue" onClick={e=>this.showMap()}/>
 					</div>
-					{map && (<Map markers={waypoints}/>)}
+					<Dialog open={needMap}>
+						<Map onReady={map=>this.showWaypoints(map)}/>
+					</Dialog>
 				</div>
 			)
 		}else{
@@ -158,6 +152,15 @@ class TextScheduler extends Component{
 	}
 
 	showMap(){
-		this.setState({map:true})
+		this.setState({needMap:true})
+	}
+	
+	showWaypoints(map){
+		const {waypoints}=this.state
+		const {Marker}=map
+		waypoints.forEach(waypoint=>{
+			const {coordinates:[lat,lng]}=waypoint.loc
+			map.addOverlay(new Marker(lat,lng))
+		})
 	}
 }
