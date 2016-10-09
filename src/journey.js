@@ -105,7 +105,7 @@ export default class Journey extends Component{
 				name:name.getValue(),
 				startedAt:startedAt.getDate(),
 				endedAt:endedAt.getDate()
-			}).then(journey=>this.context.router.push(`journey/${journey._id}`))
+			}).then(journey=>this.context.router.replace(`journey/${journey._id}`))
 		}
 
 		static contextTypes={
@@ -136,8 +136,9 @@ class TextScheduler extends Component{
 					<div style={{width:24,verticalAlign:"bottom"}}>
 						<IconMap color="lightblue" onClick={e=>this.showMap()}/>
 					</div>
-					<Dialog open={needMap}>
-						<Map onReady={map=>this.showWaypoints(map)}/>
+					<Dialog open={needMap} 
+						onRequestClose={e=>this.setState({needMap:false})}>
+						<Map onReady={map=>this.showWaypoints(map)} style={{width:400,height:500}}/>
 					</Dialog>
 				</div>
 			)
