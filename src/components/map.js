@@ -12,6 +12,7 @@ export default class extends React.Component {
 			map.Marker=Marker
 			map.centerAndZoom(new Point(116.404, 39.915), 11);
 			map.setCurrentCity("北京");
+			map.addControl(new BMap.NavigationControl());  
 			this.mapDidMount(map)
 		}
 		

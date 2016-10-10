@@ -40,8 +40,6 @@ class Main extends QiliApp{
 			if(typeof(extractPosFromPhotos)=='undefined')
 				return;
 			
-			alert(1)
-			debugger
 			let waypoints=[]
 			let extracting=lastTimeExtractingPosFromPhoto=>extractPosFromPhotos(lastTimeExtractingPosFromPhoto,null,waypoint=>{
 				switch(typeof waypoint){

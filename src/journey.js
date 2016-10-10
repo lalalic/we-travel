@@ -42,15 +42,17 @@ export default class Journey extends Component{
 		if(!journey)
 			return (<Loading/>)
 		
+		const {startedAt, endedAt}=journey
+		let scheduler, searcher
+		if(startedAt && endedAt && endedAt.getTime()<Date.now()){
+			
+		}else{
+			scheduler=(<TextScheduler ref="scheduler" journey={journey}/>)
+			searcher=(<Search hintText="查找:看看大侠们的足迹好好规划一下" fullWidth={true}/>)
+		}
 		return (
 			<div>
 				<div style={{padding:5}}>
-					<TextScheduler ref="scheduler" journey={journey}/>
-
-					<Search hintText="查找:看看大侠们的足迹好好规划一下" fullWidth={true}/>
-
-					<br/>
-
 					<TextField ref="name" hintText="名字" fullWidth={true} defaultValue={journey.name}/>
 
 					<DatePicker ref="startedAt" hintText="开始日期" autoOk={true} defaultDate={journey.startedAt}/>
@@ -69,6 +71,13 @@ export default class Journey extends Component{
 								"海滩","人文","山水","都市","会友",
 								"蜜月","生日","周年庆"
 							]}/>
+							
+					
+					<br/>
+
+					{scheduler}
+					
+					{searcher}
 				</div>
 
 				<UI.CommandBar className="footbar"
@@ -138,7 +147,7 @@ class TextScheduler extends Component{
 					</div>
 					<Dialog open={needMap} 
 						onRequestClose={e=>this.setState({needMap:false})}>
-						<Map onReady={map=>this.showWaypoints(map)} style={{width:400,height:500}}/>
+						<Map onReady={map=>this.showWaypoints(map)} style={{width:"100%",height:500}}/>
 					</Dialog>
 				</div>
 			)
@@ -158,10 +167,16 @@ class TextScheduler extends Component{
 	
 	showWaypoints(map){
 		const {waypoints}=this.state
-		const {Marker}=map
+		const {Marker,Point}=BMap
+		let points=[]
 		waypoints.forEach(waypoint=>{
 			const {coordinates:[lat,lng]}=waypoint.loc
-			map.addOverlay(new Marker(lat,lng))
+			let marker=new Marker(new Point(lat,lng), {enableDragging:true})
+			map.addOverlay(marker)
+			points.push(marker.getPosition())
 		})
+		
+		if(points.length)
+			map.setViewport(points)
 	}
 }

@@ -2,7 +2,7 @@ import {Model} from "qili-app"
 
 export default class extends Model{
 	static get _name(){
-		return "__abc__"
+		return "waypoint"
 	}
 	
 	static upsert(){
@@ -10,7 +10,9 @@ export default class extends Model{
 	}
 	
 	static get(start, end){
-		return Promise.resolve([{loc:{coordinates:[40.2423,168.234343]}},{loc:{coordinates:[40.2433,168.234443]}}])
+		return Promise.resolve([
+			{when: new Date(23435235), loc:{coordinates:[40.2423,168.234343]}},
+			{when: new Date(223523453), loc:{coordinates:[30.1433,18.234443]}}])
 		let cond={}, Location=this
 		if(start)
 			cond.$gte=start.getTime()
@@ -28,7 +30,7 @@ export default class extends Model{
 
 	static schema={
 	/*
-	geo:{type:"Point",coordinates:[lat,lng]},
+	loc:{type:"Point",coordinates:[lat,lng]},
 	thumbnail,
 	photo,
 	when,
