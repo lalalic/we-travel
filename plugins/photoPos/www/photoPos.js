@@ -4,7 +4,7 @@ window.extractPosFromPhotos=function(from, to, success, fail){
 		case 'number':
 		break
 		default:
-			waypoint.taken=new Date(taken)
+			waypoint.when=new Date(waypoint.when)
 		}
 		success(waypoint)
 	},fail,"PhotoPosPlugin","extract",[

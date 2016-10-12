@@ -9,6 +9,6 @@ export default {
 	,init(){
 		Journey.init()
 		Footprint.init()
-		Location.init(true)//local only
+		Location.init()
 	}
 }

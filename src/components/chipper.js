@@ -20,15 +20,16 @@ export default class Chipper extends Component{
 		let header=null, icon
 		
 		if(title){
+			let onClick=null
 			if(!autoOpen){
-				let onClick=e=>this.setState({open:!this.state.open})
+				onClick=e=>this.setState({open:!this.state.open})
 				if(open)
-					icon=(<IconLess viewBox="0 0 24 12" color="lightgray" onClick={onClick}/>)
+					icon=(<IconLess viewBox="0 0 24 12" color="lightgray"/>)
 				else
-					icon=(<IconMore viewBox="0 0 24 12" color="lightgray" onClick={onClick}/>)
+					icon=(<IconMore viewBox="0 0 24 12" color="lightgray"/>)
 			}
 				
-			header=(<div style={{color:"lightgray"}}>{icon}{title}</div>)
+			header=(<div style={{color:"lightgray"}} onClick={onClick} unselectable="on">{icon}{title}</div>)
 			
 			if(!open)
 				style.display="none"

@@ -4,4 +4,10 @@ export default class extends Model{
 	static get _name(){
 		return "footprint"
 	}
+	
+	/*
+	schema={
+		
+	}
+	*/
 }
