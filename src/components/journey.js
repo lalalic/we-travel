@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {UI, User} from "qili-app"
 
-import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog} from "material-ui"
+import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Toggle} from "material-ui"
 import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
 
 import Logo from 'material-ui/svg-icons/maps/directions-walk'
@@ -24,7 +24,7 @@ export default class Journey extends Component{
 			.then(footprints=>this.setState({footprints}))
 	}
 	render(){
-		let {startedAt}=this.props.journey
+		let {journey:{startedAt}, onMap}=this.props
 		let {footprints, editing}=this.state
 		let currentDate=null, lastDay=0, all=[];
 		
@@ -47,7 +47,7 @@ export default class Journey extends Component{
 		return (
 			<div>
 				<Stepper orientation="vertical">
-					<Title journey={this.props.journey}/>
+					<Title journey={this.props.journey} onMap={onMap}/>
 					{all}
 				</Stepper>
 				{editing && (<Editor footprint={editing} 
@@ -138,19 +138,37 @@ class Editor extends Component{
     }
 }
 
-class Title extends Component{
+export class Title extends Component{
 	render(){
-		const {journey,onEdit}=this.props
+		const {journey, completed, onMap}=this.props
 		const {name,_id, startedAt}=journey
-		return (
-			<Step>
-				<StepLabel icon="*">
-					<div onClick={e=>this.context.router.push(`journey/${_id}`)}>
-						<b>{name}</b>
-					</div>
-				</StepLabel>
-			</Step>
-		)
+		if(completed){
+			return (
+				<Step completed={true} disabled={true}>
+					<StepLabel>
+						<span onClick={e=>this.context.router.push(`journey/${_id}`)}>
+							{startedAt.smartFormat()}
+							<br/>
+							{name}
+						</span>
+					</StepLabel>
+				</Step>
+			)
+		}else{
+			return (
+				<Step>
+					<StepLabel icon="*">
+						<span onClick={e=>this.context.router.push(`journey/${_id}`)}>
+							<b>{name}</b>
+							{onMap && (<Toggle labelPosition="right" 
+								label="map" 
+								style={{display:"inline"}}
+								onToggle={onMap}/>)}
+						</span>
+					</StepLabel>
+				</Step>
+			)
+		}
 	}
 		
 	static contextTypes={
@@ -174,20 +192,24 @@ class Day extends Component{
 
 class Footprint extends Component{
 	render(){
-		const {data: {when,photo,note}, onEdit}=this.props
+		const {data: {when,photos=[],note}, onEdit}=this.props
 		return  (
 			<Step completed={true} active={true}>
-				<StepLabel icon={"."} onTouchTap={onEdit}>
+				<StepLabel icon={"."} >
 					<time>{when.format('HH:mm')}&nbsp;</time>
 					<span>{note}</span>
-					<IconMore/>
+					<IconMore onTouchTap={onEdit} />
 				</StepLabel>
 				<StepContent>
 					<p>
-						<img style={{height:250}} src={photo}/>
+						{photos.map(({url,taken,loc},i)=>(<img key={i} onClick={e=>this.context.viewPhoto(url)} style={{height:50, margin:2}} src={url}/>))}
 					</p>
 				</StepContent>
 			</Step>
 		)
+	}
+	
+	static contextTypes={
+		viewPhoto:React.PropTypes.func
 	}
 }

@@ -9,6 +9,7 @@ import IconLife from 'material-ui/svg-icons/maps/person-pin-circle'
 
 import {QiliApp, UI, User} from "qili-app"
 import {init, Location as LocationDB} from "./db"
+import PhotoViewer from "./components/photo-viewer"
 const {CommandBar}=UI
 
 class Main extends QiliApp{
@@ -30,9 +31,20 @@ class Main extends QiliApp{
 						{label:"发现", action:"explore", icon:IconExplore},
 						{label:"帐号", action:"my", icon:IconAccount},
 					]}/>
+				<PhotoViewer ref="photoViewer"/>
 			</div>
 		)
 	}
+	
+	static childContextTypes=Object.assign(QiliApp.childContextTypes,{
+		viewPhoto: PropTypes.func
+    })
+	
+	getChildContext(){
+		return Object.assign(super.getChildContext(),{
+			viewPhoto:url=>this.refs.photoViewer.view(url)
+		})
+	} 
 
 	static defaultProps=Object.assign(QiliApp.defaultProps,{
 		init:a=>{

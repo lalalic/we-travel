@@ -11,14 +11,16 @@ import IconAdd from 'material-ui/svg-icons/content/add'
 
 import {Journey as JourneyDB, Footprint as FootprintDB} from "./db"
 import Chipper from "./components/chipper"
-import Journey from "./components/journey"
+import Journey, {Title} from "./components/journey"
+import Map from "./components/map"
 
 const {Empty, Photo}=UI
 
 export default class extends Component{
 	state={
 		journeys:[],
-		showHistory:true
+		showHistory:true,
+		onMap:[]
 	}
 	componentDidMount(){
 		JourneyDB.find()
@@ -26,7 +28,7 @@ export default class extends Component{
 	}
 	
 	render(){
-		const {journeys, showHistory}=this.state
+		const {journeys, showHistory, onMap}=this.state
 		const {memory, wish, active}=this.group(journeys)
 		let publisher=null
 		
@@ -40,8 +42,17 @@ export default class extends Component{
 			)
 		}
 		
+		let map=null
+		
+		if(onMap && onMap.length>0){
+			map=(<Map className="floating sticky top left" 
+				style={{zIndex:1,opacity:"0.13",height:"100%",width:"100%"}}/>)
+		}
+		
 		return (
 		<div>
+			{map}
+			
 			{publisher}
 			
 			<FloatingActionButton 
@@ -50,49 +61,31 @@ export default class extends Component{
 				<IconAdd/>
 			</FloatingActionButton>
 			
-			{showHistory && memory.length && (
-				<Stepper orientation="vertical" activeStep={-1}>
-				{
-					memory.map(({_id, name, startedAt})=>(
-						<Step key={name} completed={true}>
-							<StepLabel>
-								<div onClick={e=>this.context.router.push(`journey/${_id}`)}>
-									{startedAt.smartFormat()}
-									<br/>
-									{name}
-								</div>
-							</StepLabel>
-						</Step>
-					))
-				}
-				</Stepper>
-			)||null}
-			
-			{active.length && (
-				active.map(journey=>(
-					<Journey key={journey} journey={journey}/>
-				))
-			)||null}
-			
-			{wish.length && (
-				<div>
-					<Stepper orientation="vertical" activeStep={-1} linear={false}>
+			<div style={{zIndex:7, background:"white"}}>
+				{showHistory && memory.length && (
+					<Stepper orientation="vertical" activeStep={-1}>
 					{
-						wish.map(({_id,name, startedAt})=>(
-							<Step key={name} completed={false}>
-								<StepLabel>
-									<div onClick={e=>this.context.router.push(`journey/${_id}`)}>
-										{startedAt.smartFormat()}
-										<br/>
-										{name}
-									</div>
-								</StepLabel>
-							</Step>
-						))
+						memory.map(a=>(<Title key={a.name} journey={a} completed={true}/>))
 					}
 					</Stepper>
-				</div>
-			)||(<Empty icon={<Logo/>}>来,开始你的心旅程</Empty>)}
+				)||null}
+				
+				{active.length && (
+					active.map(journey=>(
+						<Journey key={journey} journey={journey} onMap={e=>this.setState({onMap: this.state.onMap.concat([journey])})}/>
+					))
+				)||null}
+				
+				{wish.length && (
+					<div>
+						<Stepper orientation="vertical" activeStep={-1} linear={false}>
+						{
+							wish.map(a=>(<Title key={a.name} completed={false} journey={a}/>))
+						}
+						</Stepper>
+					</div>
+				)||(<Empty icon={<Logo/>}>来,开始你的心旅程</Empty>)}
+			</div>
 		</div>
 		)
 	}

@@ -21,7 +21,7 @@ export default class extends Model{
 			this.getWaypoints(journey)
 			]).then(a=>{
 				const [footprints,waypoints]=a
-				footprints.splice(0,0,...waypoints)
+				//footprints.splice(0,0,...waypoints)
 				footprints.sort((a,b)=>a.when.getTime()-b.when.getTime())
 				return footprints
 			}, console.error)
