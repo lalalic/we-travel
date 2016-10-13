@@ -49,27 +49,6 @@ class Main extends QiliApp{
 	static defaultProps=Object.assign(QiliApp.defaultProps,{
 		init:a=>{
 			init()
-			if(typeof(extractPosFromPhotos)=='undefined')
-				return;
-			
-			let waypoints=[]
-			let extracting=lastTimeExtractingPosFromPhoto=>extractPosFromPhotos(lastTimeExtractingPosFromPhoto,null,waypoint=>{
-				switch(typeof waypoint){
-				case 'number':
-					if(waypoint>0){
-						console.info(`发现${waypoint}个地址信息`)
-						LocationDB.upsert(waypoints, a=>{
-							User.localStorage.setItem('lastTimeExtractingPosFromPhoto',new Date())
-						}, console.error)
-					}
-				break
-				default:
-					waypoints.push(waypoint)
-				break
-				}
-			})
-			User.localStorage.getItem('lastTimeExtractingPosFromPhoto',null)
-				.then(startTime=>extracting(startTime))
 		}
 	})
 }

@@ -1,14 +1,19 @@
-window.extractPosFromPhotos=function(from, to, success, fail){
-	cordova.exec(function(waypoint){
-		switch(typeof waypoint){
-		case 'number':
-		break
-		default:
-			waypoint.when=new Date(waypoint.when)
-		}
-		success(waypoint)
-	},fail,"PhotoPosPlugin","extract",[
-		from && (from=from.getTime())||0
-		,to && (to=to.getTime()+(24*60*60*1000-2))||new Date().getTime()
-	])
+window.PhotoPos={
+	version:1,
+	extract: function(from, to){
+		return new Promise( function(resolve, reject){
+			cordova.exec(resovle,reject,"PhotoPosPlugin","extract",[
+					from && (from=from.getTime())||0
+					,to && (to=to.getTime()+(24*60*60*1000-2))||new Date().getTime()
+				])
+		})
+	},
+	query: function(from, to){
+		return new Promise(function(resolve, reject){
+			cordova.exec(resolve,reject,"PhotoPosPlugin","query",[
+					from && (from=from.getTime())||0
+					,to && (to=to.getTime()+(24*60*60*1000-2))||new Date().getTime()
+				])
+		})
+	}
 }
