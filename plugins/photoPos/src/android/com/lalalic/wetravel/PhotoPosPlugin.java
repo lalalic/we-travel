@@ -36,7 +36,18 @@ public class PhotoPosPlugin extends CordovaPlugin{
 	protected void pluginInitialize(){
 		this.cordova.getActivity().sendBroadcast(new Intent("com.lalalic.wetravel.PhotoPos"));
         dbHelper=new TravelDB(this.cordova.getActivity().getApplicationContext());
-		extract(0,new Date().getTime(),this.cordova.getActivity().getContentResolver(), cordova.getActivity().getApplicationContext());
+        cordova.getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    extract(0,new Date().getTime(),
+                            cordova.getActivity().getContentResolver(),
+                            cordova.getActivity().getApplicationContext());
+                }catch (Exception ex) {
+                    Log.e(TAG, ex.getMessage(), ex);
+                }
+            }
+        });
 		Log.i(TAG,"photoPos plugin initialized");
 	}
 
@@ -45,6 +56,7 @@ public class PhotoPosPlugin extends CordovaPlugin{
 		final Context context = this.cordova.getActivity().getApplicationContext();
 		final long from = args.getLong(0);
 		final long to = args.getLong(1);
+
 		if ("extract".equals(action)) {
 			cordova.getThreadPool().execute(new Runnable() {
 				@Override
@@ -62,20 +74,39 @@ public class PhotoPosPlugin extends CordovaPlugin{
 			});
 			return true;
 		}else if("query".equals(action)){
-			SQLiteDatabase db=dbHelper.getReadableDatabase();
-			JSONArray results=new JSONArray();
-			Cursor cursor=db.rawQuery("select taken,lat,lng,path from photopos where taken>=? and taken<=?", new String[]{""+from,""+to});
-			while(cursor.moveToNext()){
-				results.put(new JSONObject()
-						.put("taken",cursor.getLong(0))
-						.put("lat", cursor.getDouble(1))
-						.put("lng",cursor.getDouble(2))
-						.put("path",cursor.getString(3)));
-			}
-			cursor.close();
-			db.close();
-			callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, results));
-		}
+            cordova.getThreadPool().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        SQLiteDatabase db = dbHelper.getReadableDatabase();
+                        JSONArray results = new JSONArray();
+                        Cursor cursor = db.rawQuery("select taken,lat,lng,path from photopos where taken>=? and taken<=?", new String[]{"" + from, "" + to});
+                        while (cursor.moveToNext()) {
+                            results.put(new JSONObject()
+                                    .put("taken", cursor.getLong(0))
+                                    .put("lat", cursor.getDouble(1))
+                                    .put("lng", cursor.getDouble(2))
+                                    .put("path", cursor.getString(3)));
+                        }
+                        cursor.close();
+                        db.close();
+                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.OK, results));
+                    }catch(Exception ex){
+                        Log.e(TAG, ex.getMessage(), ex);
+                        callbackContext.error(ex.getMessage());
+                    }
+                }
+            });
+            return true;
+		}else if("backup".equals(action)){
+            cordova.getThreadPool().execute(new Runnable() {
+                @Override
+                public void run() {
+                    callbackContext.success(dbHelper.backup());
+                }
+            });
+        }
+
 		return false;
 	}
 
@@ -97,10 +128,10 @@ public class PhotoPosPlugin extends CordovaPlugin{
 				, "datetaken>=? AND datetaken<=? AND mime_type=? and _data like ?"
 				, new String[]{String.valueOf(start), String.valueOf(to), "image/jpeg", "%DCIM/Camera%"}
 				, null);
-		SQLiteDatabase db=dbHelper.getWritableDatabase();
+		SQLiteDatabase db=null;
 		try {
 				while (cursor.moveToNext()) {
-					int i = 0;
+                    int i = 0;
 					String filePath = cursor.getString(i++);
 					long taken = cursor.getLong(i++);
 					float lat = cursor.getFloat(i++);
@@ -114,7 +145,10 @@ public class PhotoPosPlugin extends CordovaPlugin{
 					if (loc != null) {
 						Log.i(TAG + ".GPS", "a photo taken at " + loc[0] + "," + loc[1] + " on " + taken);
 						counter++;
-						db.execSQL("insert or replace into photopos(taken,lat,lng,path,uploaded) values (?,?,?,?,?)"
+                        if(db==null)
+                            db=dbHelper.getWritableDatabase();
+
+                        db.execSQL("insert or ignore into photopos(taken,lat,lng,path,uploaded) values (?,?,?,?,?)"
 								, new Object[]{taken, loc[0], loc[1], filePath, 0});
 					}
 				}
@@ -123,12 +157,14 @@ public class PhotoPosPlugin extends CordovaPlugin{
 						.putLong(KEY_LAST_EXTRACT_TIME, new Date().getTime())
 						.commit();
 				Log.d(TAG + ".GPS", "found " + counter + " photos with position information");
+				if(counter>0)
+					dbHelper.backup();
 				return counter;
 			}finally {
-				cursor.close();
-				db.close();
-				if(counter>0)
-					dbHelper.backup(db.getPath());
+                if(cursor!=null)
+				    cursor.close();
+				if(db!=null)
+                    db.close();
 			}
 	}
 
@@ -146,16 +182,17 @@ public class PhotoPosPlugin extends CordovaPlugin{
 	}
 
 	public static void save(Context ctx, float[] loc, long taken, String filePath){
-        SQLiteOpenHelper helper=new TravelDB(ctx);
+        SQLiteDatabase db=null;
         try {
-            helper.getWritableDatabase()
-                    .execSQL("insert into photopos(taken,lat,lng,path,uploaded) values (?,?,?,?,?)"
+            db=dbHelper.getWritableDatabase();
+            db.execSQL("insert into photopos(taken,lat,lng,path,uploaded) values (?,?,?,?,?)"
                             , new Object[]{taken, loc[0], loc[1], filePath, 0});
 
         }catch(Exception ex){
             Log.e(TAG, ex.getMessage(), ex);
         }finally{
-            helper.close();
+            if(db!=null)
+                db.close();
         }
 	}
 
@@ -182,28 +219,51 @@ public class PhotoPosPlugin extends CordovaPlugin{
 
 		}
 
-		public void backup(String file){
+		public int backup(){
 			File sd = Environment.getExternalStorageDirectory();
 			if(sd.canWrite()){
-				File backupDB=new File(sd+"/"+TAG+"/photopos.db");
-				FileChannel src=null, backup=null;
+				FileOutputStream backup=null;
+                SQLiteDatabase db=null;
 				try {
-					if(!backupDB.exists()) {
+                    File backupDB=new File(sd+"/"+TAG+"/photopos.json");
+                    if(!backupDB.exists()) {
 						backupDB.getParentFile().mkdirs();
 						backupDB.createNewFile();
 					}
-					src = new FileInputStream(file).getChannel();
-					backup = new FileOutputStream(backupDB).getChannel();
-					backup.transferFrom(src,0,src.size());
-					src.close();
+                    db=getReadableDatabase();
+                    Cursor cursor=db.rawQuery("select taken, lat,lng,path from photopos",null);
+                    backup = new FileOutputStream(backupDB);
+                    backup.write("[\n\r".getBytes());
+                    int counter=0;
+                    while(cursor.moveToNext()){
+                        counter++;
+                        if(counter>1) {
+                            backup.write(',');
+                        }
+                        backup.write(
+                            new JSONObject()
+                                    .put("taken",cursor.getLong(0))
+                                    .put("lat", cursor.getDouble(1))
+                                    .put("lng", cursor.getDouble(2))
+                                    .put("path", cursor.getString(3))
+                                    .toString()
+                                    .getBytes("utf8")
+                        );
+                        backup.write("\n\r".getBytes());
+                    }
+                    backup.write(']');
+                    backup.flush();
 					backup.close();
 					Log.d(TAG, "photopos db backup done");
+                    return counter;
 				}catch(Exception ex){
 					Log.e(TAG,ex.getMessage(),ex);
+                    return -1;
 				}finally {
-
+                    db.close();
 				}
 			}
+			return 0;
 		}
     }
 }

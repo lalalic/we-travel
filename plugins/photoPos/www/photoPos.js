@@ -15,5 +15,10 @@ window.PhotoPos={
 					,to && (to=to.getTime()+(24*60*60*1000-2))||new Date().getTime()
 				])
 		})
+	},
+	backup: function(){
+		return new Promise(function(resolve, reject){
+			cordova.exec(resolve,reject,"PhotoPosPlugin","backup",[0,0])
+		})
 	}
 }
