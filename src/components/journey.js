@@ -27,7 +27,7 @@ export default class Journey extends Component{
 		let {journey:{startedAt}, onMap}=this.props
 		let {footprints, editing}=this.state
 		let currentDate=null, lastDay=0, all=[];
-		
+
 		footprints.forEach(footprint=>{
 			const {when,photo,note}=footprint
 			if(currentDate==null || !when.isSameDate(currentDate)){
@@ -36,12 +36,12 @@ export default class Journey extends Component{
 				while(lastDay<day){
 					lastDay++
 					let date=startedAt.relativeDate(lastDay-1)
-					all.push(<Day key={lastDay} day={lastDay} 
+					all.push(<Day key={lastDay} day={lastDay}
 						date={date}
 						onEdit={a=>this.setState({editing:{when:date}})}/>)
 				}
 			}
-			all.push(<Footprint key={when} data={footprint} 
+			all.push(<Footprint key={when} data={footprint}
 				onEdit={a=>this.setState({editing:footprint})}/>)
 		})
 		return (
@@ -50,13 +50,13 @@ export default class Journey extends Component{
 					<Title journey={this.props.journey} onMap={onMap}/>
 					{all}
 				</Stepper>
-				{editing && (<Editor footprint={editing} 
-					onSave={a=>this.onSave(a)} 
+				{editing && (<Editor footprint={editing}
+					onSave={a=>this.onSave(a)}
 					onCancel={a=>this.setState({editing:undefined})}/>)}
 			</div>
 		)
 	}
-	
+
 	onSave(footprint){
 		const {journey}=this.props
 		JourneyDB.upsert(footprint)
@@ -94,7 +94,7 @@ class Editor extends Component{
 
         if(uiPhotos.length<9)
             uiPhotos.push((<Photo {...styles} onPhoto={this.onPhoto.bind(this)} key={Date.now()}/>))
-		
+
 		return (
 			<Dialog title={footprint.when.smartFormat()}
 				actions={actions}
@@ -113,7 +113,7 @@ class Editor extends Component{
 						{label:"特色吃的"},
 						{label:"花销",type:"number"}
 						]}/>
-						
+
 					<Chipper chips={[
 						"太美了","无法呼吸","太壮观了","喜欢这里"
 						]}/>
@@ -121,7 +121,7 @@ class Editor extends Component{
 			</Dialog>
 		)
 	}
-	
+
 	onPhoto(url, index){
         var {footprint}=this.props
         if(footprint.photos.indexOf(url)!=-1){
@@ -158,19 +158,18 @@ export class Title extends Component{
 			return (
 				<Step>
 					<StepLabel icon="*">
-						<span onClick={e=>this.context.router.push(`journey/${_id}`)}>
-							<b>{name}</b>
-							{onMap && (<Toggle labelPosition="right" 
-								label="map" 
-								style={{display:"inline"}}
+						<div className="grid">
+							<b onClick={e=>this.context.router.push(`journey/${_id}`)}>{name}</b>
+							{onMap && (<Toggle labelPosition="right"
+								label="map"
 								onToggle={onMap}/>)}
-						</span>
+						</div>
 					</StepLabel>
 				</Step>
 			)
 		}
 	}
-		
+
 	static contextTypes={
 		router: PropTypes.object
 	}
@@ -208,7 +207,7 @@ class Footprint extends Component{
 			</Step>
 		)
 	}
-	
+
 	static contextTypes={
 		viewPhoto:React.PropTypes.func
 	}

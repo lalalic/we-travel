@@ -26,41 +26,41 @@ export default class extends Component{
 		JourneyDB.find()
 			.fetch(journeys=>this.setState({journeys}))
 	}
-	
+
 	render(){
 		const {journeys, showHistory, onMap}=this.state
 		const {memory, wish, active}=this.group(journeys)
 		let publisher=null
-		
+
 		if(memory.length || active.length){
 			publisher=(
-				<FloatingActionButton 
+				<FloatingActionButton
 					className="floating sticky bottom right"
 					mini={true} onClick={e=>this.context.router.push("publish",{journey:active[0]})}>
 					<IconPublish/>$
 				</FloatingActionButton>
 			)
 		}
-		
+
 		let map=null
-		
+
 		if(onMap && onMap.length>0){
-			map=(<Map className="floating sticky top left" 
+			map=(<Map className="floating sticky top left"
 				style={{zIndex:1,opacity:"0.13",height:"100%",width:"100%"}}/>)
 		}
-		
+
 		return (
 		<div>
 			{map}
-			
+
 			{publisher}
-			
-			<FloatingActionButton 
+
+			<FloatingActionButton
 				className="floating sticky top right"
 				mini={true} onClick={e=>this.context.router.push("journey/_new")}>
 				<IconAdd/>
 			</FloatingActionButton>
-			
+
 			<div style={{zIndex:7, background:"white"}}>
 				{showHistory && memory.length && (
 					<Stepper orientation="vertical" activeStep={-1}>
@@ -69,13 +69,14 @@ export default class extends Component{
 					}
 					</Stepper>
 				)||null}
-				
+
 				{active.length && (
 					active.map(journey=>(
-						<Journey key={journey} journey={journey} onMap={e=>this.setState({onMap: this.state.onMap.concat([journey])})}/>
+						<Journey key={journey} journey={journey}
+							onMap={e=>this.setState({onMap: this.state.onMap.concat([journey])})}/>
 					))
 				)||null}
-				
+
 				{wish.length && (
 					<div>
 						<Stepper orientation="vertical" activeStep={-1} linear={false}>
@@ -89,14 +90,14 @@ export default class extends Component{
 		</div>
 		)
 	}
-	
+
 	group(journeys){
 		let now=new Date()
 		let memory=[], wish=[], active=[]
 		journeys.forEach(journey=>{
 			let {startedAt, endedAt}=journey
 			let started=null, ended=null
-			
+
 			if(startedAt){
 				started=now.relative(startedAt)
 				if(started<0){
@@ -107,23 +108,23 @@ export default class extends Component{
 					return
 				}
 			}
-			
+
 			if(endedAt){
 				ended=now.relative(endedAt)
 				if(ended>0){
 					memory.push(journey)
-					return 
+					return
 				}else if(ended==0){
 					active.push(journey)
 					return
 				}
 			}
-			
+
 			if(started!=null && ended!=null && started>0 && ended<0){
 				active.push(journey)
 				return
 			}
-			
+
 			//unconfirmed as wish
 			wish.push(journey)
 		})
@@ -146,7 +147,7 @@ export default class extends Component{
 		})
 		return {memory, wish, active}
 	}
-	
+
 	static contextTypes={
 		router: PropTypes.object
 	}
