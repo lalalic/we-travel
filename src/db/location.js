@@ -10,9 +10,7 @@ export default class extends Model{
 	}
 	
 	static get(start, end){
-		return Promise.resolve([
-			{when: new Date(23435235), loc:{coordinates:[40.2423,168.234343]}},
-			{when: new Date(223523453), loc:{coordinates:[30.1433,18.234443]}}])
+		return Promise.resolve(require("./location-data"))
 		let cond={}, Location=this
 		if(start)
 			cond.$gte=start.getTime()

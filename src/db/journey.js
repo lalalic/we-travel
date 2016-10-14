@@ -22,8 +22,45 @@ export default class extends Model{
 			]).then(a=>{
 				const [footprints,waypoints]=a
 				//footprints.splice(0,0,...waypoints)
-				footprints.sort((a,b)=>a.when.getTime()-b.when.getTime())
+				footprints.sort((a,b)=>{
+					if(typeof(a.when)=='number')
+						a.when=new Date(a);
+					
+					if(typeof(b.when)=='number')
+						b.when=new Date(b);
+					
+					return a.when.getTime()-b.when.getTime()
+				})
 				return footprints
 			}, console.error)
+	}
+	
+	static getState(journey){
+		let now=new Date()
+		const {startedAt, endedAt}=journey
+		let started=null, ended=null
+		if(startedAt){
+			started=now.relative(startedAt)
+			if(started<0){
+				return "Plan"
+			}else if(started==0){
+				return "Starting"
+			}
+		}
+
+		if(endedAt){
+			ended=now.relative(endedAt)
+			if(ended>0){
+				return "Memory"
+			}else if(ended==0){
+				return "Ending"
+			}
+		}
+		
+		if(started!=null && ended!=null && started>0 && ended<0){
+			return "Traveling"
+		}
+		
+		return "Plan"
 	}
 }

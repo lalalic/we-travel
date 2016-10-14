@@ -111,17 +111,6 @@
 			"createdAt": "2016-10-03T03:05:21.100Z"
 		},
 		{
-			"_id": "10",
-			"author": {
-				"_id": "lalalic",
-				"name": "lalalic"
-			},
-			"name": "Sichuan",
-			"startedAt": "2016-10-07T00:00:00.100Z",
-			"endedAt": "2016-12-10T00:00:00.100Z",
-			"createdAt": "2016-10-03T03:05:21.100Z"
-		},
-		{
 			"_id": "1",
 			"author": {
 				"_id": "lalalic",
@@ -129,7 +118,7 @@
 			},
 			"name": "Alps",
 			"startedAt": "2016-08-25T00:00:00.100Z",
-			"endedAt": "2016-09-20T00:00:00.100Z",
+			"endedAt": "2016-10-20T00:00:00.100Z",
 			"createdAt": "2016-10-03T03:05:21.100Z"
 		},
 		{
@@ -163,7 +152,7 @@
 			"when": "2016-08-10T08:23:00Z",
 			"note": "出发了",
 			"photos": [
-				{taken:"2016-08-10T07:23:00Z", url:"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
+				{"taken":"2016-08-10T07:23:00Z", "url":"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
 			]
 		},
 		{
@@ -171,8 +160,8 @@
 			"when": "2016-08-10T09:23:00Z",
 			"note": "alps",
 			"photos": [
-				{taken:"2016-08-10T07:23:00Z", url:"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
-				,{taken:"2016-08-10T07:23:00Z", url:"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
+				{"taken":"2016-08-10T07:23:00Z", "url":"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
+				,{"taken":"2016-08-10T07:23:00Z", "url":"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
 			]		
 		},
 		{
@@ -180,7 +169,7 @@
 			"when": "2016-08-10T11:23:00Z",
 			"note": "小木屋",
 			"photos": [
-				{taken:"2016-08-10T07:23:00Z", url:"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
+				{"taken":"2016-08-10T07:23:00Z", "url":"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
 			]
 		},
 		{
@@ -188,7 +177,7 @@
 			"when": "2016-08-10T12:23:00Z",
 			"note": "准备回家",
 			"photos": [
-				{taken:"2016-08-10T07:23:00Z", url:"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
+				{"taken":"2016-08-10T07:23:00Z", "url":"http://www.imnotobsessed.com/wp-content/uploads/charlize-theron2012-05-30_08-30-38stops-by-the-colbert-report-499x800.jpg"}
 			]
 		}]
 	},

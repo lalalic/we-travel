@@ -10,7 +10,7 @@ import IconLife from 'material-ui/svg-icons/maps/person-pin-circle'
 import {QiliApp, UI, User} from "qili-app"
 import {init, Location as LocationDB} from "./db"
 import PhotoViewer from "./components/photo-viewer"
-const {CommandBar}=UI
+const {CommandBar, Comment}=UI
 
 class Main extends QiliApp{
 	static defaultProps=Object.assign(QiliApp.defaultProps,{
@@ -78,6 +78,8 @@ document.addEventListener('deviceready', function() {
 			<Route path="_new" component={JourneyUI.Creator}/>
 			<Route path=":_id" component={JourneyUI}/>
 		</Route>
+		
+		<Route path="comment/:type/:_id" component={Comment}/>
 	</Route>
 	)
 });
@@ -97,6 +99,9 @@ Object.assign(Date.prototype,{
 	},
 	relativeDate(days){
 		return new Date(this.getTime()+24*60*60*1000*days)
+	},
+	isFuture(){
+		return this.relative(new Date())>0
 	},
 	format(tmpl="y-M-d"){
 		let value={

@@ -6,13 +6,14 @@ export default class extends React.Component {
 		this.id=this.props.id||`_map${Date.now()}`
 	}
     componentDidMount() {
+		const {nav}=this.props
 		let init=a=>{
 			const {Map,Point,Marker}=BMap
 			var map=this._map = new Map(this.id);
 			map.Marker=Marker
 			map.centerAndZoom(new Point(116.404, 39.915), 11);
 			map.setCurrentCity("北京");
-			map.addControl(new BMap.NavigationControl());  
+			map.addControl(new BMap.NavigationControl({anchor:BMAP_ANCHOR_BOTTOM_RIGHT}));  
 			this.mapDidMount(map)
 		}
 		

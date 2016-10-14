@@ -6,6 +6,8 @@ import {TextField, DatePicker, Avatar, Divider, Dialog} from "material-ui"
 import IconSave from "material-ui/svg-icons/file/cloud-done"
 import IconMap from "material-ui/svg-icons/maps/map"
 import IconSchedule from "material-ui/svg-icons/maps/edit-location"
+import IconPublish from "material-ui/svg-icons/image/camera-roll"
+import IconRemove from "material-ui/svg-icons/action/delete"
 
 import Chipper from "./components/chipper"
 import TextFieldWithIcon from "./components/textFieldWithIcon"
@@ -44,12 +46,36 @@ export default class Journey extends Component{
 		
 		const {startedAt, endedAt}=journey
 		let scheduler, searcher
-		if(startedAt && endedAt && endedAt.getTime()<Date.now()){
+		let actions=[
+			"Back"
+			,{action:"Comment"
+				,label:"评论"
+				,onSelect: e=>this.context.router.push(`comment/${JourneyDB._name}/${journey._id}`,{journey}) 
+				,icon:IconPublish}
+			,{action:"Publish"
+				,label:"出版"
+				,onSelect: e=>this.context.router.push("publish",{journey}) 
+				,icon:IconPublish}
+		]
+		switch(JourneyDB.getState(journey)){
+		case "Memory":
 			
-		}else{
+		break
+		case "Starting":
+		case "Ending":
+		case "Traveling":
+		case "Plan":
+		default:
 			scheduler=(<TextScheduler ref="scheduler" journey={journey}/>)
 			searcher=(<Search hintText="查找:看看大侠们的足迹好好规划一下" fullWidth={true}/>)
+			actions.splice(1,0,{
+				action:"Remove"
+				,label:"删除"
+				,onSelect:e=>this.remove()
+				,icon: IconRemove
+			})
 		}
+		
 		return (
 			<div>
 				<div style={{padding:5}}>
@@ -81,11 +107,18 @@ export default class Journey extends Component{
 				</div>
 
 				<UI.CommandBar className="footbar"
-                    items={["Back",
-						{action:"Extract", label:"提取", onSelect: e=>this.extract(), icon:IconSave}
-						]}/>
+                    items={actions}/>
 			</div>
 		)
+	}
+	
+	remove(){
+		JourneyDB.remove(this.state.entity)
+		this.context.router.replace("/")
+	}
+	
+	static contextTypes={
+		router:React.PropTypes.object
 	}
 
 	static Creator=class JourneyCreator extends Journey{
@@ -116,10 +149,6 @@ export default class Journey extends Component{
 				endedAt:endedAt.getDate()
 			}).then(journey=>this.context.router.replace(`journey/${journey._id}`))
 		}
-
-		static contextTypes={
-			router:React.PropTypes.object
-		}
 	}
 }
 
@@ -139,7 +168,7 @@ class TextScheduler extends Component{
 		if(waypoints && waypoints.length){
 			return (
 				<div className="grid">
-					<TextFieldWithIcon icon={<IconSchedule/>} floatingLabelFixed={true}
+					<TextField floatingLabelFixed={true}
 						floatingLabelText={`发现${waypoints.length}张照片有地址信息，点击图标查看详细信息`}
 						multiLine={true} fullWidth={true} {...others}/>
 					<div style={{width:24,verticalAlign:"bottom"}}>

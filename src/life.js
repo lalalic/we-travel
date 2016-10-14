@@ -5,61 +5,63 @@ import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog} from
 import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
 
 import Logo from 'material-ui/svg-icons/maps/directions-walk'
-import IconPublish from "material-ui/svg-icons/image/camera-roll"
+
 import IconMore from 'material-ui/svg-icons/navigation/more-horiz'
 import IconAdd from 'material-ui/svg-icons/content/add'
+import IconMap from "material-ui/svg-icons/maps/map"
 
 import {Journey as JourneyDB, Footprint as FootprintDB} from "./db"
 import Chipper from "./components/chipper"
 import Journey, {Title} from "./components/journey"
 import Map from "./components/map"
+import LocationDB from "./db/location"
+
 
 const {Empty, Photo}=UI
 
 export default class extends Component{
 	state={
-		journeys:[],
+		memory:[],
+		wish:[],
+		active:[],
 		showHistory:true,
-		onMap:[]
+		onMap:false
 	}
 	componentDidMount(){
 		JourneyDB.find()
-			.fetch(journeys=>this.setState({journeys}))
+			.fetch(journeys=>this.setState(this.group(journeys)))
 	}
 
 	render(){
-		const {journeys, showHistory, onMap}=this.state
-		const {memory, wish, active}=this.group(journeys)
-		let publisher=null
-
-		if(memory.length || active.length){
-			publisher=(
-				<FloatingActionButton
-					className="floating sticky bottom right"
-					mini={true} onClick={e=>this.context.router.push("publish",{journey:active[0]})}>
-					<IconPublish/>$
-				</FloatingActionButton>
-			)
-		}
-
-		let map=null
-
-		if(onMap && onMap.length>0){
-			map=(<Map className="floating sticky top left"
-				style={{zIndex:1,opacity:"0.13",height:"100%",width:"100%"}}/>)
+		const {memory, wish, active, showHistory, onMap}=this.state
+	
+		let map=null, mapToggler=null
+		
+		if(active.length>0){			
+			mapToggler=(<FloatingActionButton
+							className="floating sticky top right _2"
+							mini={true} onClick={e=>this.toggleMap()}>
+							<IconMap/>
+						</FloatingActionButton>)
+						
+			if(onMap){
+				map=(<Map className="floating sticky top left" 
+						onReady={map=>this.showJourneyOnMap(map)}
+						style={{opacity:"0.5", width:940, height:window.innerHeight-50-10}}/>)
+			}
 		}
 
 		return (
 		<div>
 			{map}
 
-			{publisher}
-
 			<FloatingActionButton
 				className="floating sticky top right"
 				mini={true} onClick={e=>this.context.router.push("journey/_new")}>
 				<IconAdd/>
 			</FloatingActionButton>
+			
+			{mapToggler}
 
 			<div style={{zIndex:7, background:"white"}}>
 				{showHistory && memory.length && (
@@ -72,8 +74,7 @@ export default class extends Component{
 
 				{active.length && (
 					active.map(journey=>(
-						<Journey key={journey} journey={journey}
-							onMap={e=>this.setState({onMap: this.state.onMap.concat([journey])})}/>
+						<Journey key={journey} journey={journey}/>
 					))
 				)||null}
 
@@ -90,43 +91,72 @@ export default class extends Component{
 		</div>
 		)
 	}
+	
+	toggleMap(){
+		const {onMap}=this.state
+		this.setState({onMap:!onMap})
+	}
+	
+	showJourneyOnMap(map){
+		const {active:[journey]}=this.state
+		const {Marker,Point,PointCollection,Label,Size}=BMap
+		LocationDB.get()
+			.then(waypoints=>{
+				if(waypoints.length==0)
+					return;
+				waypoints.sort((a,b)=>a.when-b.when)
+				let days=[waypoints[0]], dayLong=24*60*60*1000
+				let points=waypoints.map(waypoint=>{
+					const {when,lat,lng}=waypoint
+					if(when-days[days.length-1].when>dayLong)
+						days.push(waypoint)
+					return new Point(lng,lat)	
+				})
+				map.addOverlay(new PointCollection(points, {size:BMAP_POINT_SIZE_TINY,shape:BMAP_POINT_SHAPE_STAR, color:"red"})) 
+				
+				let startedAt=journey.startedAt
+				let current, onClick=e=>{
+					current && current.setAnimation(null);
+					current=e.target
+					current.setAnimation(BMAP_ANIMATION_BOUNCE)
+				}
+				days.forEach(({when,lat,lng}, i)=>{
+					let marker=new Marker(new Point(lng,lat))
+					let dayNo=new Date(when).relative(startedAt)+1
+					let label=new Label(`${dayNo}`)
+					label.setStyle({backgroundColor:"transparent",border:"0px"})
+					label.setOffset(new Size(dayNo>9 ? 2 : 5, 2))
+					marker.setLabel(label)
+					map.addOverlay(marker)
+					marker.addEventListener("click", onClick)
+					if(i==0){
+						current=marker
+						marker.setAnimation(BMAP_ANIMATION_BOUNCE)
+					}
+				});
+				
+				let delta=Math.round(points.length/5)
+				map.setViewport(points.filter((a,i)=>i%delta==0))
+			})
+	}
 
 	group(journeys){
 		let now=new Date()
 		let memory=[], wish=[], active=[]
 		journeys.forEach(journey=>{
-			let {startedAt, endedAt}=journey
-			let started=null, ended=null
-
-			if(startedAt){
-				started=now.relative(startedAt)
-				if(started<0){
-					wish.push(journey)
-					return
-				}else if(started==0){
-					active.push(journey)
-					return
-				}
-			}
-
-			if(endedAt){
-				ended=now.relative(endedAt)
-				if(ended>0){
-					memory.push(journey)
-					return
-				}else if(ended==0){
-					active.push(journey)
-					return
-				}
-			}
-
-			if(started!=null && ended!=null && started>0 && ended<0){
+			switch(JourneyDB.getState(journey)){
+			case "Memory":
+				memory.push(journey)
+			break
+			case "Starting":
+			case "Ending":
+			case "Traveling":
 				active.push(journey)
-				return
+			break
+			case "Plan":
+			default:
+				wish.push(journey)
 			}
-
-			//unconfirmed as wish
-			wish.push(journey)
 		})
 		memory.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())
 		active.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())

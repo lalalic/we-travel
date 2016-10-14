@@ -8,6 +8,7 @@ import Logo from 'material-ui/svg-icons/maps/directions-walk'
 import IconPublish from "material-ui/svg-icons/image/camera-roll"
 import IconMore from 'material-ui/svg-icons/navigation/more-horiz'
 import IconAdd from 'material-ui/svg-icons/content/add'
+import IconMap from "material-ui/svg-icons/maps/map"
 
 import {Journey as JourneyDB, Footprint as FootprintDB} from "../db"
 import Chipper from "./chipper"
@@ -28,7 +29,7 @@ export default class Journey extends Component{
 		let {footprints, editing}=this.state
 		let currentDate=null, lastDay=0, all=[];
 
-		footprints.forEach(footprint=>{
+		footprints.forEach((footprint,i)=>{
 			const {when,photo,note}=footprint
 			if(currentDate==null || !when.isSameDate(currentDate)){
 				currentDate=when
@@ -41,7 +42,7 @@ export default class Journey extends Component{
 						onEdit={a=>this.setState({editing:{when:date}})}/>)
 				}
 			}
-			all.push(<Footprint key={when} data={footprint}
+			all.push(<Footprint key={i} data={footprint}
 				onEdit={a=>this.setState({editing:footprint})}/>)
 		})
 		return (
@@ -155,14 +156,16 @@ export class Title extends Component{
 				</Step>
 			)
 		}else{
+			let mapToggle=null
+			if(onMap){
+				mapToggle=(<div style={{width:100}}><Toggle labelPosition="right" label="Map"onToggle={onMap}/></div>)
+			}
 			return (
 				<Step>
 					<StepLabel icon="*">
 						<div className="grid">
 							<b onClick={e=>this.context.router.push(`journey/${_id}`)}>{name}</b>
-							{onMap && (<Toggle labelPosition="right"
-								label="map"
-								onToggle={onMap}/>)}
+							{mapToggle}
 						</div>
 					</StepLabel>
 				</Step>
