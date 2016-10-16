@@ -24,7 +24,7 @@ export default class Journey extends Component{
 		JourneyDB.findOne({_id},entity=>{
 			entity.startedAt && (entity.startedAt=new Date(entity.startedAt));
 			entity.endedAt && (entity.endedAt=new Date(entity.endedAt));
-		
+
 			this.setState({entity})
 		})
 	}
@@ -43,23 +43,23 @@ export default class Journey extends Component{
 
 		if(!journey)
 			return (<Loading/>)
-		
+
 		const {startedAt, endedAt}=journey
 		let scheduler, searcher
 		let actions=[
 			"Back"
 			,{action:"Comment"
 				,label:"评论"
-				,onSelect: e=>this.context.router.push(`comment/${JourneyDB._name}/${journey._id}`,{journey}) 
+				,onSelect: e=>this.context.router.push(`comment/${JourneyDB._name}/${journey._id}`,{journey})
 				,icon:IconPublish}
 			,{action:"Publish"
 				,label:"出版"
-				,onSelect: e=>this.context.router.push("publish",{journey}) 
+				,onSelect: e=>this.context.router.push("publish",{journey})
 				,icon:IconPublish}
 		]
 		switch(JourneyDB.getState(journey)){
 		case "Memory":
-			
+
 		break
 		case "Starting":
 		case "Ending":
@@ -75,15 +75,18 @@ export default class Journey extends Component{
 				,icon: IconRemove
 			})
 		}
-		
+
 		return (
 			<div>
 				<div style={{padding:5}}>
 					<TextField ref="name" hintText="名字" fullWidth={true} defaultValue={journey.name}/>
 
-					<DatePicker ref="startedAt" hintText="开始日期" autoOk={true} defaultDate={journey.startedAt}/>
-
-					<DatePicker ref="endedAt" hintText="结束日期" autoOk={true} defaultDate={journey.endedAt}/>
+					<div className="grid">
+						<DatePicker ref="startedAt" hintText="开始日期" fullWidth={true}
+							autoOk={true} defaultDate={journey.startedAt}/>
+						<DatePicker ref="endedAt" hintText="结束日期" fullWidth={true}
+							autoOk={true} defaultDate={journey.endedAt}/>
+					</div>
 
 					<br/>
 					<Chipper
@@ -97,12 +100,12 @@ export default class Journey extends Component{
 								"海滩","人文","山水","都市","会友",
 								"蜜月","生日","周年庆"
 							]}/>
-							
-					
+
+
 					<br/>
 
 					{scheduler}
-					
+
 					{searcher}
 				</div>
 
@@ -111,12 +114,12 @@ export default class Journey extends Component{
 			</div>
 		)
 	}
-	
+
 	remove(){
 		JourneyDB.remove(this.state.entity)
 		this.context.router.replace("/")
 	}
-	
+
 	static contextTypes={
 		router:React.PropTypes.object
 	}
@@ -128,9 +131,12 @@ export default class Journey extends Component{
 					<div style={{padding:5}}>
 						<TextField ref="name" hintText="名字" fullWidth={true}/>
 
-						<DatePicker ref="startedAt" hintText="开始日期" autoOk={true}/>
-
-						<DatePicker ref="endedAt" hintText="结束日期" autoOk={true}/>
+						<div className="grid">
+							<DatePicker ref="startedAt" hintText="开始日期"
+								fullWidth={true} autoOk={true}/>
+							<DatePicker ref="endedAt" hintText="结束日期"
+								fullWidth={true} autoOk={true}/>
+						</div>
 					</div>
 
 					<UI.CommandBar className="footbar"
@@ -174,7 +180,7 @@ class TextScheduler extends Component{
 					<div style={{width:24,verticalAlign:"bottom"}}>
 						<IconMap color="lightblue" onClick={e=>this.showMap()}/>
 					</div>
-					<Dialog open={needMap} 
+					<Dialog open={needMap}
 						onRequestClose={e=>this.setState({needMap:false})}>
 						<Map onReady={map=>this.showWaypoints(map)} style={{width:"100%",height:500}}/>
 					</Dialog>
@@ -193,7 +199,7 @@ class TextScheduler extends Component{
 	showMap(){
 		this.setState({needMap:true})
 	}
-	
+
 	showWaypoints(map){
 		const {waypoints}=this.state
 		const {Marker,Point}=BMap
@@ -204,7 +210,7 @@ class TextScheduler extends Component{
 			map.addOverlay(marker)
 			points.push(marker.getPosition())
 		})
-		
+
 		if(points.length)
 			map.setViewport(points)
 	}

@@ -5,6 +5,7 @@ export default class extends React.Component {
 		super(...arguments)
 		this.id=this.props.id||`_map${Date.now()}`
 	}
+
     componentDidMount() {
 		const {nav}=this.props
 		let init=a=>{
@@ -12,11 +13,11 @@ export default class extends React.Component {
 			var map=this._map = new Map(this.id);
 			map.Marker=Marker
 			map.centerAndZoom(new Point(116.404, 39.915), 11);
-			map.setCurrentCity("北京");
-			map.addControl(new BMap.NavigationControl({anchor:BMAP_ANCHOR_BOTTOM_RIGHT}));  
+			this.refs.root.style.zIndex=3;
+			map.addControl(new BMap.NavigationControl({anchor:BMAP_ANCHOR_BOTTOM_RIGHT}));
 			this.mapDidMount(map)
 		}
-		
+
 		if(!document.querySelector("script#map")){
 			window.__initMap=function(){
 				init()
@@ -29,9 +30,9 @@ export default class extends React.Component {
 			document.body.appendChild(script);
 		}else{
 			init()
-		}	
+		}
     }
-	
+
 	mapDidMount(map){
 		const {onReady}=this.props
 		onReady && onReady(map);
@@ -39,7 +40,7 @@ export default class extends React.Component {
 
     render() {
 		let {onReady, ...others}=this.props
-        return <div id={this.id} {...others}>loading...</div>;
+        return <div ref="root" id={this.id} {...others}>loading...</div>;
     }
 
     static propTypes = {

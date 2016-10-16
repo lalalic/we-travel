@@ -34,20 +34,20 @@ export default class extends Component{
 
 	render(){
 		const {memory, wish, active, showHistory, onMap}=this.state
-	
+
 		let map=null, mapToggler=null
-		
-		if(active.length>0){			
+
+		if(active.length>0){
 			mapToggler=(<FloatingActionButton
-							className="floating sticky top right _2"
+							className="sticky top right _2"
 							mini={true} onClick={e=>this.toggleMap()}>
 							<IconMap/>
 						</FloatingActionButton>)
-						
+
 			if(onMap){
-				map=(<Map className="floating sticky top left" 
+				map=(<Map className="sticky top left"
 						onReady={map=>this.showJourneyOnMap(map)}
-						style={{opacity:"0.5", width:940, height:window.innerHeight-50-10}}/>)
+						style={{zIndex:3, opacity:"0.5", width:940, height:window.innerHeight-50-10}}/>)
 			}
 		}
 
@@ -60,10 +60,10 @@ export default class extends Component{
 				mini={true} onClick={e=>this.context.router.push("journey/_new")}>
 				<IconAdd/>
 			</FloatingActionButton>
-			
+
 			{mapToggler}
 
-			<div style={{zIndex:7, background:"white"}}>
+			<div style={{background:"white"}}>
 				{showHistory && memory.length && (
 					<Stepper orientation="vertical" activeStep={-1}>
 					{
@@ -91,12 +91,12 @@ export default class extends Component{
 		</div>
 		)
 	}
-	
+
 	toggleMap(){
 		const {onMap}=this.state
 		this.setState({onMap:!onMap})
 	}
-	
+
 	showJourneyOnMap(map){
 		const {active:[journey]}=this.state
 		const {Marker,Point,PointCollection,Label,Size}=BMap
@@ -110,10 +110,10 @@ export default class extends Component{
 					const {when,lat,lng}=waypoint
 					if(when-days[days.length-1].when>dayLong)
 						days.push(waypoint)
-					return new Point(lng,lat)	
+					return new Point(lng,lat)
 				})
-				map.addOverlay(new PointCollection(points, {size:BMAP_POINT_SIZE_TINY,shape:BMAP_POINT_SHAPE_STAR, color:"red"})) 
-				
+				map.addOverlay(new PointCollection(points, {size:BMAP_POINT_SIZE_TINY,shape:BMAP_POINT_SHAPE_STAR, color:"red"}))
+
 				let startedAt=journey.startedAt
 				let current, onClick=e=>{
 					current && current.setAnimation(null);
@@ -134,7 +134,7 @@ export default class extends Component{
 						marker.setAnimation(BMAP_ANIMATION_BOUNCE)
 					}
 				});
-				
+
 				let delta=Math.round(points.length/5)
 				map.setViewport(points.filter((a,i)=>i%delta==0))
 			})
