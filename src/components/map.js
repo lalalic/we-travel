@@ -12,8 +12,8 @@ export default class extends React.Component {
 			const {Map,Point}=BMap
 			var map=this._map = new Map(this.id);
 			map.centerAndZoom(new Point(116.404, 39.915), 11);
-			if(zIndex!=undefined) 
-				;//this.refs.root.style.zIndex=zIndex;
+			if(zIndex!=undefined)
+				this.refs.root.style.zIndex=zIndex;
 			this.mapDidMount(map)
 		}
 

@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {UI, User} from "qili-app"
 
-import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Slider} from "material-ui"
+import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Slider, Drawer} from "material-ui"
 import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
 
 import Logo from 'material-ui/svg-icons/maps/directions-walk'
@@ -51,8 +51,8 @@ export default class Life extends Component{
 							style={{opacity:"0.5", zIndex:1}}/>
 						<div className="sticky bottom right _2">
 							<Slider axis="y" ref="opacity"
-								style={{height:100}} 
-								disableFocusRipple={true} 
+								style={{height:100}}
+								disableFocusRipple={true}
 								defaultValue={0.5}
 								step={0.1}
 								onChange={e=>this.onChangeMapOpacity()}
@@ -74,7 +74,7 @@ export default class Life extends Component{
 
 			{mapToggler}
 
-			<div style={{zIndex: 7, background:"white"}}>
+			<div style={{background:"white"}}>
 				{showHistory && memory.length && (
 					<Stepper orientation="vertical" activeStep={-1}>
 					{
@@ -85,7 +85,7 @@ export default class Life extends Component{
 
 				{active.length && (
 					active.map(journey=>(
-						<Journey key={journey} journey={journey}/>
+						<Journey key={journey} journey={journey} publishable={true}/>
 					))
 				)||null}
 
@@ -102,7 +102,7 @@ export default class Life extends Component{
 		</div>
 		)
 	}
-	
+
 	onChangeMapOpacity(){
 		let mapStyle=this.refs.map.refs.root.style
 		let opacity=mapStyle.opacity=this.refs.opacity.getValue()
@@ -157,7 +157,7 @@ export default class Life extends Component{
 				let delta=Math.round(points.length/5)
 				map.setViewport(points.filter((a,i)=>i%delta==0))
 			})
-	
+
 	}
 
 	group(journeys){

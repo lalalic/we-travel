@@ -26,9 +26,28 @@ export default class Journey extends Component{
 			.then(footprints=>this.setState({footprints}))
 	}
 	render(){
-		let {journey:{startedAt}, onMap}=this.props
+		let {journey:{startedAt}, onMap, publishable}=this.props
 		let {footprints, editing}=this.state
-		let currentDate=null, lastDay=0, all=[];
+		let currentDate=null, lastDay=0
+		let all=[<Title journey={this.props.journey} key="title"/>]
+		if(publishable){
+			all.push(
+				<Step active={true} completed={false} key="trigger">
+					<StepLabel icon="*">
+						<p>
+							<input style={{border:"1px solid lightgray",padding:10, marginRight:10}}
+								onClick={e=>this.setState({editing:{when:new Date(),focusing:"text"}})}
+								placeholder="发状态当达人..."/>
+							<span style={{position:"relative", top:8}}>
+								<IconCamera
+									onClick={e=>this.setState({editing:{when:new Date(),focusing:"photo"}})}
+									color="lightgray"/>
+							</span>
+						</p>
+					</StepLabel>
+				</Step>
+			)
+		}
 
 		footprints.forEach((footprint,i)=>{
 			const {when,photo,note}=footprint
@@ -46,7 +65,7 @@ export default class Journey extends Component{
 			all.push(<Footprint key={i} data={footprint}
 				onEdit={a=>this.setState({editing:footprint})}/>)
 		})
-		
+
 		let editor=null
 		if(editing){
 			const {focusing, ...others}=editing
@@ -58,12 +77,9 @@ export default class Journey extends Component{
 		return (
 			<div>
 				<Stepper orientation="vertical">
-					<Title journey={this.props.journey} 
-						onMap={onMap}
-						onEdit={type=>this.setState({editing:{when:new Date(), focusing:type}})}/>
 					{all}
 				</Stepper>
-				
+
 				{editor}
 			</div>
 		)
@@ -71,7 +87,9 @@ export default class Journey extends Component{
 
 	onSave(footprint){
 		const {journey}=this.props
+		const {footprints=[]}=this.state
 		footprint.journey=journey._id
+		this.state.setState({footprints: footprints.concat([footprint])})
 		FootprintDB.upsert(footprint)
 			.then(a=>{
 				JourneyDB.emit("footprint.changed")
@@ -106,7 +124,8 @@ class Editor extends Component{
             })
 
         if(uiPhotos.length<9)
-            uiPhotos.push((<Photo ref="photo" {...styles} onPhoto={this.onPhoto.bind(this)} key={Date.now()}/>))
+            uiPhotos.push((<Photo ref="photo" key="_new" {...styles}
+				onPhoto={(url,i)=>this.onPhoto(url,i)}/>))
 
 		return (
 			<Dialog title={footprint.when.smartFormat()}
@@ -134,15 +153,15 @@ class Editor extends Component{
 			</Dialog>
 		)
 	}
-	
-	componentDidUpdate(){
+
+	componentDidMount(){
 		const {focusing}=this.props
 		switch(focusing){
 		case "text":
 			this.refs.text.focus()
 		break
 		case "photo":
-			this.refs.photo.click()
+			this.refs.photo.doPhoto()
 		break
 		}
 	}
@@ -165,7 +184,7 @@ class Editor extends Component{
 
 export class Title extends Component{
 	render(){
-		const {journey, completed, onMap, onEdit}=this.props
+		const {journey, completed, onMap}=this.props
 		const {name,_id, startedAt}=journey
 		if(completed){
 			return (
@@ -192,16 +211,6 @@ export class Title extends Component{
 							{mapToggle}
 						</div>
 					</StepLabel>
-					<StepContent>
-						<p>
-							<input style={{border:"1px solid lightgray",padding:10, marginRight:10}} 
-								onClick={e=>onEdit("text")}
-								placeholder="发状态当达人..."/>
-							<span style={{position:"relative", top:8}}>
-								<IconCamera onClick={e=>onEdit("photo")} color="lightgray"/>
-							</span>
-						</p>
-					</StepContent>
 				</Step>
 			)
 		}
