@@ -9,6 +9,7 @@ import IconPublish from "material-ui/svg-icons/image/camera-roll"
 import IconMore from 'material-ui/svg-icons/navigation/more-horiz'
 import IconAdd from 'material-ui/svg-icons/content/add'
 import IconMap from "material-ui/svg-icons/maps/map"
+import IconCamera from 'material-ui/svg-icons/image/photo-camera'
 
 import {Journey as JourneyDB, Footprint as FootprintDB} from "../db"
 import Chipper from "./chipper"
@@ -45,22 +46,33 @@ export default class Journey extends Component{
 			all.push(<Footprint key={i} data={footprint}
 				onEdit={a=>this.setState({editing:footprint})}/>)
 		})
+		
+		let editor=null
+		if(editing){
+			const {focusing, ...others}=editing
+			editor=(<Editor footprint={others}
+					focusing={focusing}
+					onSave={a=>this.onSave(a)}
+					onCancel={a=>this.setState({editing:undefined})}/>)
+		}
 		return (
 			<div>
 				<Stepper orientation="vertical">
-					<Title journey={this.props.journey} onMap={onMap}/>
+					<Title journey={this.props.journey} 
+						onMap={onMap}
+						onEdit={type=>this.setState({editing:{when:new Date(), focusing:type}})}/>
 					{all}
 				</Stepper>
-				{editing && (<Editor footprint={editing}
-					onSave={a=>this.onSave(a)}
-					onCancel={a=>this.setState({editing:undefined})}/>)}
+				
+				{editor}
 			</div>
 		)
 	}
 
 	onSave(footprint){
 		const {journey}=this.props
-		JourneyDB.upsert(footprint)
+		footprint.journey=journey._id
+		FootprintDB.upsert(footprint)
 			.then(a=>{
 				JourneyDB.emit("footprint.changed")
 			})
@@ -70,7 +82,7 @@ export default class Journey extends Component{
 
 class Editor extends Component{
 	render(){
-		const {footprint, onSave, onCancel}=this.props
+		const {footprint, onSave, onCancel, focusing}=this.props
 		const actions = [
 			  <FlatButton
 				label="关闭"
@@ -94,7 +106,7 @@ class Editor extends Component{
             })
 
         if(uiPhotos.length<9)
-            uiPhotos.push((<Photo {...styles} onPhoto={this.onPhoto.bind(this)} key={Date.now()}/>))
+            uiPhotos.push((<Photo ref="photo" {...styles} onPhoto={this.onPhoto.bind(this)} key={Date.now()}/>))
 
 		return (
 			<Dialog title={footprint.when.smartFormat()}
@@ -104,7 +116,7 @@ class Editor extends Component{
 				onRequestClose={onCancel}>
 				<div className="section">
 					<div style={{textAlign:"center"}}>{uiPhotos}</div>
-					<textarea
+					<textarea ref="text"
 						style={{width:"100%",border:0,height:100, fontSize:12, paddingTop:5, borderTop:"1px dotted lightgray"}}
 						placeholder="这一刻的想法"
 						defaultValue={footprint.note}/>
@@ -121,6 +133,18 @@ class Editor extends Component{
 				</div>
 			</Dialog>
 		)
+	}
+	
+	componentDidUpdate(){
+		const {focusing}=this.props
+		switch(focusing){
+		case "text":
+			this.refs.text.focus()
+		break
+		case "photo":
+			this.refs.photo.click()
+		break
+		}
 	}
 
 	onPhoto(url, index){
@@ -141,7 +165,7 @@ class Editor extends Component{
 
 export class Title extends Component{
 	render(){
-		const {journey, completed, onMap}=this.props
+		const {journey, completed, onMap, onEdit}=this.props
 		const {name,_id, startedAt}=journey
 		if(completed){
 			return (
@@ -161,13 +185,23 @@ export class Title extends Component{
 				mapToggle=(<div style={{width:100}}><Toggle labelPosition="right" label="Map"onToggle={onMap}/></div>)
 			}
 			return (
-				<Step>
+				<Step completed={true} active={true}>
 					<StepLabel icon="*">
 						<div className="grid">
 							<b onClick={e=>this.context.router.push(`journey/${_id}`)}>{name}</b>
 							{mapToggle}
 						</div>
 					</StepLabel>
+					<StepContent>
+						<p>
+							<input style={{border:"1px solid lightgray",padding:10, marginRight:10}} 
+								onClick={e=>onEdit("text")}
+								placeholder="发状态当达人..."/>
+							<span style={{position:"relative", top:8}}>
+								<IconCamera onClick={e=>onEdit("photo")} color="lightgray"/>
+							</span>
+						</p>
+					</StepContent>
 				</Step>
 			)
 		}

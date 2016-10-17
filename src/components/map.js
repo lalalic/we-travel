@@ -7,14 +7,13 @@ export default class extends React.Component {
 	}
 
     componentDidMount() {
-		const {nav}=this.props
+		const {style:{zIndex}}=this.props
 		let init=a=>{
-			const {Map,Point,Marker}=BMap
+			const {Map,Point}=BMap
 			var map=this._map = new Map(this.id);
-			map.Marker=Marker
 			map.centerAndZoom(new Point(116.404, 39.915), 11);
-			this.refs.root.style.zIndex=3;
-			map.addControl(new BMap.NavigationControl({anchor:BMAP_ANCHOR_BOTTOM_RIGHT}));
+			if(zIndex!=undefined) 
+				;//this.refs.root.style.zIndex=zIndex;
 			this.mapDidMount(map)
 		}
 

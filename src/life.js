@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from 'react'
 import {UI, User} from "qili-app"
 
-import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog} from "material-ui"
+import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Slider} from "material-ui"
 import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
 
 import Logo from 'material-ui/svg-icons/maps/directions-walk'
@@ -19,7 +19,7 @@ import LocationDB from "./db/location"
 
 const {Empty, Photo}=UI
 
-export default class extends Component{
+export default class Life extends Component{
 	state={
 		memory:[],
 		wish:[],
@@ -45,9 +45,20 @@ export default class extends Component{
 						</FloatingActionButton>)
 
 			if(onMap){
-				map=(<Map className="sticky top left"
-						onReady={map=>this.showJourneyOnMap(map)}
-						style={{zIndex:3, opacity:"0.5", width:940, height:window.innerHeight-50-10}}/>)
+				map=(<div>
+						<Map className="sticky full" ref="map"
+							onReady={map=>this.showJourneyOnMap(map)}
+							style={{opacity:"0.5", zIndex:1}}/>
+						<div className="sticky bottom right _2">
+							<Slider axis="y" ref="opacity"
+								style={{height:100}} 
+								disableFocusRipple={true} 
+								defaultValue={0.5}
+								step={0.1}
+								onChange={e=>this.onChangeMapOpacity()}
+								/>
+						</div>
+					</div>)
 			}
 		}
 
@@ -63,7 +74,7 @@ export default class extends Component{
 
 			{mapToggler}
 
-			<div style={{background:"white"}}>
+			<div style={{zIndex: 7, background:"white"}}>
 				{showHistory && memory.length && (
 					<Stepper orientation="vertical" activeStep={-1}>
 					{
@@ -91,6 +102,15 @@ export default class extends Component{
 		</div>
 		)
 	}
+	
+	onChangeMapOpacity(){
+		let mapStyle=this.refs.map.refs.root.style
+		let opacity=mapStyle.opacity=this.refs.opacity.getValue()
+		if(opacity<0.5)
+			mapStyle.zIndex=1;
+		else
+			mapStyle.zIndex=3;
+	}
 
 	toggleMap(){
 		const {onMap}=this.state
@@ -112,14 +132,18 @@ export default class extends Component{
 						days.push(waypoint)
 					return new Point(lng,lat)
 				})
-				map.addOverlay(new PointCollection(points, {size:BMAP_POINT_SIZE_TINY,shape:BMAP_POINT_SHAPE_STAR, color:"red"}))
+				let pc=new PointCollection(points, {size:BMAP_POINT_SIZE_TINY,shape:BMAP_POINT_SHAPE_CIRCLE, color:"red"})
+				map.addOverlay(pc)
+				map.addEventListener("zoomend", ()=>{
+					let zoom=map.getZoom()
+					if(zoom<=11){
+						pc.setStyles({size:BMAP_POINT_SIZE_TINY})
+					}else{
+						pc.setStyles({size:BMAP_POINT_SIZE_BIG})
+					}
+				})
 
 				let startedAt=journey.startedAt
-				let current, onClick=e=>{
-					current && current.setAnimation(null);
-					current=e.target
-					current.setAnimation(BMAP_ANIMATION_BOUNCE)
-				}
 				days.forEach(({when,lat,lng}, i)=>{
 					let marker=new Marker(new Point(lng,lat))
 					let dayNo=new Date(when).relative(startedAt)+1
@@ -128,16 +152,12 @@ export default class extends Component{
 					label.setOffset(new Size(dayNo>9 ? 2 : 5, 2))
 					marker.setLabel(label)
 					map.addOverlay(marker)
-					marker.addEventListener("click", onClick)
-					if(i==0){
-						current=marker
-						marker.setAnimation(BMAP_ANIMATION_BOUNCE)
-					}
 				});
 
 				let delta=Math.round(points.length/5)
 				map.setViewport(points.filter((a,i)=>i%delta==0))
 			})
+	
 	}
 
 	group(journeys){
