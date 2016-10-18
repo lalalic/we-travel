@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from "react"
 import {UI} from "qili-app"
 
-import {TextField, DatePicker, Avatar, Divider, Dialog} from "material-ui"
+import {FloatingActionButton,TextField, DatePicker, Avatar, Divider, Dialog} from "material-ui"
 
 import IconSave from "material-ui/svg-icons/file/cloud-done"
 import IconMap from "material-ui/svg-icons/maps/map"
@@ -17,7 +17,7 @@ import Itinerary from "./components/itinerary"
 
 import {Journey as JourneyDB} from "./db"
 
-const {Loading}=UI
+const {Loading, CommandBar}=UI
 export default class Journey extends Component{
 	state={entity:null}
 
@@ -46,16 +46,12 @@ export default class Journey extends Component{
 			return (<Loading/>)
 
 		const {startedAt, endedAt}=journey
-		let scheduler, searcher
+		let scheduler
 		let actions=[
 			"Back"
 			,{action:"Comment"
 				,label:"评论"
 				,onSelect: e=>this.context.router.push(`comment/${JourneyDB._name}/${journey._id}`,{journey})
-				,icon:IconPublish}
-			,{action:"Publish"
-				,label:"出版"
-				,onSelect: e=>this.context.router.push("publish",{journey})
 				,icon:IconPublish}
 		]
 		switch(JourneyDB.getState(journey)){
@@ -67,8 +63,15 @@ export default class Journey extends Component{
 		case "Traveling":
 		case "Plan":
 		default:
-			scheduler=(<TextScheduler ref="scheduler" journey={journey}/>)
-			searcher=(<Search hintText="查找:看看大侠们的足迹好好规划一下" fullWidth={true}/>)
+			scheduler=(
+				<div>
+					<TextField onClick={e=>this.context.router.push(`journey/${journey._id}/itinerary`)}
+						floatingLabelText="快速计划你的行程"
+						floatingLabelFixed={true}/>
+					<Itinerary journey={journey} mode="place"/>
+				</div>
+			)
+
 			actions.splice(1,0,{
 				action:"Remove"
 				,label:"删除"
@@ -79,17 +82,27 @@ export default class Journey extends Component{
 
 		return (
 			<div>
+				<FloatingActionButton
+					className="floating sticky top right"
+					mini={true}
+					onClick={e=>this.context.router.push(`publish/journey/${journey._id}`)}>
+					$<IconPublish/>
+				</FloatingActionButton>
+
 				<div style={{padding:5}}>
-					<TextField ref="name" hintText="名字" fullWidth={true} defaultValue={journey.name}/>
+					<TextField ref="name"
+						floatingLabelText="一次有独特意义的旅行名称"
+						fullWidth={true}
+						defaultValue={journey.name}/>
 
-					<div className="grid">
-						<DatePicker ref="startedAt" hintText="开始日期" fullWidth={true}
-							autoOk={true} defaultDate={journey.startedAt}/>
-						<DatePicker ref="endedAt" hintText="结束日期" fullWidth={true}
-							autoOk={true} defaultDate={journey.endedAt}/>
-					</div>
+					<DatePicker ref="startedAt" floatingLabelText="开始日期"
+						fullWidth={false}
+						autoOk={true} defaultDate={journey.startedAt}/>
 
-					<br/>
+					<DatePicker ref="endedAt" floatingLabelText="结束日期"
+						fullWidth={false}
+						autoOk={true} defaultDate={journey.endedAt}/>
+
 					<Chipper
 						title="更多信息"
 						autoOpen={false}
@@ -102,18 +115,10 @@ export default class Journey extends Component{
 								"蜜月","生日","周年庆"
 							]}/>
 
-
-					<br/>
-
 					{scheduler}
-
-					{searcher}
-					
-					<Itinerary journey={journey} mode="place"/>
 				</div>
 
-				<UI.CommandBar className="footbar"
-                    items={actions}/>
+				<CommandBar className="footbar" items={actions}/>
 			</div>
 		)
 	}
@@ -158,69 +163,5 @@ export default class Journey extends Component{
 				endedAt:endedAt.getDate()
 			}).then(journey=>this.context.router.replace(`journey/${journey._id}`))
 		}
-	}
-}
-
-class TextScheduler extends Component{
-	state={
-		waypoints: null,
-		needMap:false
-	}
-	componentDidMount(){
-		JourneyDB.getWaypoints(this.props.journey)
-			.then(waypoints=>this.setState({waypoints}))
-	}
-
-	render(){
-		const {journey, others}=this.props
-		const {waypoints, needMap}=this.state
-		if(waypoints && waypoints.length){
-			return (
-				<div className="grid">
-					<TextField floatingLabelFixed={true}
-						onClick={e=>this.context.router.push(`journey/${journey._id}/itinerary`)}
-						floatingLabelText={`发现${waypoints.length}张照片有地址信息，点击图标查看详细信息`}
-						multiLine={true} fullWidth={true} {...others}/>
-					<div style={{width:24,verticalAlign:"bottom"}}>
-						<IconMap color="lightblue" onClick={e=>this.showMap()}/>
-					</div>
-					<Dialog open={needMap}
-						onRequestClose={e=>this.setState({needMap:false})}>
-						<Map onReady={map=>this.showWaypoints(map)} style={{width:"100%",height:500}}/>
-					</Dialog>
-				</div>
-			)
-		}else{
-			return (
-				<div>
-					<TextFieldWithIcon icon={<IconSchedule/>} floatingLabelFixed={true}
-						onClick={e=>this.context.router.push(`journey/${journey._id}/itinerary`)}
-						floatingLabelText="快速计划你的行程，比如：北京,上海,..."
-						multiLine={true} fullWidth={true} {...others}/>
-				</div>)
-		}
-	}
-
-	showMap(){
-		this.setState({needMap:true})
-	}
-
-	showWaypoints(map){
-		const {waypoints}=this.state
-		const {Marker,Point}=BMap
-		let points=[]
-		waypoints.forEach(waypoint=>{
-			const {coordinates:[lat,lng]}=waypoint.loc
-			let marker=new Marker(new Point(lat,lng), {enableDragging:true})
-			map.addOverlay(marker)
-			points.push(marker.getPosition())
-		})
-
-		if(points.length)
-			map.setViewport(points)
-	}
-	
-	static contextTypes={
-		router: PropTypes.object
 	}
 }

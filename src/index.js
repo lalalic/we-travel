@@ -35,16 +35,16 @@ class Main extends QiliApp{
 			</div>
 		)
 	}
-	
+
 	static childContextTypes=Object.assign(QiliApp.childContextTypes,{
 		viewPhoto: PropTypes.func
     })
-	
+
 	getChildContext(){
 		return Object.assign(super.getChildContext(),{
 			viewPhoto:url=>this.refs.photoViewer.view(url)
 		})
-	} 
+	}
 
 	static defaultProps=Object.assign(QiliApp.defaultProps,{
 		init:a=>{
@@ -74,7 +74,10 @@ document.addEventListener('deviceready', function() {
 			<Route path="profile" component={ProfileUI}/>
 		</Route>
 
-		<Route path="publish" component={PublishUI}/>
+		<Route path="publish" component={PublishUI}>
+			<IndexRoute/>
+			<Route path="journey/:_id"/>
+		</Route>
 
 		<Route path="journey">
 			<Route path="_new" component={JourneyUI.Creator}/>
@@ -86,7 +89,7 @@ document.addEventListener('deviceready', function() {
 				</Route>
 			</Route>
 		</Route>
-		
+
 		<Route path="comment/:type/:_id" component={Comment}/>
 	</Route>
 	)

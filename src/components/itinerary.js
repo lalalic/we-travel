@@ -3,20 +3,20 @@ import {TextField} from "material-ui"
 import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
 import IconMap from "material-ui/svg-icons/maps/map"
 
-import {Journey as JourneyDB, Itinerary as ItineraryDB} from "../db"
+import {Itinerary as ItineraryDB} from "../db"
 
 export default class Itinerary extends Component{
 	state={
 		itinerary:[]
 	}
-	
+
 	componentDidMount(){
-		const {journey}=this.props
-		ItineraryDB.find().fetch(itinerary=>{
+		const {journey:{_id}}=this.props
+		ItineraryDB.find({journey:_id},itinerary=>{
 			this.setState({itinerary})
-		})	
+		})
 	}
-	
+
 	render(){
 		const {mode}=this.props
 		switch(mode){
@@ -28,7 +28,7 @@ export default class Itinerary extends Component{
 			return this.renderByPlace()
 		}
 	}
-	
+
 	renderByDate(){
 		const {startedAt, endedAt}=this.props.journey
 		const {itinerary}=this.state
@@ -58,7 +58,7 @@ export default class Itinerary extends Component{
 				{days}
 			</Stepper>
 		)
-	}	
+	}
 
 	renderByPlace(){
 		const {startedAt, endedAt}=this.props.journey
@@ -68,14 +68,10 @@ export default class Itinerary extends Component{
 			return (
 				<Step key={place}>
 					<StepLabel>
-						<div className="grid">
-							<span>{place}</span>
-							<span><TextField floatHintText="´ý¶àÉÙÌì" name="days" defaultValue={1}/></span>
-							<span/>
-						</div>
+						<span>{place}</span>
 					</StepLabel>
 				</Step>
-			)	
+			)
 		})
 		return (
 			<Stepper orientation="vertical">
@@ -93,7 +89,7 @@ class LocationTextField extends Component{
 		let outerStyle={}
 		if(width)
 			outerStyle.width=width-24
-		
+
 		return (
 			<div className="grid" {...outerStyle}>
 				<div>
