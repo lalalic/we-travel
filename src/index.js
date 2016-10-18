@@ -61,6 +61,7 @@ import ExploreUI from "./explore"
 import PublishUI from "./publish"
 import JourneyUI from "./journey"
 import ItineraryUI from "./itinerary"
+import ItiDetailUI from "./itidetail"
 
 document.addEventListener('deviceready', function() {
   Main.render(
@@ -81,6 +82,7 @@ document.addEventListener('deviceready', function() {
 				<IndexRoute component={JourneyUI}/>
 				<Route path="itinerary">
 					<IndexRoute  component={ItineraryUI}/>
+					<Route path=":_id2" component={ItiDetailUI}/>
 				</Route>
 			</Route>
 		</Route>

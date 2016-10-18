@@ -1,5 +1,5 @@
 import React, {Component, PropTypes} from "react"
-import {TextField, Checkbox, DropDownMenu, MenuItem} from "material-ui"
+import {TextField, Checkbox, IconMenu, IconButton, MenuItem} from "material-ui"
 import Divider from 'material-ui/Divider';
 import {UI} from "qili-app"
 
@@ -33,18 +33,30 @@ export default class Itinerary extends Component{
 				<SelectableList>
 					{itinerary.map(({_id,place,days},i)=>(
 						<ListItem key={place} 
-							leftIcon={editing ? (<RemoveIcon/>) : null}
+							leftIcon={editing ? (<RemoveIcon/>) : null} 
 							rightIcon={<RightArrow onClick={e=>this.context.router.push(`journey/${this.props.params._id}/iternerary/${_id}`)}/>}
-							primaryText={<div className="grid"><span>{place}</span><span  style={{width:50}}><input name="days" defaultValue={1} placeholder="逗留天数"/></span></div>}
+							primaryText={
+								<div className="grid">
+									<span>{place}</span>
+									<span  style={{width:150}}>
+										逗留
+										<input name="days" 
+											style={{width:"2em",background:"transparent",textAlign:"center",borderBottom:"1px solid lightgray"}} 
+											defaultValue={1} />
+										天
+									</span>
+								</div>}
 							secondaryText={
 								<div className="grid">
-									<span><NextIcon/></span>
-									<DropDownMenu>
-										<MenuItem value={1} primaryText="飞"/>
-										<MenuItem value={2} primaryText="火车"/>
-										<MenuItem value={3} primaryText="自驾"/>
-										<MenuItem value={4} primaryText="走"/>
-									</DropDownMenu>
+									<span style={{width:30}}>
+										<IconMenu iconButtonElement={<IconButton><NextIcon/></IconButton>}>
+											<MenuItem value={1} primaryText="飞"/>
+											<MenuItem value={2} primaryText="火车"/>
+											<MenuItem value={3} primaryText="自驾"/>
+											<MenuItem value={4} primaryText="走"/>
+										</IconMenu>
+									</span>
+									<span style={{position:"relative", top:-12}}>飞</span>
 								</div>
 							}/>	
 					))}
