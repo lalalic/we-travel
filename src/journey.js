@@ -13,6 +13,7 @@ import Chipper from "./components/chipper"
 import TextFieldWithIcon from "./components/textFieldWithIcon"
 import Search from "./components/searchTextField"
 import Map from "./components/map"
+import Itinerary from "./components/itinerary"
 
 import {Journey as JourneyDB} from "./db"
 
@@ -107,6 +108,8 @@ export default class Journey extends Component{
 					{scheduler}
 
 					{searcher}
+					
+					<Itinerary journey={journey} mode="place"/>
 				</div>
 
 				<UI.CommandBar className="footbar"
@@ -175,6 +178,7 @@ class TextScheduler extends Component{
 			return (
 				<div className="grid">
 					<TextField floatingLabelFixed={true}
+						onClick={e=>this.context.router.push(`journey/${journey._id}/itinerary`)}
 						floatingLabelText={`发现${waypoints.length}张照片有地址信息，点击图标查看详细信息`}
 						multiLine={true} fullWidth={true} {...others}/>
 					<div style={{width:24,verticalAlign:"bottom"}}>
@@ -190,6 +194,7 @@ class TextScheduler extends Component{
 			return (
 				<div>
 					<TextFieldWithIcon icon={<IconSchedule/>} floatingLabelFixed={true}
+						onClick={e=>this.context.router.push(`journey/${journey._id}/itinerary`)}
 						floatingLabelText="快速计划你的行程，比如：北京,上海,..."
 						multiLine={true} fullWidth={true} {...others}/>
 				</div>)
@@ -213,5 +218,9 @@ class TextScheduler extends Component{
 
 		if(points.length)
 			map.setViewport(points)
+	}
+	
+	static contextTypes={
+		router: PropTypes.object
 	}
 }

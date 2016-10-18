@@ -60,6 +60,7 @@ import LifeUI from "./life"
 import ExploreUI from "./explore"
 import PublishUI from "./publish"
 import JourneyUI from "./journey"
+import ItineraryUI from "./itinerary"
 
 document.addEventListener('deviceready', function() {
   Main.render(
@@ -76,7 +77,12 @@ document.addEventListener('deviceready', function() {
 
 		<Route path="journey">
 			<Route path="_new" component={JourneyUI.Creator}/>
-			<Route path=":_id" component={JourneyUI}/>
+			<Route path=":_id">
+				<IndexRoute component={JourneyUI}/>
+				<Route path="itinerary">
+					<IndexRoute  component={ItineraryUI}/>
+				</Route>
+			</Route>
 		</Route>
 		
 		<Route path="comment/:type/:_id" component={Comment}/>
