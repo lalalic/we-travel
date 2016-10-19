@@ -23,10 +23,9 @@ export default class Journey extends Component{
 
 	getData(_id){
 		JourneyDB.findOne({_id},entity=>{
-			entity.startedAt && (entity.startedAt=new Date(entity.startedAt));
-			entity.endedAt && (entity.endedAt=new Date(entity.endedAt));
-
-			this.setState({entity})
+			if(entity){
+				this.setState({entity})
+			}
 		})
 	}
 
@@ -93,7 +92,7 @@ export default class Journey extends Component{
 					<TextField ref="name"
 						floatingLabelText="一次有独特意义的旅行名称"
 						fullWidth={true}
-						defaultValue={journey.name}/>
+						defaultValue={journey.name}/> 
 
 					<DatePicker ref="startedAt" floatingLabelText="开始日期"
 						fullWidth={false}
@@ -133,18 +132,24 @@ export default class Journey extends Component{
 	}
 
 	static Creator=class JourneyCreator extends Journey{
+		getData(){
+			
+		}
 		render(){
 			return (
 				<div>
 					<div style={{padding:5}}>
-						<TextField ref="name" hintText="名字" fullWidth={true}/>
+						<TextField ref="name"
+							floatingLabelText="一次有独特意义的旅行名称"
+							fullWidth={true}/> 
 
-						<div className="grid">
-							<DatePicker ref="startedAt" hintText="开始日期"
-								fullWidth={true} autoOk={true}/>
-							<DatePicker ref="endedAt" hintText="结束日期"
-								fullWidth={true} autoOk={true}/>
-						</div>
+						<DatePicker ref="startedAt" floatingLabelText="开始日期"
+							fullWidth={false}
+							autoOk={true}/>
+
+						<DatePicker ref="endedAt" floatingLabelText="结束日期"
+							fullWidth={false}
+							autoOk={true}/>
 					</div>
 
 					<UI.CommandBar className="footbar"
