@@ -48,8 +48,8 @@ class Main extends QiliApp{
 
 	static defaultProps=Object.assign(QiliApp.defaultProps,{
 		init:a=>{
-			init()
-			PhotoPos && PhotoPos.upload()
+			init();
+			WaypointDB.upload()
 		}
 	})
 }

@@ -22,12 +22,10 @@
     "babel-preset-react": "^6.5.0",
     "babelify": "^7.2.0",
     "browserify": "^13.0.0",
-    "enzyme": "^2.4.1",
     "fakexmlhttprequest": "0.0.1",
     "node-lessify": "0.0.10",
     "qiniu": "^6.1.8",
     "react-addons-test-utils": "^15.1.0",
-    "request": "^2.67.0",
     "restmock": "^0.2.2",
     "svg-to-png": "2.0.1",
     "through2": "^2.0.0",
@@ -38,7 +36,7 @@
     "transform": [
       [
         "node-lessify",
-        {	
+        {
           "plugins": []
         }
       ]
@@ -69,7 +67,7 @@
 	"run":"cordova plugin remove cordova-plugin-photo-taken-position && cordova run android"
   },
   "jest":{
-	  
+
   },
   "keywords": [],
   "repository": {
