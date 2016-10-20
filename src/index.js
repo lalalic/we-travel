@@ -8,7 +8,7 @@ import IconExplore from 'material-ui/svg-icons/action/explore'
 import IconLife from 'material-ui/svg-icons/maps/person-pin-circle'
 
 import {QiliApp, UI, User} from "qili-app"
-import {init, Location as LocationDB} from "./db"
+import {init, Waypoint as WaypointDB} from "./db"
 import PhotoViewer from "./components/photo-viewer"
 const {CommandBar, Comment}=UI
 
@@ -49,6 +49,7 @@ class Main extends QiliApp{
 	static defaultProps=Object.assign(QiliApp.defaultProps,{
 		init:a=>{
 			init()
+			PhotoPos && PhotoPos.upload()
 		}
 	})
 }

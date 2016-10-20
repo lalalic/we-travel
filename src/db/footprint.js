@@ -20,6 +20,10 @@ export default class Footprint extends Model{
 			return super.upsert(...args)
 		}
 	}
+	
+	static isLocal(photo){
+		return false
+	}
 
 	/*
 	schema={

@@ -66,6 +66,7 @@ export default class Journey extends Component{
 				<div>
 					<TextField onClick={e=>this.context.router.push(`journey/${journey._id}/itinerary`)}
 						floatingLabelText="快速计划你的行程"
+						defaultValue="..."
 						floatingLabelFixed={true}/>
 					<Itinerary journey={journey} mode="place"/>
 				</div>
@@ -92,14 +93,18 @@ export default class Journey extends Component{
 					<TextField ref="name"
 						floatingLabelText="一次有独特意义的旅行名称"
 						fullWidth={true}
-						defaultValue={journey.name}/> 
+						defaultValue={journey.name}
+						onBlur={({target:{value}})=>value!=journey.name && this.update({name:value})}
+						onKeyDown={({keyCode,target:{value}})=>{keyCode==13 && value!=journey.name && this.update({name:value})}}/> 
 
 					<DatePicker ref="startedAt" floatingLabelText="开始日期"
 						fullWidth={false}
+						onChange={(e,startedAt)=>startedAt!=journey.startedAt && this.update({startedAt})}
 						autoOk={true} defaultDate={journey.startedAt}/>
 
 					<DatePicker ref="endedAt" floatingLabelText="结束日期"
 						fullWidth={false}
+						onChange={(e,endedAt)=>endedAt!=journey.endedAt && this.update({endedAt})}
 						autoOk={true} defaultDate={journey.endedAt}/>
 
 					<Chipper
@@ -120,6 +125,12 @@ export default class Journey extends Component{
 				<CommandBar className="footbar" items={actions}/>
 			</div>
 		)
+	}
+	
+	update(changed){
+		const {entity:journey}=this.state
+		JourneyDB.upsert(Object.assign(journey,changed))
+			.then(updated=>this.setState({entity:updated}))
 	}
 
 	remove(){

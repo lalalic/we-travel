@@ -15,27 +15,6 @@ export default class extends Model{
 		return Location.get(startedAt, endedAt)
 	}
 
-	static getFootprints(journey){
-		return Promise.all([
-			new Promise((resolve,reject)=>Footprint.find()//{journey:journey._id})
-				.fetch(footprints=>resolve(footprints), reject)),
-			this.getWaypoints(journey)
-			]).then(a=>{
-				const [footprints,waypoints]=a
-				//footprints.splice(0,0,...waypoints)
-				footprints.sort((a,b)=>{
-					if(typeof(a.when)=='number')
-						a.when=new Date(a);
-
-					if(typeof(b.when)=='number')
-						b.when=new Date(b);
-
-					return a.when.getTime()-b.when.getTime()
-				})
-				return footprints
-			}, console.error)
-	}
-
 	static getState(journey){
 		let now=new Date()
 		const {startedAt, endedAt}=journey

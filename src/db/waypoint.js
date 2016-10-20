@@ -1,12 +1,22 @@
-import {Model} from "qili-app"
+import {Model, User} from "qili-app"
 
-export default class extends Model{
+export default Waypoint class extends Model{
 	static get _name(){
 		return "waypoint"
 	}
 
-	static upsert(){
-		return this.cols.upsert(...arguments)
+	static upload(){
+		return PhotoPos.query(User.localStorage.getItem("lastUpload",null))
+			.then(data=>{
+				if(data && data.length){
+					console.log(`found ${data.length} location data from photos, uploading`)
+					return WaypointDB.upload(data)
+						.then(a=>{
+							console.log(`uploaded location data`)
+							return User.localStorage.setItem("lastUpload",new Date())
+						})
+				}	
+			})
 	}
 
 	static get(start, end){
