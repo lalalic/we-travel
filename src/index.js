@@ -35,6 +35,14 @@ class Main extends QiliApp{
 			</div>
 		)
 	}
+	
+	componentDidMount(){
+		super.componentDidMount()
+		WaypointDB.on("upload", (uploaded, sum, startTime, endTime)=>{
+			if(uploaded==sum)
+				this.showMessage(`${sum} location data synced to server from ${startTime.smartFormat()} to ${endTime.smartFormat()}`)
+		})
+	}
 
 	static childContextTypes=Object.assign(QiliApp.childContextTypes,{
 		viewPhoto: PropTypes.func
@@ -47,8 +55,8 @@ class Main extends QiliApp{
 	}
 
 	static defaultProps=Object.assign(QiliApp.defaultProps,{
-		init:a=>{
-			init();
+		init(){
+			init()
 			WaypointDB.upload()
 		}
 	})

@@ -119,9 +119,11 @@ export default class Life extends Component{
 
 	showJourneyOnMap(map){
 		const {active:[journey]}=this.state
+		const {startedAt, endedAt}=journey
 		const {Marker,Point,PointCollection,Label,Size}=BMap
-		LocationDB.get()
-			.then(waypoints=>{
+		LocationDB.get(startedAt, endedAt,
+			waypoints=>{
+				map.reset()
 				if(waypoints.length==0)
 					return;
 				waypoints.sort((a,b)=>a.when-b.when)
