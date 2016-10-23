@@ -10,7 +10,7 @@ import IconMore from 'material-ui/svg-icons/navigation/more-horiz'
 import IconAdd from 'material-ui/svg-icons/content/add'
 import IconMap from "material-ui/svg-icons/maps/map"
 
-import {Journey as JourneyDB, Footprint as FootprintDB} from "./db"
+import {Journey as JourneyDB, Footprint as FootprintDB, Waypoint as WaypointDB} from "./db"
 import Chipper from "./components/chipper"
 import Journey, {Title} from "./components/journey"
 import Map from "./components/map"
@@ -121,17 +121,17 @@ export default class Life extends Component{
 		const {active:[journey]}=this.state
 		const {startedAt, endedAt}=journey
 		const {Marker,Point,PointCollection,Label,Size}=BMap
-		LocationDB.get(startedAt, endedAt,
+		WaypointDB.get(startedAt, endedAt,
 			waypoints=>{
 				map.reset()
 				if(waypoints.length==0)
 					return;
-				waypoints.sort((a,b)=>a.when-b.when)
-				let days=[waypoints[0]], dayLong=24*60*60*1000
+				waypoints.sort((a,b)=>a.when.getTime()-b.when.getTime())
+				let days=[waypoints[0]]
 				let points=waypoints.map(waypoint=>{
-					const {when,lat,lng}=waypoint
-					if(when-days[days.length-1].when>dayLong)
-						days.push(waypoint)
+					const {when,loc:{y:lat,x:lng}}=waypoint
+					if(!when.isSameDate(days[0].when))
+						days.unshift(waypoint)
 					return new Point(lng,lat)
 				})
 				let pc=new PointCollection(points, {size:BMAP_POINT_SIZE_TINY,shape:BMAP_POINT_SHAPE_CIRCLE, color:"red"})
@@ -146,9 +146,9 @@ export default class Life extends Component{
 				})
 
 				let startedAt=journey.startedAt
-				days.forEach(({when,lat,lng}, i)=>{
+				days.forEach(({when,loc:{y:lat,x:lng}}, i)=>{
 					let marker=new Marker(new Point(lng,lat))
-					let dayNo=new Date(when).relative(startedAt)+1
+					let dayNo=when.relative(startedAt)+1
 					let label=new Label(`${dayNo}`)
 					label.setStyle({backgroundColor:"transparent",border:"0px"})
 					label.setOffset(new Size(dayNo>9 ? 2 : 5, 2))

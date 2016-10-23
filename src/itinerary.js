@@ -18,6 +18,7 @@ export default class Itinerary extends Component{
 	}
 	state={
 		itinerary:[]
+		,text:""
 		,editing:false
 	}
 
@@ -28,7 +29,7 @@ export default class Itinerary extends Component{
 	}
 
 	render(){
-		const {itinerary, editing}=this.state
+		const {itinerary, text, editing}=this.state
 		let actions=["Back"]
 		if(editing)
 			actions.push({action:"edit-done",label:"完成", onSelect:e=>this.setState({editing:false})})
@@ -37,19 +38,20 @@ export default class Itinerary extends Component{
 
 		let items=[]
 		itinerary.forEach((a,i)=>{
-			items.push(<Item key={`${a.place}_${i}`} data={a} 
-				editing={editing} 
+			items.push(<Item key={`${a.place}_${i}`} data={a}
+				editing={editing}
 				onRemove={id=>this.remove(id)}/>)
-				
+
 			items.push(<Divider inset={true} key={`-${i}`}/>)
 		})
 		return (
 			<div>
 				<div className="grid">
-					<TextField ref="place" fullWidth={true} 
+					<TextField ref="place" fullWidth={true}
+						onChange={e=>this.setState({text:e.target.value})}
 						onKeyDown={({keyCode,target:{value}})=>keyCode==13 && value &&this.add(value)}
-						onBlur={({target:{value}})=>this.add(value)}
-						name="place" floatingLabelText="输入地址"/>
+						onBlur={({target:{value}})=>value && this.add(value)}
+						value={text} name="place" floatingLabelText="输入地址"/>
 					<span style={{width:50}}>
 						<IconButton onClick={e=>{
 											let value=this.refs.place.value
@@ -79,12 +81,11 @@ export default class Itinerary extends Component{
 		ItineraryDB.upsert(a)
 			.then(updated=>{
 				const {itinerary}=this.state
-				this.setState({itinerary:itinerary.concat([updated])})
-				this.refs.place.setState({value:""})
+				this.setState({itinerary:itinerary.concat([updated]),text:''})
 			})
 	}
-	
-	
+
+
 
 
 }
