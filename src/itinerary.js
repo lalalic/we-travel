@@ -1,5 +1,5 @@
 import React, {Component, PropTypes} from "react"
-import {TextField, Checkbox, IconMenu, IconButton, MenuItem} from "material-ui"
+import {TextField, Checkbox, IconMenu, IconButton} from "material-ui"
 import Divider from 'material-ui/Divider';
 import {UI} from "qili-app"
 
@@ -10,6 +10,7 @@ import RemoveIcon from 'material-ui/svg-icons/content/remove-circle-outline'
 import AddIcon from 'material-ui/svg-icons/content/add-circle-outline'
 
 import Map from "./components/map"
+import TransportationField from "./components/transportation-field"
 import {Itinerary as ItineraryDB} from "./db"
 
 export default class Itinerary extends Component{
@@ -77,7 +78,10 @@ export default class Itinerary extends Component{
 			})
 	}
 	add(place){
-		let a={place,days:1,journey:this.props.params._id}
+		let a={place,dayth:1, journey:this.props.params._id}
+		let {itinerary}=this.state, last=itinerary[itinerary.length-1]
+		if(last)
+			a.dayth=last.dayth+1
 		ItineraryDB.upsert(a)
 			.then(updated=>{
 				const {itinerary}=this.state
@@ -90,39 +94,29 @@ export default class Itinerary extends Component{
 
 }
 
+
+
 class Item extends Component{
 	render(){
-		const {data:{_id,place,days=1},editing, onRemove}=this.props
+		const {data:{_id,place,dayth,trans=1},editing, onRemove}=this.props
 		return (
 			<ListItem key={place}
 				leftIcon={editing ? (<RemoveIcon onClick={e=>onRemove(_id)}/>) : <span/>}
 				rightIcon={<RightArrow onClick={e=>this.context.router.push(`${this.props.location.pathname}/${_id}`)}/>}
 				primaryText={
 					<div className="grid">
-						<span>{place}</span>
-						<span  style={{width:150}}>
-							逗留
-							<input name="days"
+						<span  style={{width:80}}>
+							第
+							<input name="dayth" type="number"
 								style={{width:"2em",background:"transparent",textAlign:"center",borderBottom:"1px solid lightgray"}}
-								onBlur={({target:{value}})=>value!=days && this.update({days:value})}
-								onKeyDown={({keyCode,target:{value}})=>keyCode==13 && value!=days && this.update({days:value})}
-								defaultValue={days}/>
+								onBlur={({target:{value}})=>parseInt(value)!=dayth && this.update({dayth:parseInt(value)})}
+								onKeyDown={({keyCode,target:{value}})=>keyCode==13 && parseInt(value)!=dayth && this.update({dayth:parseInt(value)})}
+								defaultValue={dayth}/>
 							天
-						</span>
-					</div>}
-				secondaryText={
-					<div className="grid">
-						<span style={{width:30}}>
-							<IconMenu iconButtonElement={<IconButton><NextIcon/></IconButton>}>
-								<MenuItem value={1} primaryText="飞"/>
-								<MenuItem value={2} primaryText="火车"/>
-								<MenuItem value={3} primaryText="自驾"/>
-								<MenuItem value={4} primaryText="走"/>
-							</IconMenu>
-						</span>
-						<span style={{position:"relative", top:-12}}>飞</span>
-					</div>
-				}/>
+						</span>					
+						<span style={{width:50}}><TransportationField style={{width:50}}/></span>
+						<span>{place}</span>
+					</div>}/>
 		)
 	}
 	update(changed){
