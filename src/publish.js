@@ -53,8 +53,8 @@ export default class Publisher extends Component{
 				</GridList>
                 <CommandBar className="footbar"
                     items={["Back",
-						{action:"Preview", label:"预览", onSelect:e=>this.preview(), icon:IconView},
-						{action:"Print", label:"云打印", onSelect:e=>this.print(), icon:IconPrint}
+						{action:"Preview", label:"预览", onSelect:e=>this.preview(), icon:<IconView/>},
+						{action:"Print", label:"云打印", onSelect:e=>this.print(), icon:<IconPrint/>}
 						]}/>
             </div>
         )

@@ -2,6 +2,7 @@ require('../style/index.less')
 
 import React, {PropTypes} from "react"
 import {Route, IndexRoute} from "react-router"
+import {connect} from "react-redux"
 
 import IconAccount from 'material-ui/svg-icons/action/account-box'
 import IconExplore from 'material-ui/svg-icons/action/explore'
@@ -12,55 +13,63 @@ import {init, Waypoint as WaypointDB} from "./db"
 import PhotoViewer from "./components/photo-viewer"
 const {CommandBar, Comment}=UI
 
-class Main extends QiliApp{
-	static defaultProps=Object.assign(QiliApp.defaultProps,{
-		appId:"we-travel",
-		title:"travel along life"
-	})
+const DOMAIN='main'
+const INIT_STATE={}
+export const ACTION={
+	UPLOAD_WAYPOINT: A=>dispatch=>)
+}
 
-	renderContent(){
+export const REDUCER={
+	[DOMAIN]:(state=INIT_STATE,{type,payload})=>{
+		switch(type){
+
+		}
+		return state
+	}
+}
+
+const Main=connect()(
+class extends Component{
+	render(){
+		const {service, router}=this.props
 		let {pathname}=this.props.children.props.location
+		let refApp
 		return (
-			<div>
+			<QiliApp appId="we-travel" ref={a=>refApp=a}
+				title="travel along life"
+				init={a=>{
+					init();
+					WaypointDB.on("upload", (uploaded, sum, startTime, endTime)=>{
+						if(uploaded==sum)
+							refApp.showMessage(`${sum} location data synced to server from ${startTime.smartFormat()} to ${endTime.smartFormat()}`)
+					}
+					WaypointDB.upload();
+				}}>
+
 				{this.props.children}
+
 				<CommandBar className="footbar" style={{zIndex:8}}
-					onSelect={cmd=>this.context.router.push(cmd.toLowerCase())}
 					primary={pathname=="/" ? "/" : pathname.split("/")[1]}
 					items={[
-						{label:"我", action:"/",icon:IconLife},
-						{label:"发现", action:"explore", icon:IconExplore},
-						{label:"帐号", action:"my", icon:IconAccount},
+						{label:"我", action:"/",icon:<IconLife/>, onSelect:{a=>router.push("/")}},
+						{label:"发现", action:"explore", icon:<IconExplore/>, onSelect:{a=>router.push("/explore")}},
+						{label:"帐号", action:"my", icon:<IconAccount/>, onSelect:{a=>router.push("/my")}},
 					]}/>
 				<PhotoViewer ref="photoViewer"/>
-			</div>
+			</QiliApp>
 		)
 	}
-	
-	componentDidMount(){
-		super.componentDidMount()
-		WaypointDB.on("upload", (uploaded, sum, startTime, endTime)=>{
-			if(uploaded==sum)
-				this.showMessage(`${sum} location data synced to server from ${startTime.smartFormat()} to ${endTime.smartFormat()}`)
-		})
-	}
 
-	static childContextTypes=Object.assign(QiliApp.childContextTypes,{
+	static childContextTypes={
 		viewPhoto: PropTypes.func
-    })
+    }
 
 	getChildContext(){
-		return Object.assign(super.getChildContext(),{
+		return {
 			viewPhoto:url=>this.refs.photoViewer.view(url)
-		})
-	}
-
-	static defaultProps=Object.assign(QiliApp.defaultProps,{
-		init(){
-			init()
-			WaypointDB.upload()
 		}
-	})
-}
+	}
+})
 
 import MyUI from "./my"
 import SettingUI from "qili-app/lib/setting"

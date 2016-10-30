@@ -51,7 +51,7 @@ export default class Journey extends Component{
 			,{action:"Comment"
 				,label:"评论"
 				,onSelect: e=>this.context.router.push(`comment/${JourneyDB._name}/${journey._id}`,{journey})
-				,icon:IconPublish}
+				,icon:<IconPublish/>}
 		]
 		switch(JourneyDB.getState(journey)){
 		case "Memory":
@@ -76,7 +76,7 @@ export default class Journey extends Component{
 				action:"Remove"
 				,label:"删除"
 				,onSelect:e=>this.remove()
-				,icon: IconRemove
+				,icon: <IconRemove/>
 			})
 		}
 
@@ -95,7 +95,7 @@ export default class Journey extends Component{
 						fullWidth={true}
 						defaultValue={journey.name}
 						onBlur={({target:{value}})=>value!=journey.name && this.update({name:value})}
-						onKeyDown={({keyCode,target:{value}})=>{keyCode==13 && value!=journey.name && this.update({name:value})}}/> 
+						onKeyDown={({keyCode,target:{value}})=>{keyCode==13 && value!=journey.name && this.update({name:value})}}/>
 
 					<DatePicker ref="startedAt" floatingLabelText="开始日期"
 						fullWidth={false}
@@ -126,7 +126,7 @@ export default class Journey extends Component{
 			</div>
 		)
 	}
-	
+
 	update(changed){
 		const {entity:journey}=this.state
 		JourneyDB.upsert(Object.assign(journey,changed))
@@ -144,7 +144,7 @@ export default class Journey extends Component{
 
 	static Creator=class JourneyCreator extends Journey{
 		getData(){
-			
+
 		}
 		render(){
 			return (
@@ -152,7 +152,7 @@ export default class Journey extends Component{
 					<div style={{padding:5}}>
 						<TextField ref="name"
 							floatingLabelText="一次有独特意义的旅行名称"
-							fullWidth={true}/> 
+							fullWidth={true}/>
 
 						<DatePicker ref="startedAt" floatingLabelText="开始日期"
 							fullWidth={false}
@@ -165,7 +165,7 @@ export default class Journey extends Component{
 
 					<UI.CommandBar className="footbar"
 	                    items={["Back",
-							{action:"Save", label:"保存", onSelect:e=>this.save(), icon:IconSave}
+							{action:"Save", label:"保存", onSelect:e=>this.save(), icon:<IconSave/>}
 							]}/>
 				</div>
 			)
