@@ -14,6 +14,7 @@ import IconCamera from 'material-ui/svg-icons/image/photo-camera'
 import {Journey as JourneyDB, Footprint as FootprintDB, Waypoint as WaypointDB, Itinerary as ItineraryDB} from "../db"
 import Chipper from "./chipper"
 import PhotosField from "./photos-field"
+import TransportationField from "./transportation-field"
 
 const {Empty}=UI
 
@@ -32,6 +33,19 @@ export default class Journey extends Component{
 			]).then(([footprints,itinerary])=>this.setState({footprints, itinerary}))
 	}
 	
+	getDayItinerary(dayth){
+		const {itinerary}=this.state
+		return itinerary.reduceRight((found,a)=>{
+			if(a.dayth==dayth){
+				found.unshift(a)
+			}else if(found.length==0){
+				if(a.dayth<dayth)
+					found.unshift(a)
+			}
+			return found
+		},[])
+	}
+	
 	render(){
 		let {journey:{startedAt, _id }, onMap, publishable}=this.props
 		let {footprints, itinerary}=this.state
@@ -46,7 +60,7 @@ export default class Journey extends Component{
 					lastDay++
 					let date=startedAt.relativeDate(lastDay-1)
 					all.push(<Day key={`day${lastDay}`} day={lastDay}
-						date={date}
+						date={date} itinerary={this.getDayItinerary(lastDay)}
 						onEdit={a=>this.editing({when:date})}/>)
 				}
 			}
@@ -225,11 +239,22 @@ export class Title extends Component{
 
 class Day extends Component{
 	render(){
-		const {day,date, onEdit}=this.props
+		const label=TransportationField.getLabel
+		const {day,date, onEdit, itinerary}=this.props
+		let itiText=itinerary.reduce((r,a)=>{
+			let {dayth, place, trans}=a
+			if(trans!=undefined){
+				if(trans=label(trans))
+					place=`${trans}到${place}`
+			}
+			return r.length ? `${r},${place}` : place
+		},"")
+		
 		return (
 			<Step disabled={false}>
 				<StepLabel icon={`${day}`} onTouchTap={onEdit}>
 					<span>{date.smartFormat("今天")}</span>
+					<span>{itiText}</span>
 					<IconMore/>
 				</StepLabel>
 			</Step>
