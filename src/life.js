@@ -1,5 +1,6 @@
 import React, {Component, PropTypes} from 'react'
 import {UI, User} from "qili-app"
+import {connect} from "react-redux"
 
 import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Slider, Drawer} from "material-ui"
 import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
@@ -19,28 +20,86 @@ import LocationDB from "./db/location"
 
 const {Empty, Photo}=UI
 
-export default class Life extends Component{
-	state={
-		memory:[],
-		wish:[],
-		active:[],
-		showHistory:true,
-		onMap:false
+const DOMAIN="ui.life"
+
+const INIT_STATE={
+	memory:[],
+	wish:[],
+	active:[],
+	showHistory:true,
+	onMap:false,
+	waypoints:[]
+}
+
+export const ACTION={
+	FETCH: a=>dispatch=>JourneyDB.find()
+		.fetch(journeys=>dispatch({type:`@@${DOMAIN}/fetched`,payload:journeys}))
+		
+	,TOGGLE_MAP: {type:`@@${DOMAIN}/TOGGLE_MAP`}
+}
+
+export const REDUCER={
+	[DOMAIN]:(state=INIT_STATE,{type, payload})=>{
+		switch(type){
+		case `@@${DOMAIN}/TOGGLE_MAP`:
+			return Object.assign({},state,{onMap:!state.onMap})
+		case `@@${DOMAIN}/fetched`:
+			let journeys=payload
+			let now=new Date()
+			let memory=[], wish=[], active=[]
+			journeys.forEach(journey=>{
+				switch(JourneyDB.getState(journey)){
+				case "Memory":
+					memory.push(journey)
+				break
+				case "Starting":
+				case "Ending":
+				case "Traveling":
+					active.push(journey)
+				break
+				case "Plan":
+				default:
+					wish.push(journey)
+				}
+			})
+			memory.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())
+			active.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())
+			wish.sort((a,b)=>{
+				if(a.startedAt){
+					if(b.startedAt){
+						return a.startedAt.getTime()-b.startedAt.getTime()
+					}else{
+						return -1
+					}
+				}else{
+					if(b.startedAt){
+						return 1
+					}else{
+						return a.createdAt.getTime()-b.createdAt.getTime()
+					}
+				}
+			})
+		return Object.assign({},state,{memory,wish,active})
+		}
+		return state
 	}
+}
+
+export const Life=connect(state=>state[DOMAIN])(
+class extends Component{
 	componentDidMount(){
-		JourneyDB.find()
-			.fetch(journeys=>this.setState(this.group(journeys)))
+		this.props.dispatch(ACTION.FETCH())
 	}
 
 	render(){
-		const {memory, wish, active, showHistory, onMap}=this.state
+		const {memory, wish, active, showHistory, onMap,dispatch,router}=this.props
 
 		let map=null, mapToggler=null
 
 		if(active.length>0){
 			mapToggler=(<FloatingActionButton
 							className="sticky top right _2"
-							mini={true} onClick={e=>this.toggleMap()}>
+							mini={true} onClick={e=>dispatch(ACTION.TOGGLE_MAP)}>
 							<IconMap/>
 						</FloatingActionButton>)
 
@@ -68,7 +127,7 @@ export default class Life extends Component{
 
 			<FloatingActionButton
 				className="floating sticky top right"
-				mini={true} onClick={e=>this.context.router.push("journey/_new")}>
+				mini={true} onClick={e=>router.push("/journey/_new")}>
 				<IconAdd/>
 			</FloatingActionButton>
 
@@ -112,13 +171,8 @@ export default class Life extends Component{
 			mapStyle.zIndex=3;
 	}
 
-	toggleMap(){
-		const {onMap}=this.state
-		this.setState({onMap:!onMap})
-	}
-
 	showJourneyOnMap(map){
-		const {active:[journey]}=this.state
+		const {active:[journey]}=this.props
 		const {startedAt, endedAt}=journey
 		const {Marker,Point,PointCollection,Label,Size}=BMap
 		WaypointDB.get(startedAt, endedAt,
@@ -161,46 +215,6 @@ export default class Life extends Component{
 			})
 
 	}
+})
 
-	group(journeys){
-		let now=new Date()
-		let memory=[], wish=[], active=[]
-		journeys.forEach(journey=>{
-			switch(JourneyDB.getState(journey)){
-			case "Memory":
-				memory.push(journey)
-			break
-			case "Starting":
-			case "Ending":
-			case "Traveling":
-				active.push(journey)
-			break
-			case "Plan":
-			default:
-				wish.push(journey)
-			}
-		})
-		memory.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())
-		active.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())
-		wish.sort((a,b)=>{
-			if(a.startedAt){
-				if(b.startedAt){
-					return a.startedAt.getTime()-b.startedAt.getTime()
-				}else{
-					return -1
-				}
-			}else{
-				if(b.startedAt){
-					return 1
-				}else{
-					return a.createdAt.getTime()-b.createdAt.getTime()
-				}
-			}
-		})
-		return {memory, wish, active}
-	}
-
-	static contextTypes={
-		router: PropTypes.object
-	}
-}
+export default Object.assign(Life,{ACTION, REDUCER})

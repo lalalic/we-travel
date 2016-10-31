@@ -1,5 +1,6 @@
 import React, {Component, PropTypes} from "react"
 import {UI} from "qili-app"
+import {connect} from "react-redux"
 
 import {FloatingActionButton,TextField, DatePicker, Avatar, Divider, Dialog} from "material-ui"
 
@@ -18,39 +19,94 @@ import Itinerary from "./components/itinerary"
 import {Journey as JourneyDB} from "./db"
 
 const {Loading, CommandBar}=UI
-export default class Journey extends Component{
-	state={entity:null}
 
-	getData(_id){
-		JourneyDB.findOne({_id},entity=>{
-			if(entity){
-				this.setState({entity})
-			}
-		})
+const DOMAIN="ui.journey"
+
+const INIT_STATE={}
+export const ACTION={
+	CREATE: journey=>dispatch=>{
+		const {name,startedAt, endedAt}=journey
+		let nameError, endedAtError
+		if(!name)
+			nameError="名称不能为空"
+		if(startedAt && endedAt && (endedAt.getTime()-startedAt.getTime())<0)
+			endedAtError="结束时间不能晚于开始时间"
+		
+		if(nameError || endedAtError){
+			dispatch({type:`@@${DOMAIN}/error`, payload:{nameError, endedAtError}})
+			return Promise.reject()
+		}
+		return JourneyDB.upsert(journey)
+			.then(journey=>{
+				dispatch({type:`@@${DOMAIN}/created`,journey})
+				return journey
+			})
+	}
+	,FETCH: _id=>dispatch=>JourneyDB.findOne({_id},a=>dispatch({type:`@@${DOMAIN}/fetched`,payload:a}))
+	,UPDATE: (journey,changed)=>dispatch=>{
+		const {name,startedAt, endedAt}=journey
+		let nameError, endedAtError
+		if(!name)
+			nameError="名称不能为空"
+		if(startedAt && endedAt && (endedAt.getTime()-startedAt.getTime())<0)
+			endedAtError="结束时间不能晚于开始时间"
+		
+		if(nameError || endedAtError){
+			dispatch({type:`@@${DOMAIN}/error`, payload:{nameError, endedAtError}})
+			return Promise.reject()
+		}
+		
+		return JourneyDB.upsert(journey)
+			.then(a=>dispatch({type:`@@${DOMAIN}/updated`,payload:a}))	
+	}
+	,REMOVE: _id=>dispatch=>JourneyDB.remove(_id)
+	,CLEAR: {type:`@@${DOMAIN}/CLEAR`}
+}
+
+export const REDUCER={
+	[DOMAIN]: (state=INIT_STATE, {type, payload})=>{
+		switch(type){
+		case `@@${DOMAIN}/error`:
+			return payload
+		case `@@${DOMAIN}/fetched`:
+		case `@@${DOMAIN}/updated`:
+			return Object.assign({},INIT_STATE,{entity:payload})
+		case `@@${DOMAIN}/created`:
+		case `@@${DOMAIN}/CLEAR`:
+			return INIT_STATE
+		}
+		return state
+	}
+}
+
+
+export const Journey=connect((state,{params:{_id}})=>({_id, ...state[DOMAIN]}))(
+class extends Component{
+    componentDidMount(){
+		const {dispatch, _id}=this.props
+		dispatch(ACTION.FETCH(_id))
+    }
+
+    componentWillReceiveProps(next){
+        if(this.props._id!=next._id)
+           next.dispatch(ACTION.FETCH(_id))
+    }
+	
+	componentWillUnmount(){
+		this.props.dispatch(ACTION.CLEAR)
 	}
 
-    componentDidMount(){
-		this.getData(this.props.params._id)
-    }
-
-    componentWillReceiveProps(nextProps){
-        if(this.props.params._id!=nextProps.params._id)
-            this.getData(nextProps.params._id)
-    }
-
 	render(){
-		const {entity:journey}=this.state
-
+		const {entity:journey,router, dispatch, _id, nameError,endedAtError}=this.props
 		if(!journey)
-			return (<Loading/>)
-
+			return <Loading/>
 		const {startedAt, endedAt}=journey
 		let scheduler
 		let actions=[
 			"Back"
 			,{action:"Comment"
 				,label:"评论"
-				,onSelect: e=>this.context.router.push(`comment/${JourneyDB._name}/${journey._id}`,{journey})
+				,onSelect: e=>router.push(`/comment/${JourneyDB._name}/${journey._id}`,{journey})
 				,icon:<IconPublish/>}
 		]
 		switch(JourneyDB.getState(journey)){
@@ -64,7 +120,7 @@ export default class Journey extends Component{
 		default:
 			scheduler=(
 				<div>
-					<TextField onClick={e=>this.context.router.push(`journey/${journey._id}/itinerary`)}
+					<TextField onClick={e=>router.push(`/journey/${journey._id}/itinerary`)}
 						floatingLabelText="快速计划你的行程"
 						defaultValue="..."
 						floatingLabelFixed={true}/>
@@ -75,37 +131,45 @@ export default class Journey extends Component{
 			actions.splice(1,0,{
 				action:"Remove"
 				,label:"删除"
-				,onSelect:e=>this.remove()
+				,onSelect:e=>dispatch(ACTION.REMOVE(_id)).then(removed=>router.replace("/"))
 				,icon: <IconRemove/>
 			})
 		}
 
+		let refName
 		return (
 			<div>
 				<FloatingActionButton
 					className="floating sticky top right"
 					mini={true}
-					onClick={e=>this.context.router.push(`publish/journey/${journey._id}`)}>
+					onClick={e=>router.push(`/publish/journey/${journey._id}`)}>
 					$<IconPublish/>
 				</FloatingActionButton>
 
 				<div style={{padding:5}}>
-					<TextField ref="name"
+					<TextField ref={a=>refName=a}
 						floatingLabelText="一次有独特意义的旅行名称"
 						fullWidth={true}
-						defaultValue={journey.name}
-						onBlur={({target:{value}})=>value!=journey.name && this.update({name:value})}
-						onKeyDown={({keyCode,target:{value}})=>{keyCode==13 && value!=journey.name && this.update({name:value})}}/>
+						value={journey.name}
+						errorText={nameError}
+						onChange={(e,value)=>refName.value=value}
+						onBlur={({target:{value}})=>value!=journey.name && dispatch(ACTION.UPDATE(journey,{name:value}))}
+						onKeyDown={({keyCode,target:{value}})=>{keyCode==13 && value!=journey.name && dispatch(ACTION.UPDATE(journey,{name:value}))}}/>
 
-					<DatePicker ref="startedAt" floatingLabelText="开始日期"
+					<DatePicker
+						floatingLabelText="开始日期"
 						fullWidth={false}
-						onChange={(e,startedAt)=>startedAt!=journey.startedAt && this.update({startedAt})}
-						autoOk={true} defaultDate={journey.startedAt}/>
+						value={journey.startedAt}
+						onChange={(e,startedAt)=>startedAt!=journey.startedAt && dispatch(ACTION.UPDATE(journey,{startedAt}))}
+						autoOk={true}/>
 
-					<DatePicker ref="endedAt" floatingLabelText="结束日期"
+					<DatePicker
+						floatingLabelText="结束日期"
 						fullWidth={false}
-						onChange={(e,endedAt)=>endedAt!=journey.endedAt && this.update({endedAt})}
-						autoOk={true} defaultDate={journey.endedAt}/>
+						value={journey.endedAt}
+						errorText={endedAtError}
+						onChange={(e,endedAt)=>endedAt!=journey.endedAt && dispatch(ACTION.UPDATE(journey,{endedAt}))}
+						autoOk={true}/>
 
 					<Chipper
 						title="更多信息"
@@ -126,58 +190,52 @@ export default class Journey extends Component{
 			</div>
 		)
 	}
+})
 
-	update(changed){
-		const {entity:journey}=this.state
-		JourneyDB.upsert(Object.assign(journey,changed))
-			.then(updated=>this.setState({entity:updated}))
-	}
-
-	remove(){
-		JourneyDB.remove(this.state.entity)
-		this.context.router.replace("/")
-	}
-
-	static contextTypes={
-		router:React.PropTypes.object
-	}
-
-	static Creator=class JourneyCreator extends Journey{
-		getData(){
-
+export const Creator=connect(state=>state[DOMAIN])(
+	class extends Component{
+		componentWillUnmount(){
+			this.props.dispatch(ACTION.CLEAR)
 		}
 		render(){
+			const {dispatch, router, nameError, endedAtError}=this.props
+			let name, startedAt, endedAt
+			let values=a=>({
+				name:name.getValue(),
+				startedAt:startedAt.getDate(),
+				endedAt:endedAt.getDate()
+			})
 			return (
 				<div>
 					<div style={{padding:5}}>
-						<TextField ref="name"
+						<TextField ref={a=>name=a}
 							floatingLabelText="一次有独特意义的旅行名称"
-							fullWidth={true}/>
+							fullWidth={true}
+							errorText={nameError}/>
 
-						<DatePicker ref="startedAt" floatingLabelText="开始日期"
+						<DatePicker ref={a=>startedAt=a}
+							floatingLabelText="开始日期"
 							fullWidth={false}
 							autoOk={true}/>
 
-						<DatePicker ref="endedAt" floatingLabelText="结束日期"
+						<DatePicker ref={a=>endedAt=a}
+							floatingLabelText="结束日期"
 							fullWidth={false}
-							autoOk={true}/>
+							autoOk={true}
+							errorText={endedAtError}/>
 					</div>
 
 					<UI.CommandBar className="footbar"
-	                    items={["Back",
-							{action:"Save", label:"保存", onSelect:e=>this.save(), icon:<IconSave/>}
+						items={["Back",
+							{action:"Save", label:"保存", icon:<IconSave/>
+								,onSelect:a=>dispatch(ACTION.CREATE(values()))
+									.then(a=>router.replace(`/journey/${a._id}`))
+							}
 							]}/>
 				</div>
 			)
 		}
-
-		save(){
-			const {name, startedAt, endedAt}=this.refs
-			JourneyDB.upsert({
-				name:name.getValue(),
-				startedAt:startedAt.getDate(),
-				endedAt:endedAt.getDate()
-			}).then(journey=>this.context.router.replace(`journey/${journey._id}`))
-		}
 	}
-}
+)
+
+export default Object.assign(Journey,{ACTION,REDUCER,Creator})

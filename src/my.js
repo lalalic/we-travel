@@ -1,6 +1,7 @@
-import {React, UI} from "qili-app"
+import React from "react"
+
+import {UI} from "qili-app"
 
 const {Account}=UI
 
-export default class My extends Account{
-}
+export default props=><Account {...props}/>
