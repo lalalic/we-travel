@@ -18,6 +18,8 @@ import TransportationField from "./transportation-field"
 
 const {Empty}=UI
 
+const DOMAIN="journey"
+
 export default class Journey extends Component{
 	state={
 		footprints:[]
@@ -111,7 +113,6 @@ export default class Journey extends Component{
 	}
 }
 
-
 class Editor extends Component{
 	state={
 		footprint:false,
@@ -198,90 +199,68 @@ class Editor extends Component{
 	}
 }
 
-export class Title extends Component{
-	render(){
-		const {journey, completed, onMap}=this.props
-		const {name,_id, startedAt}=journey
-		if(completed){
-			return (
-				<Step completed={true} disabled={true}>
-					<StepLabel>
-						<span onClick={e=>this.context.router.push(`journey/${_id}`)} style={{cursor:"default"}}>
-							{startedAt.smartFormat()}
-							<br/>
-							{name}
-						</span>
-					</StepLabel>
-				</Step>
-			)
-		}else{
-			let mapToggle=null
-			if(onMap){
-				mapToggle=(<div style={{width:100}}><Toggle labelPosition="right" label="Map"onToggle={onMap}/></div>)
-			}
-			return (
-				<Step completed={true} active={true}>
-					<StepLabel icon="*">
-						<div className="grid" style={{cursor:"default"}}>
-							<b onClick={e=>this.context.router.push(`journey/${_id}`)}>{name}</b>
-							{mapToggle}
-						</div>
-					</StepLabel>
-				</Step>
-			)
-		}
-	}
-
-	static contextTypes={
-		router: PropTypes.object
-	}
-}
-
-class Day extends Component{
-	render(){
-		const label=TransportationField.getLabel
-		const {day,date, onEdit, itinerary}=this.props
-		let itiText=itinerary.reduce((r,a)=>{
-			let {dayth, place, trans}=a
-			if(trans!=undefined){
-				if(trans=label(trans))
-					place=`${trans}到${place}`
-			}
-			return r.length ? `${r},${place}` : place
-		},"")
-		
+export const Title=({journey:{name,_id, startedAt}, completed, onMap},{router})=>{
+	if(completed){
 		return (
-			<Step disabled={false}>
-				<StepLabel icon={`${day}`} onTouchTap={onEdit}>
-					<span>{date.smartFormat("今天")}</span>
-					<span>{itiText}</span>
-					<IconMore/>
+			<Step completed={true} disabled={true}>
+				<StepLabel>
+					<span onClick={e=>router.push(`journey/${_id}`)} style={{cursor:"default"}}>
+						{startedAt.smartFormat()}
+						<br/>
+						{name}
+					</span>
 				</StepLabel>
 			</Step>
 		)
-	}
-}
-
-class Footprint extends Component{
-	render(){
-		const {data: {when,photos=[],note}, onEdit}=this.props
-		return  (
+	}else{
+		return (
 			<Step completed={true} active={true}>
-				<StepLabel icon={"."} >
-					<time>{when.format('HH:mm')}&nbsp;</time>
-					<span>{note}</span>
-					<IconMore onTouchTap={onEdit} />
+				<StepLabel icon="*">
+					<div className="grid" style={{cursor:"default"}}>
+						<b onClick={e=>router.push(`journey/${_id}`)}>{name}</b>
+						{onMap ? (<div style={{width:100}}><Toggle labelPosition="right" label="Map"onToggle={onMap}/></div>) : null}
+					</div>
 				</StepLabel>
-				<StepContent>
-					<p>
-						{photos.map(({url,taken,loc},i)=>(<img key={i} onClick={e=>this.context.viewPhoto(url)} style={{height:50, margin:2}} src={url}/>))}
-					</p>
-				</StepContent>
 			</Step>
 		)
 	}
-
-	static contextTypes={
-		viewPhoto:React.PropTypes.func
-	}
 }
+Title.contextTypes={router:React.PropTypes.obj}
+
+const Day=({day,date, onEdit, itinerary,label=TransportationField.getLabel})=>(
+	<Step disabled={false}>
+		<StepLabel icon={`${day}`} onTouchTap={onEdit}>
+			<span>{date.smartFormat("今天")}</span>
+			<span>
+			{
+				itinerary.reduce((r,a)=>{
+					let {dayth, place, trans}=a
+					if(trans!=undefined){
+						if(trans=label(trans))
+							place=`${trans}到${place}`
+					}
+					return r.length ? `${r},${place}` : place
+				},"")
+			}
+			</span>
+			<IconMore/>
+		</StepLabel>
+	</Step>
+)
+
+const Footprint=({data: {when,photos=[],note}, onEdit},{viewPhoto})=>(
+	<Step completed={true} active={true}>
+		<StepLabel icon={"."} >
+			<time>{when.format('HH:mm')}&nbsp;</time>
+			<span>{note}</span>
+			<IconMore onTouchTap={onEdit} />
+		</StepLabel>
+		<StepContent>
+			<p>
+				{photos.map(({url,taken,loc},i)=>(<img key={i} onClick={e=>viewPhoto(url)} style={{height:50, margin:2}} src={url}/>))}
+			</p>
+		</StepContent>
+	</Step>
+)
+Footprint.contextTypes={viewPhoto:React.PropTypes.func}
+

@@ -27,8 +27,7 @@ const INIT_STATE={
 	wish:[],
 	active:[],
 	showHistory:true,
-	onMap:false,
-	waypoints:[]
+	onMap:false
 }
 
 export const ACTION={

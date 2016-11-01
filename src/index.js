@@ -43,7 +43,7 @@ class extends Component{
 					init();
 					WaypointDB.on("upload", (uploaded, sum, startTime, endTime)=>{
 						if(uploaded==sum)
-							refApp && refApp.showMessage(`${sum} location data synced to server from ${startTime.smartFormat()} to ${endTime.smartFormat()}`)
+							refApp && refApp.getWrappedInstance().showMessage(`${sum} location data synced to server from ${startTime.smartFormat()} to ${endTime.smartFormat()}`)
 					})
 					WaypointDB.upload();
 				}}>
