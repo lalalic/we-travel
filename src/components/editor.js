@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import React, {Component} from "react"
+import PropTypes from "prop-types"
 import {UI} from "qili-app"
 
 import AddIcon from "material-ui/svg-icons/action/note-add"
@@ -28,7 +29,7 @@ export default class Editor extends Component{
                 <div style={{textAlign:"center"}}>{uiPhotos}</div>
                 <textarea
                     style={{width:"100%",border:0,height:100, fontSize:12}}
-                    placeholder="这一刻的想法"
+                    placeholder="锟斤拷一锟教碉拷锟诫法"
                     onChange={(e)=>content.desc=e.target.value}
                     defaultValue={desc}/>
             </div>

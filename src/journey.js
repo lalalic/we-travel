@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from "react"
+import React, {Component} from "react"
+import PropTypes from "prop-types"
 import {UI} from "qili-app"
 import {connect} from "react-redux"
 
@@ -31,7 +32,7 @@ export const ACTION={
 			nameError="名称不能为空"
 		if(startedAt && endedAt && (endedAt.getTime()-startedAt.getTime())<0)
 			endedAtError="结束时间不能晚于开始时间"
-		
+
 		if(nameError || endedAtError){
 			dispatch({type:`@@${DOMAIN}/error`, payload:{nameError, endedAtError}})
 			return Promise.reject()
@@ -50,14 +51,14 @@ export const ACTION={
 			nameError="名称不能为空"
 		if(startedAt && endedAt && (endedAt.getTime()-startedAt.getTime())<0)
 			endedAtError="结束时间不能晚于开始时间"
-		
+
 		if(nameError || endedAtError){
 			dispatch({type:`@@${DOMAIN}/error`, payload:{nameError, endedAtError}})
 			return Promise.reject()
 		}
-		
+
 		return JourneyDB.upsert(journey)
-			.then(a=>dispatch({type:`@@${DOMAIN}/updated`,payload:a}))	
+			.then(a=>dispatch({type:`@@${DOMAIN}/updated`,payload:a}))
 	}
 	,REMOVE: _id=>dispatch=>JourneyDB.remove(_id)
 	,CLEAR: {type:`@@${DOMAIN}/CLEAR`}
@@ -91,7 +92,7 @@ class extends Component{
         if(this.props._id!=next._id)
            next.dispatch(ACTION.FETCH(_id))
     }
-	
+
 	componentWillUnmount(){
 		this.props.dispatch(ACTION.CLEAR)
 	}

@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from "react"
+import React, {Component} from "react"
+import PropTypes from "prop-types"
 import {TextField, Checkbox, IconMenu, IconButton} from "material-ui"
 import Divider from 'material-ui/Divider';
 import {UI} from "qili-app"
@@ -113,7 +114,7 @@ class Item extends Component{
 								onKeyDown={({keyCode,target:{value}})=>keyCode==13 && parseInt(value)!=dayth && this.update({dayth:parseInt(value)})}
 								defaultValue={dayth}/>
 							天
-						</span>					
+						</span>
 						<span style={{width:50}}><TransportationField style={{width:50}}/></span>
 						<span>{place}</span>
 					</div>}/>

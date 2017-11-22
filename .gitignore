@@ -30,6 +30,3 @@ node_modules
 cordova
 
 ~*
-
-dist/test.js
-dist/allin1.html

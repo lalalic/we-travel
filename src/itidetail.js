@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from "react"
+import React, {Component} from "react"
+import PropTypes from "prop-types"
 import Subheader from 'material-ui/Subheader'
 import {List, ListItem} from 'material-ui/List'
 
@@ -8,7 +9,7 @@ const {Loading} = UI
 
 export default class ItiDetail extends Component{
 	state={iti:null}
-	
+
 	componentDidMount(){
 		ItineraryDB.findOne({_id:this.props.params._id2}, iti=>this.setState({iti}))
 	}
@@ -16,14 +17,14 @@ export default class ItiDetail extends Component{
 		const {iti}=this.state
 		if(!iti)
 			return (<Loading/>)
-		
+
 		const {place, days}=iti
-		
+
 		return (
 			<div>
 				<List>
 					<Subheader>{place}</Subheader>
-					
+
 				</List>
 				<CommandBar items={["Back"]}/>
 			</div>

@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import React, {Component} from "react"
+import PropTypes from "prop-types"
 
 import Logo from 'material-ui/svg-icons/maps/directions-walk'
 import {UI} from "qili-app"

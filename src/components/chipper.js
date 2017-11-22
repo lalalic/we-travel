@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from "react"
+import React, {Component} from "react"
+import PropTypes from "prop-types"
 
 import {Chip, Avatar,Subheader} from "material-ui"
 import IconCheck from 'material-ui/svg-icons/navigation/check'
@@ -15,10 +16,10 @@ export default class Chipper extends Component{
 	render(){
 		const {chips=[], children, title, autoOpen=true, ...others}=this.props
 		const {open}=this.state
-		
+
 		let style={display: 'flex',flexWrap: 'wrap'}
 		let header=null, icon
-		
+
 		if(title){
 			let onClick=null
 			if(!autoOpen){
@@ -28,13 +29,13 @@ export default class Chipper extends Component{
 				else
 					icon=(<IconMore viewBox="0 0 24 12" color="lightgray"/>)
 			}
-				
+
 			header=(<div style={{color:"lightgray"}} onClick={onClick} unselectable="on">{icon}{title}</div>)
-			
+
 			if(!open)
 				style.display="none"
 		}
-		
+
 		return (
 			<div>
 				{header}
@@ -45,7 +46,7 @@ export default class Chipper extends Component{
 			</div>
 		)
 	}
-	
+
 	achip(data,key){
 		const style={margin:2}, inputStyle={width:"6em"}
 		switch(typeof(data)){
@@ -59,7 +60,7 @@ export default class Chipper extends Component{
 					return (<Chip key={key}>{label} <input style={inputStyle} type={type} {...others}/></Chip>)
 				break
 				}
-				
+
 			}
 		break
 		default:

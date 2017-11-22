@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import React, {Component} from "react"
+import PropTypes from "prop-types"
 import {UI, User} from "qili-app"
 
 import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Toggle} from "material-ui"
@@ -25,7 +26,7 @@ export default class Journey extends Component{
 		footprints:[]
 		,itinerary:[]
 	}
-	
+
 	componentDidMount(){
 		const {journey}=this.props
 		let cond={journey:journey._id}
@@ -34,7 +35,7 @@ export default class Journey extends Component{
 			,new Promise((resolve,reject)=>ItineraryDB.find(cond).fetch(resolve,reject))
 			]).then(([footprints,itinerary])=>this.setState({footprints, itinerary}))
 	}
-	
+
 	getDayItinerary(dayth){
 		const {itinerary}=this.state
 		return itinerary.reduceRight((found,a)=>{
@@ -47,7 +48,7 @@ export default class Journey extends Component{
 			return found
 		},[])
 	}
-	
+
 	render(){
 		let {journey:{startedAt, _id }, onMap, publishable}=this.props
 		let {footprints, itinerary}=this.state
@@ -69,7 +70,7 @@ export default class Journey extends Component{
 			all.push(<Footprint key={i} data={footprint}
 				onEdit={a=>this.editing(footprint)}/>)
 		})
-		
+
 		if(publishable){
 			all.push(
 				<Step active={true} completed={false} key="trigger">
@@ -88,7 +89,7 @@ export default class Journey extends Component{
 				</Step>
 			)
 		}
-		
+
 		all.push(<Title journey={this.props.journey} key="title"/>)
 
 		return (
@@ -107,7 +108,7 @@ export default class Journey extends Component{
 		let cond={journey:journey._id}
 		FootprintDB.find(cond).fetch(footprints=>this.setState({footprints}))
 	}
-	
+
 	editing(footprint, focusing){
 		this.refs.editor.setState({footprint, focusing})
 	}
@@ -120,10 +121,10 @@ class Editor extends Component{
 	}
 	render(){
 		const {footprint}=this.state
-		
+
 		if(!footprint)
 			return null
-		
+
 		const actions = [
 			  <FlatButton
 				label="关闭"
@@ -138,7 +139,7 @@ class Editor extends Component{
 			];
 
         let {note, photos,when}=footprint
-        
+
 		return (
 			<Dialog title={when.smartFormat()}
 				actions={actions}
@@ -146,14 +147,14 @@ class Editor extends Component{
 				open={!!footprint}
 				onRequestClose={e=>this.cancel()}>
 				<div className="section">
-					<PhotosField ref="photos" defaultValue={photos} 
+					<PhotosField ref="photos" defaultValue={photos}
 						iconStyle={{iconRatio:2/3, iconSize:{width:50, height:50}}}/>
-					
+
 					<textarea ref="text"
 						style={{width:"100%",border:0,height:100, fontSize:12, paddingTop:5, borderTop:"1px dotted lightgray"}}
 						placeholder="这一刻的想法"
 						defaultValue={note}/>
-						
+
 					<Chipper chips={[
 						"早餐","午餐","晚餐","购物","门票","公交","飞机","的士",
 						{label:"特色交通"},
@@ -180,11 +181,11 @@ class Editor extends Component{
 		break
 		}
 	}
-	
+
 	cancel(){
 		this.setState({footprint:null})
 	}
-	
+
 	save(){
 		const {onSave}=this.props
 		const {footprint}=this.state
@@ -194,7 +195,7 @@ class Editor extends Component{
 		FootprintDB.upsert(footprint)
 			.then(updated=>{
 				this.setState({footprint:null})
-				onSave(updated)	
+				onSave(updated)
 			})
 	}
 }
@@ -263,4 +264,3 @@ const Footprint=({data: {when,photos=[],note}, onEdit},{viewPhoto})=>(
 	</Step>
 )
 Footprint.contextTypes={viewPhoto:React.PropTypes.func}
-

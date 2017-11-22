@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import React, {Component} from "react"
+import PropTypes from "prop-types"
 import {UI, User} from "qili-app"
 import {connect} from "react-redux"
 
@@ -33,8 +34,9 @@ const INIT_STATE={
 export const ACTION={
 	FETCH: a=>dispatch=>JourneyDB.find()
 		.fetch(journeys=>dispatch({type:`@@${DOMAIN}/fetched`,payload:journeys}))
-		
+
 	,TOGGLE_MAP: {type:`@@${DOMAIN}/TOGGLE_MAP`}
+	,CLEAR: {type:`@@${DOMAIN}/CLEAR`}
 }
 
 export const REDUCER={
@@ -86,13 +88,19 @@ export const REDUCER={
 
 export const Life=connect(state=>state[DOMAIN])(
 class extends Component{
+	static contextTypes={
+		router: PropTypes.obj
+	}
+	componentWillUnmount(){
+		this.props.dispatch(ACTION.CLEAR)
+	}
 	componentDidMount(){
 		this.props.dispatch(ACTION.FETCH())
 	}
 
 	render(){
-		const {memory, wish, active, showHistory, onMap,dispatch,router}=this.props
-
+		const {memory, wish, active, showHistory, onMap,dispatch}=this.props
+		const {router}=this.context
 		let map=null, mapToggler=null
 
 		if(active.length>0){

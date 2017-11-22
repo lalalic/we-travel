@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from "react"
+import React, {Component} from "react"
+import PropTypes from "prop-types"
 import {UI} from "qili-app"
 import {TextField, DatePicker, IconButton, GridList, GridTile, Subheader, AppBar, Divider,} from "material-ui"
 import IconUnSelected from 'material-ui/svg-icons/toggle/star-border'

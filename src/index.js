@@ -1,13 +1,73 @@
-require('../style/index.less')
+import PropTypes from "prop-types"
 
-import React, {Component, PropTypes} from "react"
-import {Route, IndexRoute} from "react-router"
 import {connect} from "react-redux"
+import {compose, getContext, withProps, mapProps,
+	withStateHandlers,withContext,branch,renderComponent} from "recompose"
+import {withInit, withQuery, withPagination, withFragment} from "qili/tools/recompose"
+
+import {graphql} from "react-relay"
+import {Router, Route, IndexRoute, Direct, IndexRedirect, hashHistory} from "react-router"
+
+import QiliApp, * as qili from "qili-app"
+import CheckUpdate from "qili/components/check-update"
+import CommandBar from "qili/components/command-bar"
 
 import IconAccount from 'material-ui/svg-icons/action/account-box'
 import IconExplore from 'material-ui/svg-icons/action/explore'
 import IconLife from 'material-ui/svg-icons/maps/person-pin-circle'
 
+const DOMAIN='main'
+function reducer(state={},{type,payload}){
+	switch(type){
+		default:
+			return state
+	}
+}
+
+const WeTravel=compose(
+	withProps(()=>({
+		project: require("../package.json"),
+		appId:"5a15f808429af3002ea0a1c4",
+		reducers:{
+			[DOMAIN]:reducer
+		}
+	})),
+	withInit({
+		query:graphql`
+			query src_prefetch_Query{
+				me{
+					id
+					token
+				}
+			}
+		`
+	}),
+)(QiliApp)
+
+const Navigator=()=>(
+	<CommandBar  className="footbar"
+		items={[
+			{link:"/",action:"/",label:"我", icon:<IconLife/>},
+			{link:"/explore",action:"explore", label:"发现", icon:<IconExplore/>},
+			{link:"/my",action:"my",label:"帐号", icon:<CheckUpdate><IconAccount/></CheckUpdate>}
+			]}
+		/>
+)
+
+const withNavigator=()=>BaseComponent=>{
+	const factory=createEagerFactory(BaseComponent)
+	const WithNavigator=props=>(<div>{factory(props)}<Navigator/></div>)
+	return WithNavigator
+}
+
+const router=(
+	<Router history={hashHistory}>
+		<Route path="/" component={compose(withNavigator())(()=><div>hello Traveller</div>)}/>
+	</Router>
+)
+
+QiliApp.render(<WeTravel>{router}</WeTravel>)
+/*
 import {QiliApp, UI, User} from "qili-app"
 import {init, Waypoint as WaypointDB} from "./db"
 import PhotoViewer from "./components/photo-viewer"
@@ -16,7 +76,7 @@ const {CommandBar, Comment}=UI
 const DOMAIN='main'
 const INIT_STATE={}
 export const ACTION={
-	
+
 }
 
 export const REDUCER={
@@ -35,8 +95,8 @@ class extends Component{
 		let {pathname}=this.props.children.props.location
 		let refApp
 		return (
-			<QiliApp 
-				appId="we-travel" 
+			<QiliApp
+				appId="we-travel"
 				ref={a=>refApp=a}
 				title="travel along life"
 				init={a=>{
@@ -53,7 +113,7 @@ class extends Component{
 				<CommandBar className="footbar" style={{zIndex:8}}
 					primary={pathname=="/" ? "/" : pathname.split("/")[1]}
 					items={[
-						{label:"我", action:"/",icon:<IconLife/> 
+						{label:"我", action:"/",icon:<IconLife/>
 							,onSelect:a=>router.push("/")
 						}
 						,{label:"发现", action:"explore", icon:<IconExplore/>
@@ -67,7 +127,7 @@ class extends Component{
 			</QiliApp>
 		)
 	}
-	
+
 	static contextTypes={
 		showMessage: PropTypes.func
 	}
@@ -124,4 +184,4 @@ document.addEventListener('deviceready', function() {
 	</Route>
 	,Object.assign({},LifeUI.REDUCER,JourneyUI.REDUCER))
 });
-
+*/
