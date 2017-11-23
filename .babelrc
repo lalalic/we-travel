@@ -11,7 +11,8 @@
       ["module-resolver",{
 			"root": ["./src"],
 			"alias":{
-                "qili":"qili-app/lib"
+                "qili":"qili-app/lib",
+                "components":"components"
 			}
 		}]
     ]

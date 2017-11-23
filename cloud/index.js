@@ -1,19 +1,24 @@
 Cloud.typeDefs=`
     type Journey implements Node{
-        id:ID
+        id:ID!
         name:String
-        
+        startedAt:Date
+        endedAt:Date
     }
 
     type Footprint implements Node{
-        id:ID
+        id:ID!
     }
 
     type Waypoint implements Node{
-        id:ID
+        id:ID!
     }
 
     type Itinerary implements Node{
-        id:ID
+        id:ID!
+    }
+
+    extend type User{
+        journeys:[Journey]
     }
 `

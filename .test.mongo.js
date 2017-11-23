@@ -15,6 +15,6 @@ const _render=Qili.render
 Qili.render=function(app){
 	_render(React.cloneElement(app, {
 		service:`http://${host}:9080/1/graphql`,
-		isDev:false
+		isDev:true
 	}))
 }

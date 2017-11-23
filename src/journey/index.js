@@ -1,6 +1,5 @@
 import React, {Component} from "react"
 import PropTypes from "prop-types"
-import {UI, User} from "qili-app"
 import {connect} from "react-redux"
 
 import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Slider, Drawer} from "material-ui"

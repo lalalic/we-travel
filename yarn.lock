@@ -6649,6 +6649,15 @@ realize-package-specifier@~3.0.1:
     dezalgo "^1.0.1"
     npm-package-arg "^4.1.1"
 
+recompose@0.25.0:
+  version "0.25.0"
+  resolved "http://registry.npm.taobao.org/recompose/download/recompose-0.25.0.tgz#e2ec723692ff0fdab3d62bd22c1da69af1985acd"
+  dependencies:
+    change-emitter "^0.1.2"
+    fbjs "^0.8.1"
+    hoist-non-react-statics "^1.0.0"
+    symbol-observable "^1.0.4"
+
 recompose@^0.21.0:
   version "0.21.2"
   resolved "http://registry.npm.taobao.org/recompose/download/recompose-0.21.2.tgz#ff3fbdb2397b1c77c47d451be2a63b9295d44681"
@@ -6661,15 +6670,6 @@ recompose@^0.21.0:
 recompose@^0.25.0:
   version "0.25.1"
   resolved "http://registry.npm.taobao.org/recompose/download/recompose-0.25.1.tgz#5eb9d6cf6e25a9ffad73cbbae5658b5b55d6e728"
-  dependencies:
-    change-emitter "^0.1.2"
-    fbjs "^0.8.1"
-    hoist-non-react-statics "^2.3.1"
-    symbol-observable "^1.0.4"
-
-recompose@^0.26.0:
-  version "0.26.0"
-  resolved "http://registry.npm.taobao.org/recompose/download/recompose-0.26.0.tgz#9babff039cb72ba5bd17366d55d7232fbdfb2d30"
   dependencies:
     change-emitter "^0.1.2"
     fbjs "^0.8.1"

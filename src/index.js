@@ -1,7 +1,8 @@
+import React from "react"
 import PropTypes from "prop-types"
 
 import {connect} from "react-redux"
-import {compose, getContext, withProps, mapProps,
+import {compose, getContext, withProps, mapProps,createEagerFactory,
 	withStateHandlers,withContext,branch,renderComponent} from "recompose"
 import {withInit, withQuery, withPagination, withFragment} from "qili/tools/recompose"
 
@@ -11,6 +12,8 @@ import {Router, Route, IndexRoute, Direct, IndexRedirect, hashHistory} from "rea
 import QiliApp, * as qili from "qili-app"
 import CheckUpdate from "qili/components/check-update"
 import CommandBar from "qili/components/command-bar"
+
+import PhotoViewer from "components/photo-viewer"
 
 import IconAccount from 'material-ui/svg-icons/action/account-box'
 import IconExplore from 'material-ui/svg-icons/action/explore'
@@ -60,9 +63,13 @@ const withNavigator=()=>BaseComponent=>{
 	return WithNavigator
 }
 
+import Journey from "journey"
+
 const router=(
 	<Router history={hashHistory}>
-		<Route path="/" component={compose(withNavigator())(()=><div>hello Traveller</div>)}/>
+		<IndexRoute path="/" component={compose(
+			withNavigator(),
+		)(Journey)}/>
 	</Router>
 )
 
@@ -71,22 +78,6 @@ QiliApp.render(<WeTravel>{router}</WeTravel>)
 import {QiliApp, UI, User} from "qili-app"
 import {init, Waypoint as WaypointDB} from "./db"
 import PhotoViewer from "./components/photo-viewer"
-const {CommandBar, Comment}=UI
-
-const DOMAIN='main'
-const INIT_STATE={}
-export const ACTION={
-
-}
-
-export const REDUCER={
-	[DOMAIN]:(state=INIT_STATE,{type,payload})=>{
-		switch(type){
-
-		}
-		return state
-	}
-}
 
 const Main=connect()(
 class extends Component{

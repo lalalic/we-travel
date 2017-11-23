@@ -1,4 +1,5 @@
 const path = require('path');
+const {HotModuleReplacementPlugin}=require("webpack")
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const HtmlWebpackHarddiskPlugin=require('html-webpack-harddisk-plugin')
 const thisIP=require("ip").address()
@@ -19,12 +20,13 @@ module.exports=(base,HTML,port)=>{
 			host:"0.0.0.0",
 			disableHostCheck:true,
 			hot:true,
-			inline:false, //for apk
+			inline:true, //for apk
 			setup(app){
 				app.get("/app.apk.version",(req, res)=>res.json(require("./package.json").version))
 			}
 		},
 		plugins:[
+			new HotModuleReplacementPlugin(),
 			...base.plugins.slice(0,-1),//don't inline js
 			new HtmlWebpackPlugin({
 				...HTML,
