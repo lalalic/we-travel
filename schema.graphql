@@ -14,6 +14,23 @@ type FileToken {
 
 type Footprint implements Node {
   id: ID!
+  journey: ObjectID
+  when: Date
+  loc: JSON
+  note: String
+  photos: [String]
+  video: String
+  audio: String
+}
+
+type FootprintConnection {
+  edges: [FootprintEdge]
+  pageInfo: PageInfo
+}
+
+type FootprintEdge {
+  node: Footprint
+  cursor: JSON
 }
 
 enum Gender {
@@ -23,6 +40,9 @@ enum Gender {
 
 type Itinerary implements Node {
   id: ID!
+  journey: Journey
+  place: String
+  days: Int
 }
 
 type Journey implements Node {
@@ -30,6 +50,11 @@ type Journey implements Node {
   name: String
   startedAt: Date
   endedAt: Date
+  status: String
+  author: ObjectID
+  itineraries: [Itinerary]
+  footprints: FootprintConnection
+  waypoints: WaypointConnection
 }
 
 # The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
@@ -59,6 +84,13 @@ type Mutation {
   role_user_remove(_id: ObjectID!, users: [String!]!): Date
   file_create(_id: String!, host: ID!, bucket: String, size: Int, crc: Int, mimeType: String, imageInfo: JSON): File
   file_clean(host: ID!): Boolean
+  journey_create(name: String, startedAt: Date, endedAt: Date): Journey
+  journey_update(_id: ObjectID!, name: String, startedAt: Date, endedAt: Date): Date
+  journey_delete(_id: ObjectID!): Boolean
+  footprint_create(note: String, when: Date, loc: JSON, photos: [String], _id: ObjectID): Footprint
+  footprint_update(_id: ObjectID, patch: JSON): Date
+  waypoint_create(when: Date, loc: JSON, photo: String, _id: ObjectID): Waypoint
+  waypoint_batch(data: JSON): Int
 }
 
 interface Node {
@@ -110,8 +142,23 @@ type User implements Node {
   location: String
   signature: String
   roles: [Role]
+  journeys: [Journey]
+  journey(_id: ObjectID): Journey
 }
 
 type Waypoint implements Node {
   id: ID!
+  when: Date
+  loc: JSON
+  photo: String
+}
+
+type WaypointConnection {
+  edges: [WaypointEdge]
+  pageInfo: PageInfo
+}
+
+type WaypointEdge {
+  node: Waypoint
+  cursor: JSON
 }

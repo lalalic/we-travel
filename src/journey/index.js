@@ -1,226 +1,204 @@
 import React, {Component} from "react"
 import PropTypes from "prop-types"
-import {connect} from "react-redux"
 
-import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Slider, Drawer} from "material-ui"
-import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
+import {compose, withProps, mapProps} from "recompose"
+import {withFragment,withMutation} from "qili/tools/recompose"
+import {FloatingActionButton,TextField, DatePicker, Avatar, Divider, Dialog} from "material-ui"
 
-import Logo from 'material-ui/svg-icons/maps/directions-walk'
-
-import IconMore from 'material-ui/svg-icons/navigation/more-horiz'
-import IconAdd from 'material-ui/svg-icons/content/add'
+import IconSave from "material-ui/svg-icons/file/cloud-done"
 import IconMap from "material-ui/svg-icons/maps/map"
+import IconSchedule from "material-ui/svg-icons/maps/edit-location"
+import IconPublish from "material-ui/svg-icons/image/camera-roll"
+import IconRemove from "material-ui/svg-icons/action/delete"
 
-import {Journey as JourneyDB, Footprint as FootprintDB, Waypoint as WaypointDB} from "./db"
-import Chipper from "./components/chipper"
-import Journey, {Title} from "./components/journey"
-import Map from "./components/map"
-import LocationDB from "./db/location"
+import CommandBar from "qili/components/command-bar"
 
+import Chipper from "components/chipper"
+import TextFieldWithIcon from "components/textFieldWithIcon"
+import Search from "components/searchTextField"
+import Map from "components/map"
+import Itinerary from "components/itinerary"
 
-const {Empty, Photo}=UI
+export {default as Life} from "./life"
 
-const DOMAIN="ui.life"
-
-const INIT_STATE={
-	memory:[],
-	wish:[],
-	active:[],
-	showHistory:true,
-	onMap:false
-}
-
-export const ACTION={
-	FETCH: a=>dispatch=>JourneyDB.find()
-		.fetch(journeys=>dispatch({type:`@@${DOMAIN}/fetched`,payload:journeys}))
-
-	,TOGGLE_MAP: {type:`@@${DOMAIN}/TOGGLE_MAP`}
-	,CLEAR: {type:`@@${DOMAIN}/CLEAR`}
-}
-
-export const REDUCER={
-	[DOMAIN]:(state=INIT_STATE,{type, payload})=>{
-		switch(type){
-		case `@@${DOMAIN}/TOGGLE_MAP`:
-			return Object.assign({},state,{onMap:!state.onMap})
-		case `@@${DOMAIN}/fetched`:
-			let journeys=payload
-			let now=new Date()
-			let memory=[], wish=[], active=[]
-			journeys.forEach(journey=>{
-				switch(JourneyDB.getState(journey)){
-				case "Memory":
-					memory.push(journey)
-				break
-				case "Starting":
-				case "Ending":
-				case "Traveling":
-					active.push(journey)
-				break
-				case "Plan":
-				default:
-					wish.push(journey)
+export const Creator=compose(
+	withMutation({
+		name:"create",
+		promise:true,
+		mutation:graphql`
+			mutation journey_create_Mutation($name:String, $startedAt:Date, $endedAt:Date){
+				journey_create(name:$name, startedAt:$startedAt, endedAt:$endedAt){
+					id
 				}
-			})
-			memory.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())
-			active.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())
-			wish.sort((a,b)=>{
-				if(a.startedAt){
-					if(b.startedAt){
-						return a.startedAt.getTime()-b.startedAt.getTime()
-					}else{
-						return -1
-					}
-				}else{
-					if(b.startedAt){
-						return 1
-					}else{
-						return a.createdAt.getTime()-b.createdAt.getTime()
-					}
-				}
-			})
-		return Object.assign({},state,{memory,wish,active})
-		}
-		return state
-	}
-}
-
-export const Life=connect(state=>state[DOMAIN])(
-class extends Component{
-	static contextTypes={
-		router: PropTypes.obj
-	}
-	componentWillUnmount(){
-		this.props.dispatch(ACTION.CLEAR)
-	}
-	componentDidMount(){
-		this.props.dispatch(ACTION.FETCH())
-	}
-
-	render(){
-		const {memory, wish, active, showHistory, onMap,dispatch}=this.props
-		const {router}=this.context
-		let map=null, mapToggler=null
-
-		if(active.length>0){
-			mapToggler=(<FloatingActionButton
-							className="sticky top right _2"
-							mini={true} onClick={e=>dispatch(ACTION.TOGGLE_MAP)}>
-							<IconMap/>
-						</FloatingActionButton>)
-
-			if(onMap){
-				map=(<div>
-						<Map className="sticky full" ref="map"
-							onReady={map=>this.showJourneyOnMap(map)}
-							style={{opacity:"0.5", zIndex:1}}/>
-						<div className="sticky bottom right _2">
-							<Slider axis="y" ref="opacity"
-								style={{height:100}}
-								disableFocusRipple={true}
-								defaultValue={0.5}
-								step={0.1}
-								onChange={e=>this.onChangeMapOpacity()}
-								/>
-						</div>
-					</div>)
 			}
+		`
+	}),
+	mapProps(({toJourney,create})=>({
+		create(){
+			return create(...arguments)
+				.then(({id})=>toJourney(id))
 		}
-
-		return (
+	}))
+)(({create})=>{
+	let name, startedAt, endedAt
+	return (
 		<div>
-			{map}
+			<div style={{padding:5}}>
+				<TextField ref={a=>name=a}
+					floatingLabelText="旅行名称"
+					fullWidth={true}/>
 
-			<FloatingActionButton
-				className="floating sticky top right"
-				mini={true} onClick={e=>router.push("/journey/_new")}>
-				<IconAdd/>
-			</FloatingActionButton>
+				<DatePicker ref={a=>startedAt=a}
+					floatingLabelText="开始日期"
+					fullWidth={true}
+					autoOk={true}/>
 
-			{mapToggler}
-
-			<div style={{background:"white"}}>
-				{showHistory && memory.length && (
-					<Stepper orientation="vertical" activeStep={-1}>
-					{
-						memory.map(a=>(<Title key={a.name} journey={a} completed={true}/>))
-					}
-					</Stepper>
-				)||null}
-
-				{active.length && (
-					active.map(journey=>(
-						<Journey key={journey} journey={journey} publishable={true}/>
-					))
-				)||null}
-
-				{wish.length && (
-					<div>
-						<Stepper orientation="vertical" activeStep={-1} linear={false}>
-						{
-							wish.map(a=>(<Title key={a.name} completed={false} journey={a}/>))
-						}
-						</Stepper>
-					</div>
-				)||(<Empty icon={<Logo/>}>来,开始你的心旅程</Empty>)}
+				<DatePicker ref={a=>endedAt=a}
+					floatingLabelText="结束日期"
+					fullWidth={true}
+					autoOk={true}/>
 			</div>
-		</div>
-		)
-	}
 
-	onChangeMapOpacity(){
-		let mapStyle=this.refs.map.refs.root.style
-		let opacity=mapStyle.opacity=this.refs.opacity.getValue()
-		if(opacity<0.5)
-			mapStyle.zIndex=1;
-		else
-			mapStyle.zIndex=3;
-	}
-
-	showJourneyOnMap(map){
-		const {active:[journey]}=this.props
-		const {startedAt, endedAt}=journey
-		const {Marker,Point,PointCollection,Label,Size}=BMap
-		WaypointDB.get(startedAt, endedAt,
-			waypoints=>{
-				map.reset()
-				if(waypoints.length==0)
-					return;
-				waypoints.sort((a,b)=>a.when.getTime()-b.when.getTime())
-				let days=[waypoints[0]]
-				let points=waypoints.map(waypoint=>{
-					const {when,loc:{y:lat,x:lng}}=waypoint
-					if(!when.isSameDate(days[0].when))
-						days.unshift(waypoint)
-					return new Point(lng,lat)
-				})
-				let pc=new PointCollection(points, {size:BMAP_POINT_SIZE_TINY,shape:BMAP_POINT_SHAPE_CIRCLE, color:"red"})
-				map.addOverlay(pc)
-				map.addEventListener("zoomend", ()=>{
-					let zoom=map.getZoom()
-					if(zoom<=11){
-						pc.setStyles({size:BMAP_POINT_SIZE_TINY})
-					}else{
-						pc.setStyles({size:BMAP_POINT_SIZE_BIG})
+			<CommandBar
+				className="footbar"
+				items={[
+					"Back",
+					{
+						action:"Save",
+						label:"保存",
+						icon:<IconSave/>
+						,onSelect:()=>create({
+							name:name.getValue(),
+							startedAt:startedAt.getDate(),
+							endedAt:endedAt.getDate()
+						})
 					}
-				})
-
-				let startedAt=journey.startedAt
-				days.forEach(({when,loc:{y:lat,x:lng}}, i)=>{
-					let marker=new Marker(new Point(lng,lat))
-					let dayNo=when.relative(startedAt)+1
-					let label=new Label(`${dayNo}`)
-					label.setStyle({backgroundColor:"transparent",border:"0px"})
-					label.setOffset(new Size(dayNo>9 ? 2 : 5, 2))
-					marker.setLabel(label)
-					map.addOverlay(marker)
-				});
-
-				let delta=Math.round(points.length/5)
-				map.setViewport(points.filter((a,i)=>i%delta==0))
-			})
-
-	}
+					]}/>
+		</div>
+	)
 })
 
-export default Object.assign(Life,{ACTION, REDUCER})
+export default compose(
+	withFragment(graphql`
+		fragment journey_journey on Journey{
+			name
+			startedAt
+			endedAt
+			status
+		}
+	`),
+	withMutation(({id})=>({
+		name:"remove",
+		variables:{id},
+		promise:true,
+		mutation:graphql`
+			mutation journey_remove_Mutation($id:ObjectID!){
+				journey_delete(_id:$id)
+			}
+		`
+	})),
+	withMutation(({id})=>({
+		variables:{id},
+		promise:true,
+		mutation:graphql`
+			mutation journey_update_Mutation($id:ObjectID!, $name:String, $startedAt:Date, $endedAt:Date){
+				journey_update(_id:$id, name:$name, startedAt:$startedAt, endedAt:$endedAt)
+			}
+		`
+	})),
+	mapProps(({remove,toLife,journey,...others})=>({
+		...others,
+		remove:remove().then(toLife),
+		journey,
+	}))
+)(({name, startedAt, endedAt,status, toComment, toPublish, toPlan,remove,mutate})=>{
+	let scheduler
+	let actions=[
+		"Back",
+        {
+            action:"Comment",
+			label:"评论",
+			onSelect: toComment,
+			icon:<IconPublish/>
+        }
+	]
+
+	switch(status){
+	case "Memory":
+
+	break
+	case "Starting":
+	case "Ending":
+	case "Traveling":
+	case "Plan":
+	default:
+		scheduler=(
+			<div>
+				<TextField
+					onClick={toPlan}
+					floatingLabelText="快速计划你的行程"
+					defaultValue="..."
+					floatingLabelFixed={true}/>
+				<Itinerary journey={{startedAt, endedAt}} mode="place"/>
+			</div>
+		)
+
+		actions.splice(1,0,{
+			action:"Remove",
+			label:"删除",
+			onSelect:remove,
+			icon: <IconRemove/>,
+		})
+	}
+
+	let refName
+	return (
+		<div>
+			<FloatingActionButton
+				className="floating sticky top right"
+				mini={true}
+				onClick={toPublish}>
+				$<IconPublish/>
+			</FloatingActionButton>
+
+			<div style={{padding:5}}>
+				<TextField
+					floatingLabelText="一次有独特意义的旅行名称"
+					fullWidth={true}
+					value={name}
+					onBlur={({target:{value}})=>mutate({name:value})}
+					onKeyDown={({keyCode,target:{value}})=>{keyCode==13 && mutate({name:value})}}/>
+
+				<DatePicker
+					floatingLabelText="开始日期"
+					fullWidth={false}
+					value={startedAt}
+					onChange={(e,startedAt)=>mutate({startedAt})}
+					autoOk={true}/>
+
+				<DatePicker
+					floatingLabelText="结束日期"
+					fullWidth={false}
+					value={endedAt}
+					onChange={(e,endedAt)=>mutate({endedAt})}
+					autoOk={true}/>
+
+				<Chipper
+					title="更多信息"
+					autoOpen={false}
+					chips={[
+							"徒步","自驾","自行车",
+							"挑战","放松","家庭","商务",
+							"老人","小孩","情侣",
+							{label:"预算",type:"number"},
+							"海滩","人文","山水","都市","会友",
+							"蜜月","生日","周年庆"
+						]}/>
+
+				{scheduler}
+			</div>
+
+			<CommandBar className="footbar" items={actions}/>
+		</div>
+	)
+})

@@ -19,7 +19,7 @@ import IconAccount from 'material-ui/svg-icons/action/account-box'
 import IconExplore from 'material-ui/svg-icons/action/explore'
 import IconLife from 'material-ui/svg-icons/maps/person-pin-circle'
 
-const DOMAIN='main'
+const DOMAIN='travel'
 function reducer(state={},{type,payload}){
 	switch(type){
 		default:
@@ -63,13 +63,78 @@ const withNavigator=()=>BaseComponent=>{
 	return WithNavigator
 }
 
-import Journey from "journey"
+import Journey, {Life, Creator} from "journey"
 
 const router=(
 	<Router history={hashHistory}>
-		<IndexRoute path="/" component={compose(
-			withNavigator(),
-		)(Journey)}/>
+		<Route path="/">
+			<IndexRoute component={compose(
+				withNavigator(),
+				getContext({
+					router:PropTypes.object
+				}),
+				withQuery({
+					query:graphql`
+						query src_life_Query{
+							me{
+								journeys{
+									...life_journeys
+								}
+							}
+						}
+					`
+				}),
+				withProps(({router,data:{me:{journeys}}})=>({
+					journeys,
+					toCreate:()=>router.push(`/journey`),
+
+				})),
+
+			)(Life)}/>
+
+			<Route path="journey">
+				<IndexRoute component={compose(
+					getContext({router:PropTypes.object}),
+					withProps(({router})=>({
+						toJourney:id=>router.replace(`/journey/${id}`)
+					}))
+				)(Creator)}/>
+				<Route path=":id">
+					<IndexRoute component={compose(
+						getContext({router:PropTypes.object}),
+						withQuery(({params:{id}})=>({
+							variables:{id},
+							query:graphql`
+								query src_journey_Query($id:ObjectID){
+									me{
+										journey(_id:$id){
+											...journey_journey
+										}
+									}
+								}
+							`
+						})),
+						mapProps(({data,params:{id},router,...others})=>({
+							id,
+							journey:data.me.journey,
+							toLife:()=>router.replace("/"),
+							...others
+						}))
+					)(Journey)}/>
+					{/*
+					<Route path="itinerary">
+						<IndexRoute  component={compose(
+
+						)(Itinerary)}/>
+						<Route path=":id2" component={compose(
+
+						)(ItiDetail)}/>
+					</Route>
+				*/}
+				</Route>
+			</Route>
+
+		</Route>
 	</Router>
 )
 

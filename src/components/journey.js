@@ -1,6 +1,7 @@
 import React, {Component} from "react"
 import PropTypes from "prop-types"
-import {UI, User} from "qili-app"
+
+import {compose} from "recompose"
 
 import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Toggle} from "material-ui"
 import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
@@ -12,33 +13,46 @@ import IconAdd from 'material-ui/svg-icons/content/add'
 import IconMap from "material-ui/svg-icons/maps/map"
 import IconCamera from 'material-ui/svg-icons/image/photo-camera'
 
-import {Journey as JourneyDB, Footprint as FootprintDB, Waypoint as WaypointDB, Itinerary as ItineraryDB} from "../db"
-import Chipper from "./chipper"
-import PhotosField from "./photos-field"
-import TransportationField from "./transportation-field"
+import Empty from "qili/components/empty"
+import Chipper from "components/chipper"
+import PhotosField from "components/photos-field"
+import TransportationField from "components/transportation-field"
 
-const {Empty}=UI
-
-const DOMAIN="journey"
-
-export default class Journey extends Component{
-	state={
-		footprints:[]
-		,itinerary:[]
-	}
-
-	componentDidMount(){
-		const {journey}=this.props
-		let cond={journey:journey._id}
-		Promise.all([
-			new Promise((resolve,reject)=>FootprintDB.find(cond).fetch(resolve,reject))
-			,new Promise((resolve,reject)=>ItineraryDB.find(cond).fetch(resolve,reject))
-			]).then(([footprints,itinerary])=>this.setState({footprints, itinerary}))
-	}
-
+export default compose(
+	withFragment(graphql`
+		fragment journey_all on Journey{
+			startedAt
+			...journey_title
+			footprints{
+				when
+				...journey_footprint
+			}
+			itineraries{
+				dayth
+			}
+		}
+	`),
+	getContext({client:PropTypes.object}),
+	withProps(({id,client})=>({
+		onSave(footprint){
+			return client.runQL(graphql`
+				query journey_footprints_Query($journey:ObjectID){
+					me{
+						journey(_id:$journey){
+							footprints{
+								when
+								...journey_footprint
+							}
+						}
+					}
+				}
+			`).then(data=>data.me.journey.footprints)
+		}
+	}))
+)(class Journey extends Component{
 	getDayItinerary(dayth){
-		const {itinerary}=this.state
-		return itinerary.reduceRight((found,a)=>{
+		const {all:{itineraries}}=this.props
+		return itineraries.reduceRight((found,a)=>{
 			if(a.dayth==dayth){
 				found.unshift(a)
 			}else if(found.length==0){
@@ -50,24 +64,28 @@ export default class Journey extends Component{
 	}
 
 	render(){
-		let {journey:{startedAt, _id }, onMap, publishable}=this.props
-		let {footprints, itinerary}=this.state
+		let {all:{footprints,startedAt}, onMap, publishable}=this.props
 		let currentDate=null, lastDay=0
 		let all=[]
 		footprints.forEach((footprint,i)=>{
-			const {when,photo,note}=footprint
+			const {when}=footprint
 			if(currentDate==null || !when.isSameDate(currentDate)){
 				currentDate=when
 				let day=currentDate.relative(startedAt)+1
 				while(lastDay<day){
 					lastDay++
 					let date=startedAt.relativeDate(lastDay-1)
-					all.push(<Day key={`day${lastDay}`} day={lastDay}
-						date={date} itinerary={this.getDayItinerary(lastDay)}
-						onEdit={a=>this.editing({when:date})}/>)
+					all.push(<Day
+						key={`day${lastDay}`}
+						day={lastDay}
+						date={date}
+						itinerary={this.getDayItinerary(lastDay)}
+						onEdit={()=>this.editing({when:date})}/>)
 				}
 			}
-			all.push(<Footprint key={i} data={footprint}
+			all.push(<Footprint
+				key={i}
+				footprint={footprint}
 				onEdit={a=>this.editing(footprint)}/>)
 		})
 
@@ -90,7 +108,7 @@ export default class Journey extends Component{
 			)
 		}
 
-		all.push(<Title journey={this.props.journey} key="title"/>)
+		all.push(<Title journey={this.props.all} key="title"/>)
 
 		return (
 			<div>
@@ -103,16 +121,10 @@ export default class Journey extends Component{
 		)
 	}
 
-	onSave(footprint){
-		const {journey}=this.props
-		let cond={journey:journey._id}
-		FootprintDB.find(cond).fetch(footprints=>this.setState({footprints}))
-	}
-
 	editing(footprint, focusing){
 		this.refs.editor.setState({footprint, focusing})
 	}
-}
+})
 
 class Editor extends Component{
 	state={
@@ -200,12 +212,23 @@ class Editor extends Component{
 	}
 }
 
-export const Title=({journey:{name,_id, startedAt}, completed, onMap},{router})=>{
+export const Title=compose(
+	withFragment(graphql`
+		fragment journey_title on Journey{
+			name
+			startedAt
+			status
+		}
+	`),
+	withProps(({title:{name,startedAt,status}})=>({
+		name,startedAt
+	}))
+)(({name,startedAt,completed, onMap,toJourney})=>{
 	if(completed){
 		return (
 			<Step completed={true} disabled={true}>
 				<StepLabel>
-					<span onClick={e=>router.push(`journey/${_id}`)} style={{cursor:"default"}}>
+					<span onClick={toJourney} style={{cursor:"default"}}>
 						{startedAt.smartFormat()}
 						<br/>
 						{name}
@@ -218,15 +241,18 @@ export const Title=({journey:{name,_id, startedAt}, completed, onMap},{router})=
 			<Step completed={true} active={true}>
 				<StepLabel icon="*">
 					<div className="grid" style={{cursor:"default"}}>
-						<b onClick={e=>router.push(`journey/${_id}`)}>{name}</b>
-						{onMap ? (<div style={{width:100}}><Toggle labelPosition="right" label="Map"onToggle={onMap}/></div>) : null}
+						<b onClick={toJourney}>{name}</b>
+						{onMap ? (
+							<div style={{width:100}}>
+								<Toggle labelPosition="right" label="Map"onToggle={onMap}/>
+							</div>
+						) : null}
 					</div>
 				</StepLabel>
 			</Step>
 		)
 	}
-}
-Title.contextTypes={router:React.PropTypes.obj}
+})
 
 const Day=({day,date, onEdit, itinerary,label=TransportationField.getLabel})=>(
 	<Step disabled={false}>
@@ -249,7 +275,20 @@ const Day=({day,date, onEdit, itinerary,label=TransportationField.getLabel})=>(
 	</Step>
 )
 
-const Footprint=({data: {when,photos=[],note}, onEdit},{viewPhoto})=>(
+const Footprint=compose(
+	getContext({viewPhoto:PropTypes.func}),
+	withFragment(graphql`
+		fragment journey_footprint on Footprint{
+			when
+			photos
+			node
+			loc
+		}
+	`),
+	withProps(({footprint})=>({
+		...footprint
+	}))
+)(({when,photos=[],note, loc, onEdit,viewPhoto})=>(
 	<Step completed={true} active={true}>
 		<StepLabel icon={"."} >
 			<time>{when.format('HH:mm')}&nbsp;</time>
@@ -258,9 +297,14 @@ const Footprint=({data: {when,photos=[],note}, onEdit},{viewPhoto})=>(
 		</StepLabel>
 		<StepContent>
 			<p>
-				{photos.map(({url,taken,loc},i)=>(<img key={i} onClick={e=>viewPhoto(url)} style={{height:50, margin:2}} src={url}/>))}
+				{photos.map((url,i)=>(
+					<img
+						key={url}
+						onClick={e=>viewPhoto(url)}
+						style={{height:50, margin:2}}
+						src={url}/>
+				))}
 			</p>
 		</StepContent>
 	</Step>
-)
-Footprint.contextTypes={viewPhoto:React.PropTypes.func}
+))

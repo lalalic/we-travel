@@ -1,107 +1,69 @@
 import React, {Component} from "react"
 import PropTypes from "prop-types"
+
+import {compose} from "recompose"
+
+import date from "qili/tools/date"
 import {TextField} from "material-ui"
 import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
 import IconMap from "material-ui/svg-icons/maps/map"
 
-import {Itinerary as ItineraryDB} from "../db"
+export default compose(
 
-export default class Itinerary extends Component{
-	state={
-		itinerary:[]
-	}
+)(({mode, ...props})=>mode=="date" ? <DateMode props={props}/> : (mode=="place" ? <PlaceMode props={props}/> : null))
 
-	componentDidMount(){
-		const {journey:{_id}}=this.props
-		ItineraryDB.find({journey:_id},itinerary=>{
-			this.setState({itinerary})
-		})
-	}
+const DateMode=({startedAt, endedAt})=>(
+	<Stepper orientation="vertical">
+		{new Array(endedAt.relative(startedAt)).fill(1).map((a,i)=>(
+			<Step key={i}>
+				<StepLabel>
+					<div className="grid">
+						<span style={{width:"10em"}}>
+							{startedAt.relativeDate(i).smartFormat()}
+						</span>
+						<span style={{width:150,paddingRight:20}}>
+							<LocationTextField hintText="start from" name="start"/>
+						</span>
+						<span style={{width:150}}>
+							<LocationTextField hintText="stay at" name="end"/>
+						</span>
+						<span/>
+					</div>
+				</StepLabel>
+			</Step>
+		))}
+	</Stepper>
+)
 
-	render(){
-		const {mode}=this.props
-		switch(mode){
-		case "date":
-			return this.renderByDate()
-		break
-		case "place":
-		default:
-			return this.renderByPlace()
-		}
-	}
+const PlaceMode=({startedAt, endedAt, itinerary})=>(
+	<Stepper orientation="vertical">
+		{itinerary.map(({place, days})=>(
+			<Step key={place}>
+				<StepLabel>
+					<span>{place}</span>
+				</StepLabel>
+			</Step>
+		))}
+	</Stepper>
+)
 
-	renderByDate(){
-		const {startedAt, endedAt}=this.props.journey
-		const {itinerary}=this.state
-		let len=endedAt.relative(startedAt), days=[]
-		for(let i=0;i<len;i++){
-			days[i]=(
-				<Step key={i}>
-					<StepLabel>
-						<div className="grid">
-							<span style={{width:"10em"}}>
-								{startedAt.relativeDate(i).smartFormat()}
-							</span>
-							<span style={{width:150,paddingRight:20}}>
-								<LocationTextField hintText="start from" name="start"/>
-							</span>
-							<span style={{width:150}}>
-								<LocationTextField hintText="stay at" name="end"/>
-							</span>
-							<span/>
-						</div>
-					</StepLabel>
-				</Step>
-			)
-		}
-		return (
-			<Stepper orientation="vertical">
-				{days}
-			</Stepper>
-		)
-	}
+const LocationTextField=({style={},...others})=>{
+	const {width, ...otherStyle}=style
+	others.style=otherStyle
+	let outerStyle={}
+	if(width)
+		outerStyle.width=width-24
 
-	renderByPlace(){
-		const {startedAt, endedAt}=this.props.journey
-		const {itinerary}=this.state
-		let places=itinerary.map(a=>{
-			const {place, days}=a
-			return (
-				<Step key={place}>
-					<StepLabel>
-						<span>{place}</span>
-					</StepLabel>
-				</Step>
-			)
-		})
-		return (
-			<Stepper orientation="vertical">
-				{places}
-			</Stepper>
-		)
-	}
-}
-
-class LocationTextField extends Component{
-	render(){
-		const {style={},...others}=this.props
-		const {width, ...otherStyle}=style
-		others.style=otherStyle
-		let outerStyle={}
-		if(width)
-			outerStyle.width=width-24
-
-		return (
-			<div className="grid" {...outerStyle}>
-				<div>
-					<TextField {...others} fullWidth={true}/>
-				</div>
-				<div style={{width:24}}>
-					<span style={{position:"relative",top:8}}>
-						<IconMap color="lightgray"/>
-					</span>
-				</div>
+	return (
+		<div className="grid" {...outerStyle}>
+			<div>
+				<TextField {...others} fullWidth={true}/>
 			</div>
-		)
-	}
+			<div style={{width:24}}>
+				<span style={{position:"relative",top:8}}>
+					<IconMap color="lightgray"/>
+				</span>
+			</div>
+		</div>
+	)
 }

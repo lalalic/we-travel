@@ -1,16 +1,9 @@
 import React, {Component} from "react"
 import PropTypes from "prop-types"
-import {UI} from "qili-app"
-const {Photo}=UI
+import Photo from "qili/components/photo"
 
 export default class PhotosField extends Component{
-	constructor(){
-		super(...arguments)
-		const {defaultValue}=this.props
-		this.state={
-			photos: [].concat(defaultValue||[])
-		}
-	}
+	state={photos:[...this.props.defaultValue]}
 	render(){
 		const {max, iconStyle}=this.props
 		const {photos}=this.state
@@ -39,17 +32,13 @@ export default class PhotosField extends Component{
 			this.setState({photos:photos.concat([url])})
 	}
 
-	get value(){
-		return this.state.photos
-	}
-
 	focus(){
 		this.refs.photo.doPhoto()
 	}
 
 	static propTypes={
-		defaultValue: PropTypes.array
-		,max: PropTypes.number
+		defaultValue: PropTypes.array,
+		max: PropTypes.number,
 	}
 	static defaultProps={
 		max:6
