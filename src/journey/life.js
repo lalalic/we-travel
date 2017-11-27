@@ -23,7 +23,7 @@ export class Life extends Component{
 	render(){
 		const {memory, wish, active,
 			shouldShowHistory=true, shouldShowMap=false,
-			toggleMap,toCreate}=this.props
+			toggleMap,toCreate,toJourney}=this.props
 
 		let map=null, mapToggler=null
 
@@ -69,14 +69,23 @@ export class Life extends Component{
 					{shouldShowHistory && memory.length && (
 						<Stepper orientation="vertical" activeStep={-1}>
 						{
-							memory.map(a=>(<Title key={a.name} journey={a} completed={true}/>))
+							memory.map(a=>(<Title
+									key={a.name}
+									journey={a}
+									completed={true}
+									toJourney={()=>toJourney(a.id)}/>))
 						}
 						</Stepper>
 					)||null}
 
 					{active.length && (
-						active.map(journey=>(
-							<Journey key={journey.id} journey={journey} publishable={true}/>
+						active.map(a=>(
+							<Journey
+								key={a.id}
+								id={a.id}
+								publishable={true}
+								toJourney={()=>toJourney(a.id)}
+								/>
 						))
 					)||null}
 
@@ -84,7 +93,12 @@ export class Life extends Component{
 						<div>
 							<Stepper orientation="vertical" activeStep={-1} linear={false}>
 							{
-								wish.map(a=>(<Title key={a.name} completed={false} journey={a}/>))
+								wish.map(a=>(<Title
+									key={a.name}
+									completed={false}
+									journey={a}
+									toJourney={()=>toJourney(a.id)}
+									/>))
 							}
 							</Stepper>
 						</div>
@@ -163,6 +177,7 @@ export default compose(
 			startedAt
 			endedAt
 			status
+			...journey_title
 		}
 	`),
 	withProps(({journeys})=>{

@@ -11,12 +11,9 @@ Cloud.typeDefs=`
         author: ObjectID
 
         itineraries:[Itinerary]
-        footprints: FootprintConnection
-        waypoints: WaypointConnection
+        footprints: [Footprint]
+        waypoints: [Waypoint]
     }
-
-    ${FootprintPagination.typeDefs}
-    ${WaypointPagination.typeDefs}
 
     type Itinerary implements Node{
         id:ID!
@@ -24,6 +21,7 @@ Cloud.typeDefs=`
         place: String
         days: Int
         dayth: Int
+        trans: String
     }
 
     type Footprint implements Node{
@@ -61,8 +59,6 @@ Cloud.typeDefs=`
 `
 const relative=d=>Math.floor((Date.now()-d.getTime())/(24*60*60*1000))
 Cloud.resolver=Cloud.merge(
-    FootprintPagination.resolver,
-    WaypointPagination.resolver,
     {
         Journey:{
             id:({_id})=>`jounerys:${_id}`,
@@ -95,7 +91,7 @@ Cloud.resolver=Cloud.merge(
                 return app.findEntity("iternerarys",{journey:_id})
             },
             footprints({_id},{last,before},{app}){
-                return app.prevPage("footprints",{last:10})
+                return app.findEntity("footprints",{journey:_id})
             },
             waypoints({_id},{},{app}){
                 return app.nextPage("waypoints",{last:30})

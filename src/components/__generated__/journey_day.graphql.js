@@ -8,11 +8,10 @@
 
 /*::
 import type {ConcreteFragment} from 'relay-runtime';
-export type journey_journey = {|
-  +name: ?string;
-  +startedAt: ?any;
-  +endedAt: ?any;
-  +status: ?string;
+export type journey_day = {|
+  +dayth: ?number;
+  +place: ?string;
+  +trans: ?string;
 |};
 */
 
@@ -21,43 +20,31 @@ const fragment /*: ConcreteFragment*/ = {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "journey_journey",
+  "name": "journey_day",
   "selections": [
     {
       "kind": "ScalarField",
       "alias": null,
       "args": null,
-      "name": "name",
+      "name": "dayth",
       "storageKey": null
     },
     {
       "kind": "ScalarField",
       "alias": null,
       "args": null,
-      "name": "startedAt",
+      "name": "place",
       "storageKey": null
     },
     {
       "kind": "ScalarField",
       "alias": null,
       "args": null,
-      "name": "endedAt",
+      "name": "trans",
       "storageKey": null
-    },
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "args": null,
-      "name": "status",
-      "storageKey": null
-    },
-    {
-      "kind": "FragmentSpread",
-      "name": "itinerary_journey",
-      "args": null
     }
   ],
-  "type": "Journey"
+  "type": "Itinerary"
 };
 
 module.exports = fragment;

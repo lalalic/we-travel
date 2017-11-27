@@ -85,6 +85,7 @@ export default compose(
 			startedAt
 			endedAt
 			status
+			...itinerary_journey
 		}
 	`),
 	withMutation(({id})=>({
@@ -106,12 +107,16 @@ export default compose(
 			}
 		`
 	})),
-	mapProps(({remove,toLife,journey,...others})=>({
+	mapProps(({remove,journey,toLife,...others})=>({
 		...others,
 		remove:remove().then(toLife),
-		journey,
+		journey:{
+			...journey,
+			startedAt:journey.startedAt ? new Date(journey.startedAt) : undefined,
+			endedAt:journey.startedAt ? new Date(journey.endedAt) : undefined,
+		}
 	}))
-)(({name, startedAt, endedAt,status, toComment, toPublish, toPlan,remove,mutate})=>{
+)(({journey:{name, startedAt, endedAt,status}, toComment, toPublish, toPlan,remove,mutate})=>{
 	let scheduler
 	let actions=[
 		"Back",
@@ -139,7 +144,7 @@ export default compose(
 					floatingLabelText="快速计划你的行程"
 					defaultValue="..."
 					floatingLabelFixed={true}/>
-				<Itinerary journey={{startedAt, endedAt}} mode="place"/>
+				<Itinerary journey={this.props.journey} mode="place"/>
 			</div>
 		)
 

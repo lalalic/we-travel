@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 65df815b33c5c7347f085bf88c6cfb83
+ * @relayHash 098fc947cfa0ea2f0de08c22428a7aac
  */
 
 /* eslint-disable */
@@ -9,7 +9,7 @@
 
 /*::
 import type {ConcreteBatch} from 'relay-runtime';
-export type src_journey_QueryResponse = {|
+export type journey_active_QueryResponse = {|
   +me: {|
     +journey: ?{| |};
   |};
@@ -18,34 +18,49 @@ export type src_journey_QueryResponse = {|
 
 
 /*
-query src_journey_Query(
+query journey_active_Query(
   $id: ObjectID
 ) {
   me {
     journey(_id: $id) {
-      ...journey_journey
+      ...journey_all
       id
     }
     id
   }
 }
 
-fragment journey_journey on Journey {
-  name
+fragment journey_all on Journey {
   startedAt
-  endedAt
-  status
-  ...itinerary_journey
-}
-
-fragment itinerary_journey on Journey {
-  startedAt
-  endedAt
-  itineraries {
-    place
-    days
+  ...journey_title
+  footprints {
+    when
+    ...journey_footprint
     id
   }
+  itineraries {
+    dayth
+    ...journey_day
+    id
+  }
+}
+
+fragment journey_title on Journey {
+  name
+  startedAt
+}
+
+fragment journey_footprint on Footprint {
+  when
+  photos
+  note
+  loc
+}
+
+fragment journey_day on Itinerary {
+  dayth
+  place
+  trans
 }
 */
 
@@ -61,7 +76,7 @@ const batch /*: ConcreteBatch*/ = {
     ],
     "kind": "Fragment",
     "metadata": null,
-    "name": "src_journey_Query",
+    "name": "journey_active_Query",
     "selections": [
       {
         "kind": "LinkedField",
@@ -88,7 +103,7 @@ const batch /*: ConcreteBatch*/ = {
             "selections": [
               {
                 "kind": "FragmentSpread",
-                "name": "journey_journey",
+                "name": "journey_all",
                 "args": null
               }
             ],
@@ -103,7 +118,7 @@ const batch /*: ConcreteBatch*/ = {
   "id": null,
   "kind": "Batch",
   "metadata": {},
-  "name": "src_journey_Query",
+  "name": "journey_active_Query",
   "query": {
     "argumentDefinitions": [
       {
@@ -114,7 +129,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ],
     "kind": "Root",
-    "name": "src_journey_Query",
+    "name": "journey_active_Query",
     "operation": "query",
     "selections": [
       {
@@ -144,13 +159,6 @@ const batch /*: ConcreteBatch*/ = {
                 "kind": "ScalarField",
                 "alias": null,
                 "args": null,
-                "name": "name",
-                "storageKey": null
-              },
-              {
-                "kind": "ScalarField",
-                "alias": null,
-                "args": null,
                 "name": "startedAt",
                 "storageKey": null
               },
@@ -158,14 +166,59 @@ const batch /*: ConcreteBatch*/ = {
                 "kind": "ScalarField",
                 "alias": null,
                 "args": null,
-                "name": "endedAt",
+                "name": "name",
                 "storageKey": null
               },
               {
-                "kind": "ScalarField",
+                "kind": "LinkedField",
                 "alias": null,
                 "args": null,
-                "name": "status",
+                "concreteType": "Footprint",
+                "name": "footprints",
+                "plural": true,
+                "selections": [
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "when",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "ScalarField",
+                    "alias": null,
+                    "args": null,
+                    "name": "id",
+                    "storageKey": null
+                  },
+                  {
+                    "kind": "InlineFragment",
+                    "type": "Footprint",
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "photos",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "note",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "loc",
+                        "storageKey": null
+                      }
+                    ]
+                  }
+                ],
                 "storageKey": null
               },
               {
@@ -180,14 +233,7 @@ const batch /*: ConcreteBatch*/ = {
                     "kind": "ScalarField",
                     "alias": null,
                     "args": null,
-                    "name": "place",
-                    "storageKey": null
-                  },
-                  {
-                    "kind": "ScalarField",
-                    "alias": null,
-                    "args": null,
-                    "name": "days",
+                    "name": "dayth",
                     "storageKey": null
                   },
                   {
@@ -196,6 +242,26 @@ const batch /*: ConcreteBatch*/ = {
                     "args": null,
                     "name": "id",
                     "storageKey": null
+                  },
+                  {
+                    "kind": "InlineFragment",
+                    "type": "Itinerary",
+                    "selections": [
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "place",
+                        "storageKey": null
+                      },
+                      {
+                        "kind": "ScalarField",
+                        "alias": null,
+                        "args": null,
+                        "name": "trans",
+                        "storageKey": null
+                      }
+                    ]
                   }
                 ],
                 "storageKey": null
@@ -222,7 +288,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query src_journey_Query(\n  $id: ObjectID\n) {\n  me {\n    journey(_id: $id) {\n      ...journey_journey\n      id\n    }\n    id\n  }\n}\n\nfragment journey_journey on Journey {\n  name\n  startedAt\n  endedAt\n  status\n  ...itinerary_journey\n}\n\nfragment itinerary_journey on Journey {\n  startedAt\n  endedAt\n  itineraries {\n    place\n    days\n    id\n  }\n}\n"
+  "text": "query journey_active_Query(\n  $id: ObjectID\n) {\n  me {\n    journey(_id: $id) {\n      ...journey_all\n      id\n    }\n    id\n  }\n}\n\nfragment journey_all on Journey {\n  startedAt\n  ...journey_title\n  footprints {\n    when\n    ...journey_footprint\n    id\n  }\n  itineraries {\n    dayth\n    ...journey_day\n    id\n  }\n}\n\nfragment journey_title on Journey {\n  name\n  startedAt\n}\n\nfragment journey_footprint on Footprint {\n  when\n  photos\n  note\n  loc\n}\n\nfragment journey_day on Itinerary {\n  dayth\n  place\n  trans\n}\n"
 };
 
 module.exports = batch;

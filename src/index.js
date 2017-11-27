@@ -87,7 +87,7 @@ const router=(
 				withProps(({router,data:{me:{journeys}}})=>({
 					journeys,
 					toCreate:()=>router.push(`/journey`),
-
+					toJourney: id=>router.push(`/journey/${id}`),
 				})),
 
 			)(Life)}/>

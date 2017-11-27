@@ -23,16 +23,6 @@ type Footprint implements Node {
   audio: String
 }
 
-type FootprintConnection {
-  edges: [FootprintEdge]
-  pageInfo: PageInfo
-}
-
-type FootprintEdge {
-  node: Footprint
-  cursor: JSON
-}
-
 enum Gender {
   girl
   boy
@@ -43,6 +33,8 @@ type Itinerary implements Node {
   journey: Journey
   place: String
   days: Int
+  dayth: Int
+  trans: String
 }
 
 type Journey implements Node {
@@ -53,8 +45,8 @@ type Journey implements Node {
   status: String
   author: ObjectID
   itineraries: [Itinerary]
-  footprints: FootprintConnection
-  waypoints: WaypointConnection
+  footprints: [Footprint]
+  waypoints: [Waypoint]
 }
 
 # The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
@@ -151,14 +143,4 @@ type Waypoint implements Node {
   when: Date
   loc: JSON
   photo: String
-}
-
-type WaypointConnection {
-  edges: [WaypointEdge]
-  pageInfo: PageInfo
-}
-
-type WaypointEdge {
-  node: Waypoint
-  cursor: JSON
 }

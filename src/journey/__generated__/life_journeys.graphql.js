@@ -52,6 +52,11 @@ const fragment /*: ConcreteFragment*/ = {
       "args": null,
       "name": "status",
       "storageKey": null
+    },
+    {
+      "kind": "FragmentSpread",
+      "name": "journey_title",
+      "args": null
     }
   ],
   "type": "Journey"

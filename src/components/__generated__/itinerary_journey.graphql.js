@@ -8,11 +8,13 @@
 
 /*::
 import type {ConcreteFragment} from 'relay-runtime';
-export type journey_journey = {|
-  +name: ?string;
+export type itinerary_journey = {|
   +startedAt: ?any;
   +endedAt: ?any;
-  +status: ?string;
+  +itineraries: ?$ReadOnlyArray<?{|
+    +place: ?string;
+    +days: ?number;
+  |}>;
 |};
 */
 
@@ -21,15 +23,8 @@ const fragment /*: ConcreteFragment*/ = {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "journey_journey",
+  "name": "itinerary_journey",
   "selections": [
-    {
-      "kind": "ScalarField",
-      "alias": null,
-      "args": null,
-      "name": "name",
-      "storageKey": null
-    },
     {
       "kind": "ScalarField",
       "alias": null,
@@ -45,16 +40,29 @@ const fragment /*: ConcreteFragment*/ = {
       "storageKey": null
     },
     {
-      "kind": "ScalarField",
+      "kind": "LinkedField",
       "alias": null,
       "args": null,
-      "name": "status",
+      "concreteType": "Itinerary",
+      "name": "itineraries",
+      "plural": true,
+      "selections": [
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "args": null,
+          "name": "place",
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "args": null,
+          "name": "days",
+          "storageKey": null
+        }
+      ],
       "storageKey": null
-    },
-    {
-      "kind": "FragmentSpread",
-      "name": "itinerary_journey",
-      "args": null
     }
   ],
   "type": "Journey"

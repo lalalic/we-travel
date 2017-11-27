@@ -1,7 +1,8 @@
 import React, {Component} from "react"
 import PropTypes from "prop-types"
 
-import {compose} from "recompose"
+import {compose, withProps, mapProps, getContext} from "recompose"
+import {withFragment, withQuery, withMutation} from "qili/tools/recompose"
 
 import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Toggle} from "material-ui"
 import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
@@ -19,39 +20,59 @@ import PhotosField from "components/photos-field"
 import TransportationField from "components/transportation-field"
 
 export default compose(
-	withFragment(graphql`
-		fragment journey_all on Journey{
-			startedAt
-			...journey_title
-			footprints{
-				when
-				...journey_footprint
-			}
-			itineraries{
-				dayth
-			}
-		}
-	`),
-	getContext({client:PropTypes.object}),
-	withProps(({id,client})=>({
-		onSave(footprint){
-			return client.runQL(graphql`
-				query journey_footprints_Query($journey:ObjectID){
-					me{
-						journey(_id:$journey){
-							footprints{
-								when
-								...journey_footprint
-							}
-						}
+	withQuery(({id})=>({
+		query:graphql`
+			query journey_active_Query($id:ObjectID){
+				me{
+					journey(_id:$id){
+						...journey_all
 					}
 				}
-			`).then(data=>data.me.journey.footprints)
+			}
+		`
+	})),
+	withProps(({data:{me:{journey}}})=>({
+		journey
+	})),
+	withFragment({
+		journey:graphql`
+			fragment journey_all on Journey{
+				startedAt
+				...journey_title
+				footprints{
+					when
+					...journey_footprint
+				}
+				itineraries{
+					dayth
+					...journey_day
+				}
+			}
+		`
+	}),
+	withMutation(({id})=>({
+		name:"createFootprint",
+		variables:{journey:id},
+		promise:true,
+		mutation:graphql`
+			mutation journey_create_footprint_Mutation($when:Date, $photos:[String], $note:String, $id:ObjectID){
+				footprint_create(when:$when, photos:$photos, note:$note, _id:$id){
+					id
+					when
+					...journey_footprint
+				}
+			}
+		`,
+		updater(store,response){
+
+		},
+		optimisticUpdater(store,response){
+
 		}
-	}))
+	})),
 )(class Journey extends Component{
 	getDayItinerary(dayth){
-		const {all:{itineraries}}=this.props
+		const {journey:{itineraries}}=this.props
 		return itineraries.reduceRight((found,a)=>{
 			if(a.dayth==dayth){
 				found.unshift(a)
@@ -64,7 +85,7 @@ export default compose(
 	}
 
 	render(){
-		let {all:{footprints,startedAt}, onMap, publishable}=this.props
+		let {journey:{footprints,startedAt}, onMap, publishable, createFootprint}=this.props
 		let currentDate=null, lastDay=0
 		let all=[]
 		footprints.forEach((footprint,i)=>{
@@ -95,11 +116,11 @@ export default compose(
 					<StepLabel icon="*">
 						<p>
 							<input style={{border:"1px solid lightgray",padding:10, marginRight:10}}
-								onClick={e=>this.editing({when:new Date(), journey:_id},"text")}
+								onClick={e=>this.editing({when:new Date()},"text")}
 								placeholder="发状态当达人..."/>
 							<span style={{position:"relative", top:8}}>
 								<IconCamera
-									onClick={e=>this.editing({when:new Date(), journey:_id},"photo")}
+									onClick={e=>this.editing({when:new Date()},"photo")}
 									color="lightgray"/>
 							</span>
 						</p>
@@ -108,7 +129,7 @@ export default compose(
 			)
 		}
 
-		all.push(<Title journey={this.props.all} key="title"/>)
+		all.push(<Title journey={this.props.journey} key="title" toJourney={toJourney}/>)
 
 		return (
 			<div>
@@ -116,7 +137,7 @@ export default compose(
 					{all.reverse()}
 				</Stepper>
 
-				<Editor ref="editor" onSave={a=>this.onSave(a)}/>
+				<Editor ref="editor" onSave={createFootprint}/>
 			</div>
 		)
 	}
@@ -128,7 +149,7 @@ export default compose(
 
 class Editor extends Component{
 	state={
-		footprint:false,
+		footprint:null,
 		focusing:null
 	}
 	render(){
@@ -204,23 +225,20 @@ class Editor extends Component{
 		const {photos, text}=this.refs
 		footprint.photos=photos.value
 		footprint.note=text.value
-		FootprintDB.upsert(footprint)
-			.then(updated=>{
-				this.setState({footprint:null})
-				onSave(updated)
-			})
+		onSave(footprint)
 	}
 }
 
 export const Title=compose(
-	withFragment(graphql`
-		fragment journey_title on Journey{
-			name
-			startedAt
-			status
-		}
-	`),
-	withProps(({title:{name,startedAt,status}})=>({
+	withFragment({
+		journey:graphql`
+			fragment journey_title on Journey{
+				name
+				startedAt
+			}
+		`
+	}),
+	mapProps(({journey:{name,startedAt},completed, onMap, toJourney})=>({
 		name,startedAt
 	}))
 )(({name,startedAt,completed, onMap,toJourney})=>{
@@ -254,7 +272,20 @@ export const Title=compose(
 	}
 })
 
-const Day=({day,date, onEdit, itinerary,label=TransportationField.getLabel})=>(
+const Day=compose(
+	withFragment({
+		journey: graphql`
+			fragment journey_day on Itinerary{
+				dayth
+				place
+				trans
+			}
+		`
+	}),
+	mapProps(({journey:{dayth,place,trans}, onEdit, day, date, label})=>({
+		dayth,place,trans, onEdit, day, date, label
+	}))
+)(({day,date, onEdit, itinerary,label=TransportationField.getLabel})=>(
 	<Step disabled={false}>
 		<StepLabel icon={`${day}`} onTouchTap={onEdit}>
 			<span>{date.smartFormat("今天")}</span>
@@ -273,7 +304,7 @@ const Day=({day,date, onEdit, itinerary,label=TransportationField.getLabel})=>(
 			<IconMore/>
 		</StepLabel>
 	</Step>
-)
+))
 
 const Footprint=compose(
 	getContext({viewPhoto:PropTypes.func}),
@@ -281,12 +312,12 @@ const Footprint=compose(
 		fragment journey_footprint on Footprint{
 			when
 			photos
-			node
+			note
 			loc
 		}
 	`),
-	withProps(({footprint})=>({
-		...footprint
+	mapProps(({footprint:{when,photos,note,loc}, onEdit, viewPhoto})=>({
+		when,photos:photos||undefined,note,loc,onEdit,viewPhoto
 	}))
 )(({when,photos=[],note, loc, onEdit,viewPhoto})=>(
 	<Step completed={true} active={true}>

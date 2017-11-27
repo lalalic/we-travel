@@ -2,6 +2,7 @@ import React, {Component} from "react"
 import PropTypes from "prop-types"
 
 import {compose} from "recompose"
+import {withFragment} from "qili/tools/recompose"
 
 import date from "qili/tools/date"
 import {TextField} from "material-ui"
@@ -9,7 +10,16 @@ import {Step,Stepper,StepLabel,StepContent} from 'material-ui/Stepper'
 import IconMap from "material-ui/svg-icons/maps/map"
 
 export default compose(
-
+	withFragment(graphql`
+		fragment itinerary_journey on Journey{
+			startedAt
+			endedAt
+			itineraries{
+				place
+				days
+			}
+		}
+	`)
 )(({mode, ...props})=>mode=="date" ? <DateMode props={props}/> : (mode=="place" ? <PlaceMode props={props}/> : null))
 
 const DateMode=({startedAt, endedAt})=>(
@@ -35,9 +45,9 @@ const DateMode=({startedAt, endedAt})=>(
 	</Stepper>
 )
 
-const PlaceMode=({startedAt, endedAt, itinerary})=>(
+const PlaceMode=({startedAt, endedAt, itineraries=[]})=>(
 	<Stepper orientation="vertical">
-		{itinerary.map(({place, days})=>(
+		{(itineraries||[]).map(({place, days})=>(
 			<Step key={place}>
 				<StepLabel>
 					<span>{place}</span>
