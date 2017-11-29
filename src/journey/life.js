@@ -21,11 +21,11 @@ import Map from "components/map"
 
 export class Life extends Component{
 	render(){
-		const {memory, wish, active,
-			shouldShowHistory=true, shouldShowMap=false,
+		let {memory, wish, active,
+			shouldShowMap=false,
 			toggleMap,toCreate,toJourney}=this.props
 
-		let map=null, mapToggler=null
+		let map=null, mapToggler=null, life=null
 
 		if(active.length>0){
 			mapToggler=(<FloatingActionButton
@@ -53,6 +53,37 @@ export class Life extends Component{
 			}
 		}
 
+		if([memory,active,wish].find(a=>a.length>0)){
+			life=(
+				<Stepper orientation="vertical" activeStep={-1}>
+				{
+					memory.map(a=>(<Title
+							key={a.id}
+							journey={a}
+							completed={true}
+							toJourney={()=>toJourney(a.id)}/>))
+				}
+				{
+					active.map(a=>(
+						<Journey
+							key={a.id}
+							id={a.id}
+							publishable={true}
+							toJourney={()=>toJourney(a.id)}
+							/>))
+				}
+				{
+					wish.map(a=>(<Title
+						key={a.id}
+						completed={false}
+						journey={a}
+						toJourney={()=>toJourney(a.id)}
+						/>))
+				}
+				</Stepper>
+			)
+		}
+
 		return (
 			<div>
 				{map}
@@ -66,43 +97,8 @@ export class Life extends Component{
 				{mapToggler}
 
 				<div style={{background:"white"}}>
-					{shouldShowHistory && memory.length && (
-						<Stepper orientation="vertical" activeStep={-1}>
-						{
-							memory.map(a=>(<Title
-									key={a.name}
-									journey={a}
-									completed={true}
-									toJourney={()=>toJourney(a.id)}/>))
-						}
-						</Stepper>
-					)||null}
-
-					{active.length && (
-						active.map(a=>(
-							<Journey
-								key={a.id}
-								id={a.id}
-								publishable={true}
-								toJourney={()=>toJourney(a.id)}
-								/>
-						))
-					)||null}
-
-					{wish.length && (
-						<div>
-							<Stepper orientation="vertical" activeStep={-1} linear={false}>
-							{
-								wish.map(a=>(<Title
-									key={a.name}
-									completed={false}
-									journey={a}
-									toJourney={()=>toJourney(a.id)}
-									/>))
-							}
-							</Stepper>
-						</div>
-					)||(<Empty icon={<Logo/>}>来,开始你的心旅程</Empty>)}
+					{life}
+					{(active.length+memory.length)==0 ? (<Empty icon={<Logo/>}>开始你的心旅程</Empty>) : null}
 				</div>
 			</div>
 		)
@@ -173,6 +169,7 @@ export default compose(
 	),
 	withFragment(graphql`
 		fragment life_journeys on Journey @relay(plural: true){
+			id
 			name
 			startedAt
 			endedAt
@@ -197,12 +194,12 @@ export default compose(
 				wish.push(journey)
 			}
 		})
-		memory.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())
-		active.sort((a,b)=>a.startedAt.getTime()-b.startedAt.getTime())
+		memory.sort((a,b)=>new Date(a.startedAt).getTime()-new Date(b.startedAt).getTime())
+		active.sort((a,b)=>new Date(a.startedAt).getTime()-new Date(b.startedAt).getTime())
 		wish.sort((a,b)=>{
 			if(a.startedAt){
 				if(b.startedAt){
-					return a.startedAt.getTime()-b.startedAt.getTime()
+					return new Date(a.startedAt).getTime()-new Date(b.startedAt).getTime()
 				}else{
 					return -1
 				}
@@ -210,7 +207,7 @@ export default compose(
 				if(b.startedAt){
 					return 1
 				}else{
-					return a.createdAt.getTime()-b.createdAt.getTime()
+					return new Date(a.createdAt).getTime()-new Date(b.createdAt).getTime()
 				}
 			}
 		})

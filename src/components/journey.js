@@ -239,7 +239,8 @@ export const Title=compose(
 		`
 	}),
 	mapProps(({journey:{name,startedAt},completed, onMap, toJourney})=>({
-		name,startedAt
+		name,completed, onMap, toJourney,
+		startedAt:startedAt?new Date(startedAt):startedAt,
 	}))
 )(({name,startedAt,completed, onMap,toJourney})=>{
 	if(completed){
@@ -262,7 +263,7 @@ export const Title=compose(
 						<b onClick={toJourney}>{name}</b>
 						{onMap ? (
 							<div style={{width:100}}>
-								<Toggle labelPosition="right" label="Map"onToggle={onMap}/>
+								<Toggle labelPosition="right" label="Map" onToggle={onMap}/>
 							</div>
 						) : null}
 					</div>

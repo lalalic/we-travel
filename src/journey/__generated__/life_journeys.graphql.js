@@ -9,6 +9,7 @@
 /*::
 import type {ConcreteFragment} from 'relay-runtime';
 export type life_journeys = $ReadOnlyArray<{|
+  +id: string;
   +name: ?string;
   +startedAt: ?any;
   +endedAt: ?any;
@@ -25,6 +26,13 @@ const fragment /*: ConcreteFragment*/ = {
   },
   "name": "life_journeys",
   "selections": [
+    {
+      "kind": "ScalarField",
+      "alias": null,
+      "args": null,
+      "name": "id",
+      "storageKey": null
+    },
     {
       "kind": "ScalarField",
       "alias": null,

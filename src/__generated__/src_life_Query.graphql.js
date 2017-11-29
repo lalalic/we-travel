@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 61d2975cf985107437ab091923c59009
+ * @relayHash b9c53174d0841b323a315c28e85717c6
  */
 
 /* eslint-disable */
@@ -29,6 +29,7 @@ query src_life_Query {
 }
 
 fragment life_journeys on Journey {
+  id
   name
   startedAt
   endedAt
@@ -161,7 +162,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query src_life_Query {\n  me {\n    journeys {\n      ...life_journeys\n      id\n    }\n    id\n  }\n}\n\nfragment life_journeys on Journey {\n  name\n  startedAt\n  endedAt\n  status\n  ...journey_title\n}\n\nfragment journey_title on Journey {\n  name\n  startedAt\n}\n"
+  "text": "query src_life_Query {\n  me {\n    journeys {\n      ...life_journeys\n      id\n    }\n    id\n  }\n}\n\nfragment life_journeys on Journey {\n  id\n  name\n  startedAt\n  endedAt\n  status\n  ...journey_title\n}\n\nfragment journey_title on Journey {\n  name\n  startedAt\n}\n"
 };
 
 module.exports = batch;

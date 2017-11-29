@@ -116,7 +116,8 @@ export default compose(
 			endedAt:journey.startedAt ? new Date(journey.endedAt) : undefined,
 		}
 	}))
-)(({journey:{name, startedAt, endedAt,status}, toComment, toPublish, toPlan,remove,mutate})=>{
+)(({journey, toComment, toPublish, toPlan,remove,mutate})=>{
+	let {name, startedAt, endedAt,status}=journey
 	let scheduler
 	let actions=[
 		"Back",
@@ -127,6 +128,7 @@ export default compose(
 			icon:<IconPublish/>
         }
 	]
+	startedAt=startedAt ? new Date(startedAt) : startedAt
 
 	switch(status){
 	case "Memory":
@@ -144,7 +146,7 @@ export default compose(
 					floatingLabelText="快速计划你的行程"
 					defaultValue="..."
 					floatingLabelFixed={true}/>
-				<Itinerary journey={this.props.journey} mode="place"/>
+				<Itinerary journey={journey} mode="place"/>
 			</div>
 		)
 
