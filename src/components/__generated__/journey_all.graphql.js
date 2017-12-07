@@ -11,6 +11,7 @@ import type {ConcreteFragment} from 'relay-runtime';
 export type journey_all = {|
   +startedAt: ?any;
   +footprints: ?$ReadOnlyArray<?{|
+    +id: string;
     +when: ?any;
   |}>;
   +itineraries: ?$ReadOnlyArray<?{|
@@ -50,12 +51,24 @@ const fragment /*: ConcreteFragment*/ = {
           "kind": "ScalarField",
           "alias": null,
           "args": null,
+          "name": "id",
+          "storageKey": null
+        },
+        {
+          "kind": "ScalarField",
+          "alias": null,
+          "args": null,
           "name": "when",
           "storageKey": null
         },
         {
           "kind": "FragmentSpread",
           "name": "journey_footprint",
+          "args": null
+        },
+        {
+          "kind": "FragmentSpread",
+          "name": "journey_footprint_updater",
           "args": null
         }
       ],

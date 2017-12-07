@@ -51,8 +51,8 @@ Cloud.typeDefs=`
         journey_create(name:String, startedAt:Date, endedAt:Date):Journey
         journey_update(_id:ObjectID!, name:String, startedAt:Date, endedAt:Date):Date
         journey_delete(_id:ObjectID!):Boolean
-        footprint_create(note:String, when:Date, loc:JSON, photos:[String], _id:ObjectID):Footprint
-        footprint_update(_id:ObjectID, patch:JSON):Date
+        footprint_create(journey:ObjectID, note:String, when:Date, loc:JSON, photos:[String], _id:ObjectID):Footprint
+        footprint_update(_id:ObjectID, note:String, when:Date, loc:JSON, photos:[String]):Date
         waypoint_create(when:Date, loc:JSON, photo:String, _id:ObjectID):Waypoint
         waypoint_batch(data:JSON):Int
     }
@@ -91,10 +91,10 @@ Cloud.resolver=Cloud.merge(
                 return app.findEntity("iternerarys",{journey:_id})
             },
             footprints({_id},{last,before},{app}){
-                return app.findEntity("footprints",{journey:_id})
+                return app.findEntity("footprints",{journey:_id}, cursor=>cursor.sort({when:-1}))
             },
             waypoints({_id},{},{app}){
-                return app.nextPage("waypoints",{last:30})
+                return app.nextPage("waypoints",{last:30}, cursor=>cursor.sort({when:-1}))
             }
         },
 
@@ -102,6 +102,10 @@ Cloud.resolver=Cloud.merge(
             id:({_id})=>`iternerarys:${_id}`,
             journey:({_id},_,{app})=>app.getDataLoader("iternerarys").load(_id)
         },
+		
+		Footprint:{
+			id:({_id})=>`footprints:${_id}`
+		},
 
         User:{
             journeys(_,{}, {app,user}){
@@ -125,7 +129,7 @@ Cloud.resolver=Cloud.merge(
             footprint_create(_,footprint,{app,user}){
                 return app.createEntity("footprints",{...footprint, author:user._id})
             },
-            footprint_update(_,{_id,patch},{app,user}){
+            footprint_update(_,{_id,...patch},{app,user}){
                 return app.patchEntity("footprints", {_id},{...patch, author:user._id})
             },
             waypoint_create(_,waypoint, {app,user}){

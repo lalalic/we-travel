@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash 098fc947cfa0ea2f0de08c22428a7aac
+ * @relayHash c9f5f3ff59bc8dc5628c7edf4abb59cb
  */
 
 /* eslint-disable */
@@ -34,9 +34,10 @@ fragment journey_all on Journey {
   startedAt
   ...journey_title
   footprints {
+    id
     when
     ...journey_footprint
-    id
+    ...journey_footprint_updater
   }
   itineraries {
     dayth
@@ -51,6 +52,14 @@ fragment journey_title on Journey {
 }
 
 fragment journey_footprint on Footprint {
+  when
+  photos
+  note
+  loc
+}
+
+fragment journey_footprint_updater on Footprint {
+  id
   when
   photos
   note
@@ -181,14 +190,14 @@ const batch /*: ConcreteBatch*/ = {
                     "kind": "ScalarField",
                     "alias": null,
                     "args": null,
-                    "name": "when",
+                    "name": "id",
                     "storageKey": null
                   },
                   {
                     "kind": "ScalarField",
                     "alias": null,
                     "args": null,
-                    "name": "id",
+                    "name": "when",
                     "storageKey": null
                   },
                   {
@@ -288,7 +297,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "query journey_active_Query(\n  $id: ObjectID\n) {\n  me {\n    journey(_id: $id) {\n      ...journey_all\n      id\n    }\n    id\n  }\n}\n\nfragment journey_all on Journey {\n  startedAt\n  ...journey_title\n  footprints {\n    when\n    ...journey_footprint\n    id\n  }\n  itineraries {\n    dayth\n    ...journey_day\n    id\n  }\n}\n\nfragment journey_title on Journey {\n  name\n  startedAt\n}\n\nfragment journey_footprint on Footprint {\n  when\n  photos\n  note\n  loc\n}\n\nfragment journey_day on Itinerary {\n  dayth\n  place\n  trans\n}\n"
+  "text": "query journey_active_Query(\n  $id: ObjectID\n) {\n  me {\n    journey(_id: $id) {\n      ...journey_all\n      id\n    }\n    id\n  }\n}\n\nfragment journey_all on Journey {\n  startedAt\n  ...journey_title\n  footprints {\n    id\n    when\n    ...journey_footprint\n    ...journey_footprint_updater\n  }\n  itineraries {\n    dayth\n    ...journey_day\n    id\n  }\n}\n\nfragment journey_title on Journey {\n  name\n  startedAt\n}\n\nfragment journey_footprint on Footprint {\n  when\n  photos\n  note\n  loc\n}\n\nfragment journey_footprint_updater on Footprint {\n  id\n  when\n  photos\n  note\n  loc\n}\n\nfragment journey_day on Itinerary {\n  dayth\n  place\n  trans\n}\n"
 };
 
 module.exports = batch;

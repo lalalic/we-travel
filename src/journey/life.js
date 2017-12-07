@@ -24,7 +24,7 @@ export class Life extends Component{
 		let {memory, wish, active,
 			shouldShowMap=false,
 			toggleMap,toCreate,toJourney}=this.props
-
+		
 		let map=null, mapToggler=null, life=null
 
 		if(active.length>0){

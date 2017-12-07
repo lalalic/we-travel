@@ -3,15 +3,25 @@ import PropTypes from "prop-types"
 import Photo from "qili/components/photo"
 
 export default class PhotosField extends Component{
-	state={photos:[...this.props.defaultValue]}
+	state={photos:[...(this.props.defaultValue||[])]}
 	render(){
-		const {max, iconStyle}=this.props
+		const {max, ...props}=this.props
 		const {photos}=this.state
-		 let uiPhotos=photos.map((photo,i)=>
-			(<Photo key={photo} {...iconStyle} onPhoto={url=>this.insert(url,i)} src={photo}/>))
+		let uiPhotos=photos.map((photo,i)=>(<Photo 
+				key={photo} 
+				{...props} 
+				onPhoto={url=>this.insert(url,i)} 
+				src={photo}
+				/>)
+			)
 
         if(uiPhotos.length<max)
-            uiPhotos.push((<Photo ref="photo" key="_new" {...iconStyle} onPhoto={url=>this.insert(url)}/>))
+            uiPhotos.push(<Photo 
+				key="_new" 
+				{...props} 
+				onPhoto={url=>this.insert(url)}
+				/>
+			)
 
 		return (
 			<div style={{textAlign:"center"}}>
@@ -33,7 +43,7 @@ export default class PhotosField extends Component{
 	}
 
 	focus(){
-		this.refs.photo.doPhoto()
+		
 	}
 
 	static propTypes={
@@ -41,6 +51,7 @@ export default class PhotosField extends Component{
 		max: PropTypes.number,
 	}
 	static defaultProps={
-		max:6
+		max:6,
+		defaultValue:[]
 	}
 }

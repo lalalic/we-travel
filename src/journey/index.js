@@ -109,7 +109,7 @@ export default compose(
 	})),
 	mapProps(({remove,journey,toLife,...others})=>({
 		...others,
-		remove:remove().then(toLife),
+		remove:()=>remove().then(toLife),
 		journey:{
 			...journey,
 			startedAt:journey.startedAt ? new Date(journey.startedAt) : undefined,

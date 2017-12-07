@@ -18,9 +18,11 @@ import Empty from "qili/components/empty"
 import Chipper from "components/chipper"
 import PhotosField from "components/photos-field"
 import TransportationField from "components/transportation-field"
+import date from "qili/tools/date"
 
 export default compose(
 	withQuery(({id})=>({
+		variables:{id},
 		query:graphql`
 			query journey_active_Query($id:ObjectID){
 				me{
@@ -40,8 +42,10 @@ export default compose(
 				startedAt
 				...journey_title
 				footprints{
+					id
 					when
 					...journey_footprint
+					...journey_footprint_updater
 				}
 				itineraries{
 					dayth
@@ -49,28 +53,9 @@ export default compose(
 				}
 			}
 		`
-	}),
-	withMutation(({id})=>({
-		name:"createFootprint",
-		variables:{journey:id},
-		promise:true,
-		mutation:graphql`
-			mutation journey_create_footprint_Mutation($when:Date, $photos:[String], $note:String, $id:ObjectID){
-				footprint_create(when:$when, photos:$photos, note:$note, _id:$id){
-					id
-					when
-					...journey_footprint
-				}
-			}
-		`,
-		updater(store,response){
-
-		},
-		optimisticUpdater(store,response){
-
-		}
-	})),
+	}),	
 )(class Journey extends Component{
+	state={editing:null}
 	getDayItinerary(dayth){
 		const {journey:{itineraries}}=this.props
 		return itineraries.reduceRight((found,a)=>{
@@ -85,11 +70,15 @@ export default compose(
 	}
 
 	render(){
-		let {journey:{footprints,startedAt}, onMap, publishable, createFootprint}=this.props
+		let {journey:{footprints,startedAt}, id, 
+			toJourney, createFootprint, updateFootprint,
+			onMap, publishable}=this.props
 		let currentDate=null, lastDay=0
 		let all=[]
+		startedAt=new Date(startedAt)
+		footprints=Array.from(footprints).reverse()
 		footprints.forEach((footprint,i)=>{
-			const {when}=footprint
+			const when=new Date(footprint.when)
 			if(currentDate==null || !when.isSameDate(currentDate)){
 				currentDate=when
 				let day=currentDate.relative(startedAt)+1
@@ -107,7 +96,7 @@ export default compose(
 			all.push(<Footprint
 				key={i}
 				footprint={footprint}
-				onEdit={a=>this.editing(footprint)}/>)
+				onEdit={a=>this.editing({...footprint})}/>)
 		})
 
 		if(publishable){
@@ -129,7 +118,28 @@ export default compose(
 			)
 		}
 
-		all.push(<Title journey={this.props.journey} key="title" toJourney={toJourney}/>)
+		all.push(<Title 
+			journey={this.props.journey} 
+			key="title" 
+			toJourney={toJourney}
+			/>
+		)
+		
+		let FootprintEditor=null, editor=null
+		
+		const {editing}=this.state
+		if(editing){
+			if(editing.id){
+				FootprintEditor=Updater
+			}else{
+				FootprintEditor=Creator
+			}
+			
+			editor=(<FootprintEditor 
+					id={id}
+					onFinished={()=>this.editing(null)}
+					footprint={editing}/>)
+		}
 
 		return (
 			<div>
@@ -137,23 +147,19 @@ export default compose(
 					{all.reverse()}
 				</Stepper>
 
-				<Editor ref="editor" onSave={createFootprint}/>
+				{editor}
 			</div>
 		)
 	}
 
 	editing(footprint, focusing){
-		this.refs.editor.setState({footprint, focusing})
+		this.setState({editing:footprint})
 	}
 })
 
 class Editor extends Component{
-	state={
-		footprint:null,
-		focusing:null
-	}
 	render(){
-		const {footprint}=this.state
+		const {footprint, onFinished}=this.props
 
 		if(!footprint)
 			return null
@@ -162,7 +168,7 @@ class Editor extends Component{
 			  <FlatButton
 				label="关闭"
 				primary={false}
-				onTouchTap={e=>this.cancel()}
+				onTouchTap={onFinished}
 			  />,
 			  <FlatButton
 				label="保存"
@@ -174,26 +180,30 @@ class Editor extends Component{
         let {note, photos,when}=footprint
 
 		return (
-			<Dialog title={when.smartFormat()}
+			<Dialog title={new Date(when).smartFormat()}
 				actions={actions}
 				modal={false}
 				open={!!footprint}
-				onRequestClose={e=>this.cancel()}>
+				onRequestClose={onFinished}>
 				<div className="section">
-					<PhotosField ref="photos" defaultValue={photos}
-						iconStyle={{iconRatio:2/3, iconSize:{width:50, height:50}}}/>
+					<PhotosField 
+						ref="photos" 
+						defaultValue={photos}
+						size={50}
+						/>
 
 					<textarea ref="text"
 						style={{width:"100%",border:0,height:100, fontSize:12, paddingTop:5, borderTop:"1px dotted lightgray"}}
 						placeholder="这一刻的想法"
 						defaultValue={note}/>
-
+					
 					<Chipper chips={[
 						"早餐","午餐","晚餐","购物","门票","公交","飞机","的士",
 						{label:"特色交通"},
 						{label:"特色吃的"},
 						{label:"花销",type:"number"}
-						]}/>
+						]}
+						/>
 
 					<Chipper chips={[
 						"太美了","无法呼吸","太壮观了","喜欢这里"
@@ -203,31 +213,69 @@ class Editor extends Component{
 		)
 	}
 
-	componentDidMount(){
-		const {focusing}=this.props
-		switch(focusing){
-		case "text":
-			this.refs.text.focus()
-		break
-		case "photo":
-			this.refs.photos.focus()
-		break
-		}
-	}
-
-	cancel(){
-		this.setState({footprint:null})
-	}
-
 	save(){
-		const {onSave}=this.props
-		const {footprint}=this.state
+		const {footprint,save, onFinished}=this.props
 		const {photos, text}=this.refs
-		footprint.photos=photos.value
-		footprint.note=text.value
-		onSave(footprint)
+		
+		save({
+				...footprint, 
+				photos:photos.value,
+				note:text.value,
+			}).then(onFinished)
 	}
 }
+
+
+const Creator=compose(
+	withMutation(({id})=>{
+		return {
+			name:"save",
+			variables:{journey:id},
+			promise:true,
+			mutation:graphql`
+				mutation journey_create_footprint_Mutation($when:Date, $photos:[String], $note:String, $id:ObjectID, $journey:ObjectID){
+					footprint_create(when:$when, photos:$photos, note:$note, _id:$id, journey:$journey){
+						id
+						when
+						...journey_footprint
+						...journey_footprint_updater
+					}
+				}
+			`,
+			updater(store,{footprint_create:created}){
+				let journey=store.get(id)
+				let footprints=journey.getLinkedRecords("footprints")||[]
+				journey.setLinkedRecords([store.get(created.id),...footprints],"footprints")
+			}
+		}
+	}),
+)(Editor)
+
+const Updater=compose(
+	withFragment({
+		footprint: graphql`
+			fragment journey_footprint_updater on Footprint{
+				id
+				when
+				photos
+				note
+				loc
+			}
+		`
+	}),
+	withMutation(({footprint})=>{
+		return {
+			name:"save",
+			promise:true,
+			patch4: footprint.id,
+			mutation:graphql`
+				mutation journey_update_footprint_Mutation($when:Date, $photos:[String], $note:String, $id:ObjectID){
+					footprint_update(when:$when, photos:$photos, note:$note, _id:$id)
+				}
+			`
+		}
+	}),		
+)(Editor)
 
 export const Title=compose(
 	withFragment({
@@ -274,18 +322,16 @@ export const Title=compose(
 })
 
 const Day=compose(
+	withProps(()=>({requiredFields:null})),
 	withFragment({
-		journey: graphql`
+		requiredFields: graphql`
 			fragment journey_day on Itinerary{
 				dayth
 				place
 				trans
 			}
 		`
-	}),
-	mapProps(({journey:{dayth,place,trans}, onEdit, day, date, label})=>({
-		dayth,place,trans, onEdit, day, date, label
-	}))
+	})
 )(({day,date, onEdit, itinerary,label=TransportationField.getLabel})=>(
 	<Step disabled={false}>
 		<StepLabel icon={`${day}`} onTouchTap={onEdit}>
@@ -323,7 +369,7 @@ const Footprint=compose(
 )(({when,photos=[],note, loc, onEdit,viewPhoto})=>(
 	<Step completed={true} active={true}>
 		<StepLabel icon={"."} >
-			<time>{when.format('HH:mm')}&nbsp;</time>
+			<time>{new Date(when).format('h:m')}&nbsp;</time>
 			<span>{note}</span>
 			<IconMore onTouchTap={onEdit} />
 		</StepLabel>

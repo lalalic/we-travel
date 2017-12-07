@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash a2ecd1cb067fb0b2c8b0b639b585ccc8
+ * @relayHash b150cde760d973baa8376c65bec1aba6
  */
 
 /* eslint-disable */
@@ -14,6 +14,7 @@ export type journey_create_footprint_MutationVariables = {|
   photos?: ?$ReadOnlyArray<?string>;
   note?: ?string;
   id?: ?any;
+  journey?: ?any;
 |};
 export type journey_create_footprint_MutationResponse = {|
   +footprint_create: ?{|
@@ -30,15 +31,25 @@ mutation journey_create_footprint_Mutation(
   $photos: [String]
   $note: String
   $id: ObjectID
+  $journey: ObjectID
 ) {
-  footprint_create(when: $when, photos: $photos, note: $note, _id: $id) {
+  footprint_create(when: $when, photos: $photos, note: $note, _id: $id, journey: $journey) {
     id
     when
     ...journey_footprint
+    ...journey_footprint_updater
   }
 }
 
 fragment journey_footprint on Footprint {
+  when
+  photos
+  note
+  loc
+}
+
+fragment journey_footprint_updater on Footprint {
+  id
   when
   photos
   note
@@ -72,6 +83,12 @@ const batch /*: ConcreteBatch*/ = {
         "name": "id",
         "type": "ObjectID",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "journey",
+        "type": "ObjectID",
+        "defaultValue": null
       }
     ],
     "kind": "Fragment",
@@ -86,6 +103,12 @@ const batch /*: ConcreteBatch*/ = {
             "kind": "Variable",
             "name": "_id",
             "variableName": "id",
+            "type": "ObjectID"
+          },
+          {
+            "kind": "Variable",
+            "name": "journey",
+            "variableName": "journey",
             "type": "ObjectID"
           },
           {
@@ -129,6 +152,11 @@ const batch /*: ConcreteBatch*/ = {
             "kind": "FragmentSpread",
             "name": "journey_footprint",
             "args": null
+          },
+          {
+            "kind": "FragmentSpread",
+            "name": "journey_footprint_updater",
+            "args": null
           }
         ],
         "storageKey": null
@@ -165,6 +193,12 @@ const batch /*: ConcreteBatch*/ = {
         "name": "id",
         "type": "ObjectID",
         "defaultValue": null
+      },
+      {
+        "kind": "LocalArgument",
+        "name": "journey",
+        "type": "ObjectID",
+        "defaultValue": null
       }
     ],
     "kind": "Root",
@@ -179,6 +213,12 @@ const batch /*: ConcreteBatch*/ = {
             "kind": "Variable",
             "name": "_id",
             "variableName": "id",
+            "type": "ObjectID"
+          },
+          {
+            "kind": "Variable",
+            "name": "journey",
+            "variableName": "journey",
             "type": "ObjectID"
           },
           {
@@ -244,7 +284,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "mutation journey_create_footprint_Mutation(\n  $when: Date\n  $photos: [String]\n  $note: String\n  $id: ObjectID\n) {\n  footprint_create(when: $when, photos: $photos, note: $note, _id: $id) {\n    id\n    when\n    ...journey_footprint\n  }\n}\n\nfragment journey_footprint on Footprint {\n  when\n  photos\n  note\n  loc\n}\n"
+  "text": "mutation journey_create_footprint_Mutation(\n  $when: Date\n  $photos: [String]\n  $note: String\n  $id: ObjectID\n  $journey: ObjectID\n) {\n  footprint_create(when: $when, photos: $photos, note: $note, _id: $id, journey: $journey) {\n    id\n    when\n    ...journey_footprint\n    ...journey_footprint_updater\n  }\n}\n\nfragment journey_footprint on Footprint {\n  when\n  photos\n  note\n  loc\n}\n\nfragment journey_footprint_updater on Footprint {\n  id\n  when\n  photos\n  note\n  loc\n}\n"
 };
 
 module.exports = batch;

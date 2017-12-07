@@ -79,8 +79,8 @@ type Mutation {
   journey_create(name: String, startedAt: Date, endedAt: Date): Journey
   journey_update(_id: ObjectID!, name: String, startedAt: Date, endedAt: Date): Date
   journey_delete(_id: ObjectID!): Boolean
-  footprint_create(note: String, when: Date, loc: JSON, photos: [String], _id: ObjectID): Footprint
-  footprint_update(_id: ObjectID, patch: JSON): Date
+  footprint_create(journey: ObjectID, note: String, when: Date, loc: JSON, photos: [String], _id: ObjectID): Footprint
+  footprint_update(_id: ObjectID, note: String, when: Date, loc: JSON, photos: [String]): Date
   waypoint_create(when: Date, loc: JSON, photo: String, _id: ObjectID): Waypoint
   waypoint_batch(data: JSON): Int
 }
