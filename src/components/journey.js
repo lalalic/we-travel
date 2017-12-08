@@ -53,7 +53,7 @@ export default compose(
 				}
 			}
 		`
-	}),	
+	}),
 )(class Journey extends Component{
 	state={editing:null}
 	getDayItinerary(dayth){
@@ -196,18 +196,36 @@ class Editor extends Component{
 						style={{width:"100%",border:0,height:100, fontSize:12, paddingTop:5, borderTop:"1px dotted lightgray"}}
 						placeholder="这一刻的想法"
 						defaultValue={note}/>
-					
-					<Chipper chips={[
-						"早餐","午餐","晚餐","购物","门票","公交","飞机","的士",
-						{label:"特色交通"},
-						{label:"特色吃的"},
-						{label:"花销",type:"number"}
-						]}
-						/>
-
-					<Chipper chips={[
-						"太美了","无法呼吸","太壮观了","喜欢这里"
-						]}/>
+						
+					<div style={{zoom:0.6}}>
+						<Chipper 
+							chips={[
+								"太美了","无法呼吸","太壮观了","喜欢这里"
+							]}>
+							<Chipper 
+								title="吃。。。"
+								autoOpen={false}
+								chips={[
+									"早餐","午餐","晚餐",
+									{label:"特色吃的"},
+								]}
+								/>
+							<Chipper 
+								title="行。。。"
+								autoOpen={false}
+								chips={[
+									"公交","飞机","的士",
+									{label:"特色交通"},
+								]}/>
+							<Chipper 
+								title="住。。。"
+								autoOpen={false}
+								chips={[
+									"酒店","B&B","青年旅馆",
+									{label:"特色"},
+								]}/>
+						</Chipper>
+					</div>
 				</div>
 			</Dialog>
 		)
@@ -216,12 +234,13 @@ class Editor extends Component{
 	save(){
 		const {footprint,save, onFinished}=this.props
 		const {photos, text}=this.refs
-		
-		save({
+		photos.upload()
+			.then(photos=>save({
 				...footprint, 
-				photos:photos.value,
+				photos,
 				note:text.value,
-			}).then(onFinished)
+			}))
+			.then(onFinished)
 	}
 }
 

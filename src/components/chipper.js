@@ -7,17 +7,11 @@ import IconMore from 'material-ui/svg-icons/navigation/expand-more'
 import IconLess from 'material-ui/svg-icons/navigation/expand-less'
 
 export default class Chipper extends Component{
-	constructor(){
-		super(...arguments)
-		this.state={
-			open:this.props.autoOpen
-		}
-	}
+	state={open:this.props.autoOpen===undefined ? true : this.props.autoOpen}
 	render(){
-		const {chips=[], children, title, autoOpen=true, ...others}=this.props
+		const {chips=[], children, title, autoOpen=true, style, ...others}=this.props
 		const {open}=this.state
 
-		let style={display: 'flex',flexWrap: 'wrap'}
 		let header=null, icon
 
 		if(title){
@@ -31,16 +25,15 @@ export default class Chipper extends Component{
 			}
 
 			header=(<div style={{color:"lightgray"}} onClick={onClick} unselectable="on">{icon}{title}</div>)
-
-			if(!open)
-				style.display="none"
 		}
 
 		return (
 			<div>
 				{header}
-				<div style={style} {...others}>
-					{chips.map(chip=>this.achip(chip))}
+				<div style={{display:!open ? "none" : undefined}}>
+					<div {...others} style={{display: 'flex',flexWrap: 'wrap'}}>
+						{chips.map(chip=>this.achip(chip))}
+					</div>
 					{children}
 				</div>
 			</div>
@@ -64,10 +57,12 @@ export default class Chipper extends Component{
 			}
 		break
 		default:
-			return (<Chip key={key||data} style={style}>
+			return (
+				<Chip key={key||data} style={style}>
 					<Avatar></Avatar>
 					{data}
-				</Chip>)
+				</Chip>
+			)
 		}
 	}
 }

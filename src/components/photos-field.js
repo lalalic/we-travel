@@ -10,14 +10,14 @@ export default class PhotosField extends Component{
 		let uiPhotos=photos.map((photo,i)=>(<Photo 
 				key={photo} 
 				{...props} 
-				onPhoto={url=>this.insert(url,i)} 
+				onClick={()=>this.context.viewPhoto(photo)}
 				src={photo}
 				/>)
 			)
 
         if(uiPhotos.length<max)
             uiPhotos.push(<Photo 
-				key="_new" 
+				key={Date.now()} 
 				{...props} 
 				onPhoto={url=>this.insert(url)}
 				/>
@@ -30,20 +30,25 @@ export default class PhotosField extends Component{
 		)
 	}
 
-	insert(url,i){
+	insert(url){
 		const {photos}=this.state
 		if(photos.indexOf(url)!=-1){
 			this.forceUpdate()
 			return
 		}
-		if(i!=undefined)
-			photos.splice(i,1,url)
-		else
-			this.setState({photos:photos.concat([url])})
+		this.setState({photos:[...photos, url]})
 	}
 
 	focus(){
 		
+	}
+	
+	upload(){
+		
+	}
+	
+	static contextTypes={
+		viewPhoto: PropTypes.func
 	}
 
 	static propTypes={

@@ -1,4 +1,4 @@
-import React from "react"
+import React,{Component} from "react"
 import PropTypes from "prop-types"
 
 import {connect} from "react-redux"
@@ -12,8 +12,6 @@ import {Router, Route, IndexRoute, Direct, IndexRedirect, hashHistory} from "rea
 import QiliApp, * as qili from "qili-app"
 import CheckUpdate from "qili/components/check-update"
 import CommandBar from "qili/components/command-bar"
-
-import PhotoViewer from "components/photo-viewer"
 
 import IconAccount from 'material-ui/svg-icons/action/account-box'
 import IconExplore from 'material-ui/svg-icons/action/explore'
@@ -64,10 +62,12 @@ const withNavigator=()=>BaseComponent=>{
 }
 
 import Journey, {Life, Creator} from "journey"
+import {WithPhotoViewer} from "components/photo-viewer"
+
 
 const router=(
 	<Router history={hashHistory}>
-		<Route path="/">
+		<Route path="/" component={WithPhotoViewer}>
 			<IndexRoute component={compose(
 				withNavigator(),
 				getContext({
