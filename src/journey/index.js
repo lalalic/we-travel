@@ -9,6 +9,7 @@ import IconSave from "material-ui/svg-icons/file/cloud-done"
 import IconMap from "material-ui/svg-icons/maps/map"
 import IconSchedule from "material-ui/svg-icons/maps/edit-location"
 import IconPublish from "material-ui/svg-icons/image/camera-roll"
+import IconComment from "material-ui/svg-icons/communication/comment"
 import IconRemove from "material-ui/svg-icons/action/delete"
 
 import CommandBar from "qili/components/command-bar"
@@ -125,8 +126,14 @@ export default compose(
             action:"Comment",
 			label:"评论",
 			onSelect: toComment,
+			icon:<IconComment/>
+        },
+		{
+            action:"Publish",
+			label:"出版",
+			onSelect: toPublish,
 			icon:<IconPublish/>
-        }
+        },
 	]
 	startedAt=startedAt ? new Date(startedAt) : startedAt
 
@@ -165,7 +172,7 @@ export default compose(
 				className="floating sticky top right"
 				mini={true}
 				onClick={toPublish}>
-				$<IconPublish/>
+				<IconPublish/>
 			</FloatingActionButton>
 
 			<div style={{padding:5}}>

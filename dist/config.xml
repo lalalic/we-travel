@@ -8,24 +8,15 @@
         lalalic
     </author>
     <content src="cordova.html" />
-	
-	
-	
-    <plugin name="cordova-plugin-whitelist" spec="^1.2.2" />
-    <plugin name="cordova-plugin-file" spec="^4.2.0" />
-    <plugin name="cordova-sqlite-storage" spec="^1.4.6"/>
-    <plugin name="cordova-plugin-file-transfer" spec="^1.5.1"/>
-    <plugin name="cordova-plugin-camera" spec="^2.2.0"/>
-    <plugin name="cordova-plugin-wechat" spec="^1.2.0">
+    <plugin name="cordova-plugin-whitelist" spec="1.2.2" />
+    <plugin name="cordova-plugin-file" spec="4.2.0" />
+    <plugin name="cordova-sqlite-storage" spec="1.4.6" />
+    <plugin name="cordova-plugin-file-transfer" spec="1.5.1" />
+    <plugin name="cordova-plugin-camera" spec="2.2.0" />
+    <plugin name="cordova-plugin-wechat" spec="1.2.0">
         <variable name="APP_ID" value="xx" />
     </plugin>
-	<plugin name="photopos" spec="../plugins/photoPos" />
-	
-	
-	
-	
-	
-	
+    <plugin name="photopos" spec="../plugins/photoPos" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -40,6 +31,5 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <icon src="res/icon.png" />
-    <hook src="../scripts/icon.js" type="before_prepare" />
+    <icon src="www/images/icon.png" />
 </widget>

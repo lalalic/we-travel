@@ -53,7 +53,7 @@
     "test": "jest",
     "cordova": "cordova create cordova --link-to=dist && cd cordova && cordova platform add android && cordova build android --release -- --keystore=../lalalic.keystore --alias=lalalic",
     "relay": "relay-compiler --src ./src --schema ./schema.graphql",
-    "persist": "qili-persist src cloud",
+    "persist": "node ../qili-app/scripts/persisted-query.js src cloud",
     "cloud": "watchify cloud/index.js -o cloud/__generated.js --node --noparse"
   },
   "jest": {},

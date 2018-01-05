@@ -61,9 +61,18 @@ const withNavigator=()=>BaseComponent=>{
 	return WithNavigator
 }
 
+import My from "setting/my"
+import Setting from "qili/ui/setting"
+import Profile from "qili/ui/user-profile"
+
 import Journey, {Life, Creator} from "journey"
 import {WithPhotoViewer} from "components/photo-viewer"
 
+import Explore from "explore"
+
+import Publish from "publish"
+
+import Comment from "qili/components/comment"
 
 const router=(
 	<Router history={hashHistory}>
@@ -118,9 +127,29 @@ const router=(
 							id,
 							journey:data.me.journey,
 							toLife:()=>router.replace("/"),
+							toComment:()=>router.push(`/journey/${id}/comment`),
+							toPublish:()=>router.push(`/journey/${id}/publish`),
 							...others
 						}))
 					)(Journey)}/>
+					
+					<Route 
+						path="publish"
+						component={
+							compose(
+								
+							)(Publish)
+						}
+						/>
+					
+					<Route 
+						path="comment"
+						component={
+							compose(
+								
+							)(Comment)
+						}
+						/>
 					{/*
 					<Route path="itinerary">
 						<IndexRoute  component={compose(
@@ -133,7 +162,63 @@ const router=(
 				*/}
 				</Route>
 			</Route>
+			
+			<Route path="explore" component={
+					compose(
+						withNavigator(),
+					)(Explore)
+				}/>
+		
+			<Route path="my">
+				<IndexRoute  component={
+						compose(
+							withNavigator(),
+							withQuery({
+								query: graphql`
+									query src_my_Query{
+										me{
+											...my
+										}
+									}
+								`
+							}),
+							withProps(({me})=>({data:me})),
+							getContext({router:PropTypes.object}),
+							mapProps(({router,...others})=>({
+								...others,
+								toSetting: ()=>router.push('/my/setting'),
+								toProfile: ()=>router.push('/my/profile')
+							})),
+						)(My)
+					}/>
 
+				<Route path="setting" component={withNavigator()(Setting)}/>
+
+				<Route path="profile" component={
+						compose(
+							withQuery({
+								query:graphql`
+									query src_profile_Query{
+										me{
+											id
+											username
+											birthday
+											gender
+											location
+											photo
+											signature
+										}
+									}
+									`,
+							}),
+							withProps(({me})=>({
+								...me,
+								birthday: me&&me.birthday ? new Date(me.birthday) : undefined
+							})),
+						)(Profile)
+					}/>
+			</Route>
+		
 		</Route>
 	</Router>
 )
