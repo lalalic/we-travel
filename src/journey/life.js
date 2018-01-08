@@ -29,7 +29,7 @@ export class Life extends Component{
 
 		if(active.length>0){
 			mapToggler=(<FloatingActionButton
-							className="sticky top right _2"
+							className="sticky bottom right _2"
 							mini={true}
 							onClick={toggleMap}>
 							<IconMap/>

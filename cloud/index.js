@@ -40,11 +40,13 @@ Cloud.typeDefs=`
         when:Date
         loc:JSON
         photo: String
+		author: ObjectID
     }
 
     extend type User{
         journeys:[Journey]
         journey(_id:ObjectID):Journey
+		waypoints(startedAt:Date, endedAt:Date): [Waypoint]
     }
 
     extend type Mutation{
@@ -93,8 +95,15 @@ Cloud.resolver=Cloud.merge(
             footprints({_id},{last,before},{app}){
                 return app.findEntity("footprints",{journey:_id}, cursor=>cursor.sort({when:-1}))
             },
-            waypoints({_id},{},{app}){
-                return app.nextPage("waypoints",{last:30}, cursor=>cursor.sort({when:-1}))
+            waypoints({startedAt, endedAt},{},{app,user}){
+                return app.findEntity(
+					"waypoints",
+					{author:user._id}, 
+					cursor=>cursor
+						.filter({when:{$gte:startedAt}})
+						.filter({when:{$lte:endedAt}})
+						.sort({when:-1})
+				)
             }
         },
 
@@ -113,7 +122,17 @@ Cloud.resolver=Cloud.merge(
             },
             journey(_,{_id},{app,user}){
                 return app.get1Entity("journeys",{_id,author:user._id})
-            }
+            },
+			waypoints(_,{startedAt, endedAt},{app,user}){
+				return app.findEntity(
+					"waypoints", 
+					{author:user._id},
+					cursor=>cursor
+						.filter({when:{$gte:startedAt}})
+						.filter({when:{$lte:endedAt}})
+						.sort({when:-1})
+				)
+			}
         },
 
         Mutation:{
@@ -137,6 +156,7 @@ Cloud.resolver=Cloud.merge(
             },
             async waypoint_batch(_,waypoints,{app,user}){
                 waypoints=(Array.isArray(waypoints) ? waypoints : [waypoints]).filter(a=>a)
+				waypoints.forEach(a=>a.author=user._id)
                 let conn=await app.collection("waypoints")
                 try{
                     let {nInserted}=await conn.insert(waypoints)

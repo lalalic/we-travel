@@ -136,6 +136,7 @@ type User implements Node {
   roles: [Role]
   journeys: [Journey]
   journey(_id: ObjectID): Journey
+  waypoints(startedAt:Date, endedAt:Date): [Waypoint]
 }
 
 type Waypoint implements Node {
@@ -143,4 +144,5 @@ type Waypoint implements Node {
   when: Date
   loc: JSON
   photo: String
+  author: ObjectID
 }
