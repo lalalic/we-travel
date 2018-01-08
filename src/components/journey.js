@@ -70,7 +70,7 @@ export default compose(
 	}
 
 	render(){
-		let {journey:{footprints,startedAt}, id, 
+		let {journey:{footprints,startedAt}, id,
 			toJourney, createFootprint, updateFootprint,
 			onMap, publishable}=this.props
 		let currentDate=null, lastDay=0
@@ -118,15 +118,15 @@ export default compose(
 			)
 		}
 
-		all.push(<Title 
-			journey={this.props.journey} 
-			key="title" 
+		all.push(<Title
+			journey={this.props.journey}
+			key="title"
 			toJourney={toJourney}
 			/>
 		)
-		
+
 		let FootprintEditor=null, editor=null
-		
+
 		const {editing}=this.state
 		if(editing){
 			if(editing.id){
@@ -134,8 +134,8 @@ export default compose(
 			}else{
 				FootprintEditor=Creator
 			}
-			
-			editor=(<FootprintEditor 
+
+			editor=(<FootprintEditor
 					id={id}
 					onFinished={()=>this.editing(null)}
 					footprint={editing}/>)
@@ -186,8 +186,8 @@ class Editor extends Component{
 				open={!!footprint}
 				onRequestClose={onFinished}>
 				<div className="section">
-					<PhotosField 
-						ref="photos" 
+					<PhotosField
+						ref="photos"
 						defaultValue={photos}
 						size={50}
 						/>
@@ -196,13 +196,13 @@ class Editor extends Component{
 						style={{width:"100%",border:0,height:100, fontSize:12, paddingTop:5, borderTop:"1px dotted lightgray"}}
 						placeholder="这一刻的想法"
 						defaultValue={note}/>
-						
+
 					<div style={{zoom:0.6}}>
-						<Chipper 
+						<Chipper
 							chips={[
 								"太美了","无法呼吸","太壮观了","喜欢这里"
 							]}>
-							<Chipper 
+							<Chipper
 								title="吃。。。"
 								autoOpen={false}
 								chips={[
@@ -210,14 +210,14 @@ class Editor extends Component{
 									{label:"特色吃的"},
 								]}
 								/>
-							<Chipper 
+							<Chipper
 								title="行。。。"
 								autoOpen={false}
 								chips={[
 									"公交","飞机","的士",
 									{label:"特色交通"},
 								]}/>
-							<Chipper 
+							<Chipper
 								title="住。。。"
 								autoOpen={false}
 								chips={[
@@ -236,13 +236,15 @@ class Editor extends Component{
 		const {photos, text}=this.refs
 		photos.upload()
 			.then(photos=>save({
-				...footprint, 
+				...footprint,
 				photos,
 				note:text.value,
 			}))
 			.then(onFinished)
 	}
 }
+
+
 
 
 const Creator=compose(
@@ -293,7 +295,7 @@ const Updater=compose(
 				}
 			`
 		}
-	}),		
+	}),
 )(Editor)
 
 export const Title=compose(

@@ -9,12 +9,17 @@ import IconRightArrow from 'material-ui/svg-icons/hardware/keyboard-arrow-right'
 
 export const My=props=>(
 	<Account {...props}>
-		<ListItem 
+		<ListItem
 			disabled={typeof(PhotoPos)=="undefined"}
 			leftIcon={<LocationIcon/>}
 			primaryText="备份照片轨迹"
-			rightIcon={<IconRightArrow/>}
-			onClick={()=>typeof(PhotoPos)!="undefined" && PhotoPos.backup()}
+			onClick={()=>{
+					if(typeof(PhotoPos)!="undefined"){
+						PhotoPos.backup()
+							.then(n=>console.log(`发现${n}个waypoint`))
+					}
+				}
+			}
 			/>
 	</Account>
 )
@@ -27,5 +32,5 @@ export default compose(
 			photo
 		}
 	`),
-	withProps(({data})=>data)	
+	withProps(({data})=>data)
 )(My)

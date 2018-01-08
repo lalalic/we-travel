@@ -1,4 +1,4 @@
-window.PhotoPos={
+module.exports={
 	version:1,
 	extract: function(from, to){
 		return new Promise( function(resolve, reject){

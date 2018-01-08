@@ -105,6 +105,7 @@ public class PhotoPosPlugin extends CordovaPlugin{
                     callbackContext.success(dbHelper.backup());
                 }
             });
+			return true;
         }
 
 		return false;

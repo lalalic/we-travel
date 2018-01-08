@@ -19,8 +19,8 @@ module.exports=(base,HTML,port)=>{
 			port,
 			host:"0.0.0.0",
 			disableHostCheck:true,
-			hot:true,
-			inline:true, //for apk
+			hot:false,
+			inline:false, //for apk
 			setup(app){
 				app.get("/app.apk.version",(req, res)=>res.json(require("./package.json").version))
 			}
