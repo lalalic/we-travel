@@ -45,22 +45,27 @@ class Editor extends Component{
         let {note, photos,when}=footprint
 
 		return (
-			<Dialog title={new Date(when).smartFormat()}
+			<Dialog 
+				contentClassName="page"
+				autoDetectWindowHeight={false}
+				contentStyle={{width:"100%",maxWidth:"none",height:"100%",maxHeight:"none"}}
+				title={new Date(when).smartFormat()}
 				actions={actions}
 				modal={false}
 				open={!!footprint}
 				onRequestClose={onFinished}>
+				
 				<div className="section">
+					<textarea ref="text"
+						style={{width:"100%",border:0,height:100, fontSize:12, paddingBottom:5}}
+						placeholder="这一刻的想法"
+						defaultValue={note}/>
+						
 					<PhotosField
 						ref="photos"
 						defaultValue={photos}
 						size={50}
 						/>
-
-					<textarea ref="text"
-						style={{width:"100%",border:0,height:100, fontSize:12, paddingTop:5, borderTop:"1px dotted lightgray"}}
-						placeholder="这一刻的想法"
-						defaultValue={note}/>
 
 					<div style={{zoom:0.6}}>
 						<Chipper
@@ -105,7 +110,6 @@ class Editor extends Component{
 		}).then(onFinished)
 	}
 }
-
 export const Creator=compose(
 	withMutation(({id})=>{
 		return {

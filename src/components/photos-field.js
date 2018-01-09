@@ -24,7 +24,7 @@ export default class PhotosField extends Component{
 			)
 
 		return (
-			<div style={{textAlign:"center"}}>
+			<div>
 				{uiPhotos}
 			</div>
 		)
