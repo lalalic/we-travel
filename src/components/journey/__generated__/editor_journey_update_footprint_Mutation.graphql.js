@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash f82cdf3ddc9bbcb3d2d1987a1a096b28
+ * @relayHash 14f7c7f014048a9f452077595ec650db
  */
 
 /* eslint-disable */
@@ -9,20 +9,20 @@
 
 /*::
 import type {ConcreteBatch} from 'relay-runtime';
-export type journey_update_footprint_MutationVariables = {|
+export type editor_journey_update_footprint_MutationVariables = {|
   when?: ?any;
   photos?: ?$ReadOnlyArray<?string>;
   note?: ?string;
   id?: ?any;
 |};
-export type journey_update_footprint_MutationResponse = {|
+export type editor_journey_update_footprint_MutationResponse = {|
   +footprint_update: ?any;
 |};
 */
 
 
 /*
-mutation journey_update_footprint_Mutation(
+mutation editor_journey_update_footprint_Mutation(
   $when: Date
   $photos: [String]
   $note: String
@@ -62,7 +62,7 @@ const batch /*: ConcreteBatch*/ = {
     ],
     "kind": "Fragment",
     "metadata": null,
-    "name": "journey_update_footprint_Mutation",
+    "name": "editor_journey_update_footprint_Mutation",
     "selections": [
       {
         "kind": "ScalarField",
@@ -102,7 +102,7 @@ const batch /*: ConcreteBatch*/ = {
   "id": null,
   "kind": "Batch",
   "metadata": {},
-  "name": "journey_update_footprint_Mutation",
+  "name": "editor_journey_update_footprint_Mutation",
   "query": {
     "argumentDefinitions": [
       {
@@ -131,7 +131,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ],
     "kind": "Root",
-    "name": "journey_update_footprint_Mutation",
+    "name": "editor_journey_update_footprint_Mutation",
     "operation": "mutation",
     "selections": [
       {
@@ -168,7 +168,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "mutation journey_update_footprint_Mutation(\n  $when: Date\n  $photos: [String]\n  $note: String\n  $id: ObjectID\n) {\n  footprint_update(when: $when, photos: $photos, note: $note, _id: $id)\n}\n"
+  "text": "mutation editor_journey_update_footprint_Mutation(\n  $when: Date\n  $photos: [String]\n  $note: String\n  $id: ObjectID\n) {\n  footprint_update(when: $when, photos: $photos, note: $note, _id: $id)\n}\n"
 };
 
 module.exports = batch;

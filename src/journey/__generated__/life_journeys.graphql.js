@@ -63,7 +63,7 @@ const fragment /*: ConcreteFragment*/ = {
     },
     {
       "kind": "FragmentSpread",
-      "name": "journey_title",
+      "name": "title_journey",
       "args": null
     }
   ],

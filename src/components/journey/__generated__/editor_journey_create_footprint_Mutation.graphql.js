@@ -1,6 +1,6 @@
 /**
  * @flow
- * @relayHash b150cde760d973baa8376c65bec1aba6
+ * @relayHash 17491d9bf593e84c7ace618ea6faebfa
  */
 
 /* eslint-disable */
@@ -9,14 +9,14 @@
 
 /*::
 import type {ConcreteBatch} from 'relay-runtime';
-export type journey_create_footprint_MutationVariables = {|
+export type editor_journey_create_footprint_MutationVariables = {|
   when?: ?any;
   photos?: ?$ReadOnlyArray<?string>;
   note?: ?string;
   id?: ?any;
   journey?: ?any;
 |};
-export type journey_create_footprint_MutationResponse = {|
+export type editor_journey_create_footprint_MutationResponse = {|
   +footprint_create: ?{|
     +id: string;
     +when: ?any;
@@ -26,7 +26,7 @@ export type journey_create_footprint_MutationResponse = {|
 
 
 /*
-mutation journey_create_footprint_Mutation(
+mutation editor_journey_create_footprint_Mutation(
   $when: Date
   $photos: [String]
   $note: String
@@ -36,19 +36,19 @@ mutation journey_create_footprint_Mutation(
   footprint_create(when: $when, photos: $photos, note: $note, _id: $id, journey: $journey) {
     id
     when
-    ...journey_footprint
-    ...journey_footprint_updater
+    ...footprint
+    ...editor_journey_footprint_updater
   }
 }
 
-fragment journey_footprint on Footprint {
+fragment footprint on Footprint {
   when
   photos
   note
   loc
 }
 
-fragment journey_footprint_updater on Footprint {
+fragment editor_journey_footprint_updater on Footprint {
   id
   when
   photos
@@ -93,7 +93,7 @@ const batch /*: ConcreteBatch*/ = {
     ],
     "kind": "Fragment",
     "metadata": null,
-    "name": "journey_create_footprint_Mutation",
+    "name": "editor_journey_create_footprint_Mutation",
     "selections": [
       {
         "kind": "LinkedField",
@@ -150,12 +150,12 @@ const batch /*: ConcreteBatch*/ = {
           },
           {
             "kind": "FragmentSpread",
-            "name": "journey_footprint",
+            "name": "footprint",
             "args": null
           },
           {
             "kind": "FragmentSpread",
-            "name": "journey_footprint_updater",
+            "name": "editor_journey_footprint_updater",
             "args": null
           }
         ],
@@ -167,7 +167,7 @@ const batch /*: ConcreteBatch*/ = {
   "id": null,
   "kind": "Batch",
   "metadata": {},
-  "name": "journey_create_footprint_Mutation",
+  "name": "editor_journey_create_footprint_Mutation",
   "query": {
     "argumentDefinitions": [
       {
@@ -202,7 +202,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ],
     "kind": "Root",
-    "name": "journey_create_footprint_Mutation",
+    "name": "editor_journey_create_footprint_Mutation",
     "operation": "mutation",
     "selections": [
       {
@@ -284,7 +284,7 @@ const batch /*: ConcreteBatch*/ = {
       }
     ]
   },
-  "text": "mutation journey_create_footprint_Mutation(\n  $when: Date\n  $photos: [String]\n  $note: String\n  $id: ObjectID\n  $journey: ObjectID\n) {\n  footprint_create(when: $when, photos: $photos, note: $note, _id: $id, journey: $journey) {\n    id\n    when\n    ...journey_footprint\n    ...journey_footprint_updater\n  }\n}\n\nfragment journey_footprint on Footprint {\n  when\n  photos\n  note\n  loc\n}\n\nfragment journey_footprint_updater on Footprint {\n  id\n  when\n  photos\n  note\n  loc\n}\n"
+  "text": "mutation editor_journey_create_footprint_Mutation(\n  $when: Date\n  $photos: [String]\n  $note: String\n  $id: ObjectID\n  $journey: ObjectID\n) {\n  footprint_create(when: $when, photos: $photos, note: $note, _id: $id, journey: $journey) {\n    id\n    when\n    ...footprint\n    ...editor_journey_footprint_updater\n  }\n}\n\nfragment footprint on Footprint {\n  when\n  photos\n  note\n  loc\n}\n\nfragment editor_journey_footprint_updater on Footprint {\n  id\n  when\n  photos\n  note\n  loc\n}\n"
 };
 
 module.exports = batch;

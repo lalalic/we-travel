@@ -38,14 +38,6 @@ export default class PhotosField extends Component{
 		}
 		this.setState({photos:[...photos, url]})
 	}
-
-	focus(){
-		
-	}
-	
-	upload(){
-		
-	}
 	
 	static contextTypes={
 		viewPhoto: PropTypes.func

@@ -19,13 +19,15 @@ import Chipper from "components/chipper"
 import Journey, {Title} from "components/journey"
 import Map from "components/map"
 
+import {withGetWaypoints,withUploadWaypoints} from "components/waypoint"
+
 export class Life extends Component{
 	render(){
 		let {memory, wish, active,
 			shouldShowMap=false,
 			toggleMap,toCreate,toJourney}=this.props
 		
-		let map=null, mapToggler=null, life=null
+		let map=null, mapToggler=null, life=null, content=null
 
 		if(active.length>0){
 			mapToggler=(<FloatingActionButton
@@ -53,7 +55,7 @@ export class Life extends Component{
 			}
 		}
 
-		if([memory,active,wish].find(a=>a.length>0)){
+		if(!map && [memory,active,wish].find(a=>a.length>0)){
 			life=(
 				<Stepper orientation="vertical" activeStep={-1}>
 				{
@@ -82,24 +84,30 @@ export class Life extends Component{
 				}
 				</Stepper>
 			)
+			
+			content=(
+				<div style={{background:"white"}}>
+					<FloatingActionButton
+						className="floating sticky top right"
+						mini={true}
+						onClick={toCreate}>
+						<IconAdd/>
+					</FloatingActionButton>
+
+					{life}
+					{(active.length+memory.length)==0 ? (<Empty icon={<Logo/>}>开始你的心旅程</Empty>) : null}
+				</div>
+			)
+			
 		}
 
 		return (
 			<div>
 				{map}
-				<FloatingActionButton
-					className="floating sticky top right"
-					mini={true}
-					onClick={toCreate}>
-					<IconAdd/>
-				</FloatingActionButton>
-
+				
 				{mapToggler}
-
-				<div style={{background:"white"}}>
-					{life}
-					{(active.length+memory.length)==0 ? (<Empty icon={<Logo/>}>开始你的心旅程</Empty>) : null}
-				</div>
+				
+				{content}
 			</div>
 		)
 	}
@@ -114,10 +122,10 @@ export class Life extends Component{
 	}
 
 	showJourneyOnMap(map){
-		const {active:[journey], getWayPoints}=this.props
+		const {active:[journey], getWaypoints}=this.props
 		const {startedAt, endedAt}=journey
 		const {Marker,Point,PointCollection,Label,Size}=BMap
-		getWayPoints(startedAt, endedAt)
+		getWaypoints(startedAt, endedAt)
 			.then(waypoints=>{
 				map.reset()
 				if(waypoints.length==0)
@@ -174,7 +182,7 @@ export default compose(
 			startedAt
 			endedAt
 			status
-			...journey_title
+			...title_journey
 		}
 	`),
 	withProps(({journeys})=>{
@@ -213,4 +221,6 @@ export default compose(
 		})
 		return {memory,wish,active}
 	}),
+	withGetWaypoints,
+	withUploadWaypoints,
 )(Life)

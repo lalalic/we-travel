@@ -36,7 +36,7 @@ const fragment /*: ConcreteFragment*/ = {
     },
     {
       "kind": "FragmentSpread",
-      "name": "journey_title",
+      "name": "title_journey",
       "args": null
     },
     {
@@ -63,12 +63,12 @@ const fragment /*: ConcreteFragment*/ = {
         },
         {
           "kind": "FragmentSpread",
-          "name": "journey_footprint",
+          "name": "footprint",
           "args": null
         },
         {
           "kind": "FragmentSpread",
-          "name": "journey_footprint_updater",
+          "name": "editor_journey_footprint_updater",
           "args": null
         }
       ],
@@ -91,7 +91,7 @@ const fragment /*: ConcreteFragment*/ = {
         },
         {
           "kind": "FragmentSpread",
-          "name": "journey_day",
+          "name": "day_itinerary",
           "args": null
         }
       ],

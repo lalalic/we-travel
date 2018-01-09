@@ -1,3 +1,4 @@
+import PropTypes from "prop-types"
 import {compose,getContext, mapProps} from "recompose"
 import {withMutation} from "qili/tools/recompose"
 
@@ -7,9 +8,9 @@ export const withGetWaypoints=compose(
 		...others,
 		getWaypoints(startedAt, endedAt){
 			return client.runQL({
-					id:"file_token_Query",
-					variables:key,
-					__ql:graphql`
+					id:"waypoint_any_Query",
+					variables:{startedAt, endedAt},
+					query: (graphql`
 						query waypoint_any_Query($startedAt:Date, $endedAt:Date){
 							me{
 								waypoints(startedAt: $startedAt, endedAt: $endedAt){
@@ -19,14 +20,14 @@ export const withGetWaypoints=compose(
 								}
 							}
 						}
-					`
+					`)().text
 				})
 				.then(({data:{me:{waypoints}}})=>waypoints)
 		}
 	}))
 )
 
-export const withUploadWaypoints=withMutatio({
+export const withUploadWaypoints=withMutation({
 	name:"uploadWaypoints",
 	promise:true,
 	mutation: graphql`
@@ -35,3 +36,7 @@ export const withUploadWaypoints=withMutatio({
 		}
 	`
 })
+
+function getWaypoints(startedAt, endedAt){
+	return PhotoPos.query(startedAt, endedAt)
+}

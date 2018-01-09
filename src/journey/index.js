@@ -102,6 +102,7 @@ export default compose(
 	withMutation(({id})=>({
 		variables:{id},
 		promise:true,
+		patch4: id,
 		mutation:graphql`
 			mutation journey_update_Mutation($id:ObjectID!, $name:String, $startedAt:Date, $endedAt:Date){
 				journey_update(_id:$id, name:$name, startedAt:$startedAt, endedAt:$endedAt)
@@ -168,18 +169,11 @@ export default compose(
 	let refName
 	return (
 		<div>
-			<FloatingActionButton
-				className="floating sticky top right"
-				mini={true}
-				onClick={toPublish}>
-				<IconPublish/>
-			</FloatingActionButton>
-
 			<div style={{padding:5}}>
 				<TextField
 					floatingLabelText="一次有独特意义的旅行名称"
 					fullWidth={true}
-					value={name}
+					defaultValue={name}
 					onBlur={({target:{value}})=>mutate({name:value})}
 					onKeyDown={({keyCode,target:{value}})=>{keyCode==13 && mutate({name:value})}}/>
 

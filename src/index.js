@@ -16,6 +16,7 @@ import CommandBar from "qili/components/command-bar"
 import IconAccount from 'material-ui/svg-icons/action/account-box'
 import IconExplore from 'material-ui/svg-icons/action/explore'
 import IconLife from 'material-ui/svg-icons/maps/person-pin-circle'
+import {withUploadWaypoints} from "components/waypoint"
 
 const DOMAIN='travel'
 function reducer(state={},{type,payload}){
@@ -33,7 +34,8 @@ const WeTravel=compose(
 			[DOMAIN]:reducer
 		}
 	})),
-	withInit({
+	withUploadWaypoints,
+	withInit(({uploadWaypoints})=>({
 		query:graphql`
 			query src_prefetch_Query{
 				me{
@@ -41,8 +43,25 @@ const WeTravel=compose(
 					token
 				}
 			}
-		`
-	}),
+		`,
+		onSuccess(){
+			if(typeof(PhotoPos)!="undefined"){
+				let lastUpload=localStorage.getItem("lastUpload")||undefined
+				if(lastUpload)
+					lastUpload=new Date(parseInt(lastUpload))
+				
+				PhotoPos
+					.extract()
+					.then(()=>PhotoPos.query(lastUpload))
+					.then(waypoints=>{
+						if(waypoints){
+							uploadWaypoints(waypoints)
+								.then(()=>localStorage.setItem("lastUpload",Date.getTime()))
+						}
+					})
+			}
+		}
+	})),
 )(QiliApp)
 
 const Navigator=()=>(
