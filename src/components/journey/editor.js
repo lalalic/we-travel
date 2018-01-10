@@ -21,6 +21,9 @@ import PhotosField from "components/photos-field"
 import TransportationField from "components/transportation-field"
 import date from "qili/tools/date"
 import {withGetToken,upload} from "qili/components/file"
+import FullPage from "qili/components/full-page"
+import CommandBar from "qili/components/command-bar"
+import {InfoForm, Field} from "qili/components/info-form"
 
 class Editor extends Component{
 	render(){
@@ -45,17 +48,8 @@ class Editor extends Component{
         let {note, photos,when}=footprint
 
 		return (
-			<Dialog 
-				contentClassName="page"
-				autoDetectWindowHeight={false}
-				contentStyle={{width:"100%",maxWidth:"none",height:"100%",maxHeight:"none"}}
-				title={new Date(when).smartFormat()}
-				actions={actions}
-				modal={false}
-				open={!!footprint}
-				onRequestClose={onFinished}>
-				
-				<div className="section">
+			<FullPage>			
+				<div className="section"  style={{padding:5}}>
 					<textarea ref="text"
 						style={{width:"100%",border:0,height:100, fontSize:12, paddingBottom:5}}
 						placeholder="这一刻的想法"
@@ -66,38 +60,51 @@ class Editor extends Component{
 						defaultValue={photos}
 						size={50}
 						/>
-
-					<div style={{zoom:0.6}}>
-						<Chipper
-							chips={[
-								"太美了","无法呼吸","太壮观了","喜欢这里"
-							]}>
+						
+					<InfoForm>
+						<Field primaryText="风景">
 							<Chipper
-								title="吃。。。"
-								autoOpen={false}
+								chips={[
+									"太美了","无法呼吸","太壮观了","喜欢这里"
+								]}/>
+						</Field>
+						<Field primaryText="住">
+							<Chipper
+								chips={[
+									"酒店","B&B","青年旅馆",
+									{label:"特色"},
+								]}/>
+						</Field>
+						<Field primaryText="食">
+							<Chipper
 								chips={[
 									"早餐","午餐","晚餐",
 									{label:"特色吃的"},
 								]}
 								/>
+						</Field>
+						<Field primaryText="行">
 							<Chipper
-								title="行。。。"
-								autoOpen={false}
 								chips={[
 									"公交","飞机","的士",
 									{label:"特色交通"},
 								]}/>
-							<Chipper
-								title="住。。。"
-								autoOpen={false}
-								chips={[
-									"酒店","B&B","青年旅馆",
-									{label:"特色"},
-								]}/>
-						</Chipper>
-					</div>
+						</Field>
+					</InfoForm>
 				</div>
-			</Dialog>
+				<CommandBar 
+					className="footbar"
+					items={[
+						{
+							action:"Cancel",
+							onSelect: onFinished
+						},
+						{
+							action: "Save",
+							onSelect: ()=>this.save()
+						}
+					]}/>
+			</FullPage>
 		)
 	}
 

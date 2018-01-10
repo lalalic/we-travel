@@ -36,7 +36,3 @@ export const withUploadWaypoints=withMutation({
 		}
 	`
 })
-
-function getWaypoints(startedAt, endedAt){
-	return PhotoPos.query(startedAt, endedAt)
-}
