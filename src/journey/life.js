@@ -26,7 +26,7 @@ export class Life extends Component{
 		let {memory, wish, active,
 			shouldShowMap=false,
 			toggleMap,toCreate,toJourney}=this.props
-		
+
 		let map=null, mapToggler=null, life=null, content=null
 
 		if(active.length>0){
@@ -41,7 +41,8 @@ export class Life extends Component{
 				map=(<div>
 						<Map className="sticky full" ref="map"
 							onReady={map=>this.showJourneyOnMap(map)}
-							style={{opacity:"0.5", zIndex:1}}/>
+							style={{opacity:"0.5", zIndex:1}}>
+						</Map>
 						<div className="sticky bottom right _2">
 							<Slider axis="y" ref="opacity"
 								style={{height:100}}
@@ -84,7 +85,7 @@ export class Life extends Component{
 				}
 				</Stepper>
 			)
-			
+
 			content=(
 				<div style={{background:"white"}}>
 					<FloatingActionButton
@@ -98,15 +99,15 @@ export class Life extends Component{
 					{(active.length+memory.length)==0 ? (<Empty icon={<Logo/>}>开始你的心旅程</Empty>) : null}
 				</div>
 			)
-			
+
 		}
 
 		return (
 			<div>
 				{map}
-				
+
 				{mapToggler}
-				
+
 				{content}
 			</div>
 		)

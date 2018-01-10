@@ -49,15 +49,17 @@ const WeTravel=compose(
 				let lastUpload=localStorage.getItem("lastUpload")||undefined
 				if(lastUpload)
 					lastUpload=new Date(parseInt(lastUpload))
-				
+
 				PhotoPos
 					.extract()
 					.then(()=>PhotoPos.query(lastUpload))
 					.then(waypoints=>{
+						console.log(`found ${waypoints.length} waypoints`)
+						/*
 						if(waypoints){
 							uploadWaypoints(waypoints)
 								.then(()=>localStorage.setItem("lastUpload",Date.getTime()))
-						}
+						}*/
 					})
 			}
 		}
@@ -151,21 +153,21 @@ const router=(
 							...others
 						}))
 					)(Journey)}/>
-					
-					<Route 
+
+					<Route
 						path="publish"
 						component={
 							compose(
-								
+
 							)(Publish)
 						}
 						/>
-					
-					<Route 
+
+					<Route
 						path="comment"
 						component={
 							compose(
-								
+
 							)(Comment)
 						}
 						/>
@@ -181,13 +183,13 @@ const router=(
 				*/}
 				</Route>
 			</Route>
-			
+
 			<Route path="explore" component={
 					compose(
 						withNavigator(),
 					)(Explore)
 				}/>
-		
+
 			<Route path="my">
 				<IndexRoute  component={
 						compose(
@@ -237,7 +239,7 @@ const router=(
 						)(Profile)
 					}/>
 			</Route>
-		
+
 		</Route>
 	</Router>
 )
