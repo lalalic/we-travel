@@ -2408,7 +2408,7 @@ dom-converter@~0.1:
   dependencies:
     utila "~0.3"
 
-dom-helpers@^3.2.0:
+dom-helpers@^3.2.0, dom-helpers@^3.2.1:
   version "3.2.1"
   resolved "http://registry.npm.taobao.org/dom-helpers/download/dom-helpers-3.2.1.tgz#3203e07fed217bd1f424b019735582fc37b2825a"
 
@@ -6374,6 +6374,15 @@ react-event-listener@^0.4.0:
     prop-types "^15.5.4"
     warning "^3.0.0"
 
+react-event-listener@^0.5.1:
+  version "0.5.3"
+  resolved "http://registry.npm.taobao.org/react-event-listener/download/react-event-listener-0.5.3.tgz#a8b492596ad601865314fcc2c18cb87b6ce3876e"
+  dependencies:
+    babel-runtime "^6.26.0"
+    fbjs "^0.8.16"
+    prop-types "^15.6.0"
+    warning "^3.0.0"
+
 react-hammerjs@^0.5.0:
   version "0.5.0"
   resolved "http://registry.npm.taobao.org/react-hammerjs/download/react-hammerjs-0.5.0.tgz#aa20e5c5f44d660f3e8e87ed11282f12173e77ae"
@@ -6435,6 +6444,35 @@ react-router@^2.4.1:
     hoist-non-react-statics "^1.2.0"
     invariant "^2.2.1"
     loose-envify "^1.2.0"
+    warning "^3.0.0"
+
+react-swipeable-views-core@^0.12.11:
+  version "0.12.11"
+  resolved "http://registry.npm.taobao.org/react-swipeable-views-core/download/react-swipeable-views-core-0.12.11.tgz#3cf2b4daffbb36f9d69bd19bf5b2d5370b6b2c1b"
+  dependencies:
+    babel-runtime "^6.23.0"
+    warning "^3.0.0"
+
+react-swipeable-views-utils@^0.12.11:
+  version "0.12.11"
+  resolved "http://registry.npm.taobao.org/react-swipeable-views-utils/download/react-swipeable-views-utils-0.12.11.tgz#3c9a6a2b8dbdcc331a5d107419578f57b7e101d6"
+  dependencies:
+    babel-runtime "^6.23.0"
+    fbjs "^0.8.4"
+    keycode "^2.1.7"
+    prop-types "^15.6.0"
+    react-event-listener "^0.5.1"
+    react-swipeable-views-core "^0.12.11"
+
+react-swipeable-views@^0.12.12:
+  version "0.12.12"
+  resolved "http://registry.npm.taobao.org/react-swipeable-views/download/react-swipeable-views-0.12.12.tgz#60cdc8e3682ed082aaf094f7761eaf691ed28a6f"
+  dependencies:
+    babel-runtime "^6.23.0"
+    dom-helpers "^3.2.1"
+    prop-types "^15.5.4"
+    react-swipeable-views-core "^0.12.11"
+    react-swipeable-views-utils "^0.12.11"
     warning "^3.0.0"
 
 react-swipeable-views@^0.7.7:

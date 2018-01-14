@@ -17,7 +17,7 @@ import Photo from "qili/components/photo"
 import Empty from "qili/components/empty"
 import Chipper from "components/chipper"
 import Journey, {Title} from "components/journey"
-import Map from "components/map"
+import {Map, MyTrack} from "components/map"
 
 import {withGetWaypoints,withUploadWaypoints} from "components/waypoint"
 
@@ -42,6 +42,7 @@ export class Life extends Component{
 						<Map className="sticky full" ref="map"
 							onReady={map=>this.showJourneyOnMap(map)}
 							style={{opacity:"0.5", zIndex:1}}>
+							<MyTrack onPointClick={(waypoint,map)=>console.log(waypoint)}/>
 						</Map>
 						<div className="sticky bottom right _2">
 							<Slider axis="y" ref="opacity"
