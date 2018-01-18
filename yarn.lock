@@ -2408,7 +2408,7 @@ dom-converter@~0.1:
   dependencies:
     utila "~0.3"
 
-dom-helpers@^3.2.0, dom-helpers@^3.2.1:
+dom-helpers@^3.2.0:
   version "3.2.1"
   resolved "http://registry.npm.taobao.org/dom-helpers/download/dom-helpers-3.2.1.tgz#3203e07fed217bd1f424b019735582fc37b2825a"
 
@@ -4471,7 +4471,7 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
-keycode@^2.1.1, keycode@^2.1.7:
+keycode@^2.1.1, keycode@^2.1.6, keycode@^2.1.7:
   version "2.1.9"
   resolved "http://registry.npm.taobao.org/keycode/download/keycode-2.1.9.tgz#964a23c54e4889405b4861a5c9f0480d45141dfa"
 
@@ -6365,6 +6365,12 @@ react-dom@^15.1.0, react-dom@^15.6.1:
     object-assign "^4.1.0"
     prop-types "^15.5.10"
 
+react-event-listener@^0.3.0:
+  version "0.3.1"
+  resolved "http://registry.npm.taobao.org/react-event-listener/download/react-event-listener-0.3.1.tgz#6994a35429d6eaaef19f8d0a0d34a20590ad290d"
+  dependencies:
+    react-addons-shallow-compare "^0.14.0 || ^15.0.0"
+
 react-event-listener@^0.4.0:
   version "0.4.5"
   resolved "http://registry.npm.taobao.org/react-event-listener/download/react-event-listener-0.4.5.tgz#e3e895a0970cf14ee8f890113af68197abf3d0b1"
@@ -6372,15 +6378,6 @@ react-event-listener@^0.4.0:
     babel-runtime "^6.20.0"
     fbjs "^0.8.4"
     prop-types "^15.5.4"
-    warning "^3.0.0"
-
-react-event-listener@^0.5.1:
-  version "0.5.3"
-  resolved "http://registry.npm.taobao.org/react-event-listener/download/react-event-listener-0.5.3.tgz#a8b492596ad601865314fcc2c18cb87b6ce3876e"
-  dependencies:
-    babel-runtime "^6.26.0"
-    fbjs "^0.8.16"
-    prop-types "^15.6.0"
     warning "^3.0.0"
 
 react-hammerjs@^0.5.0:
@@ -6446,33 +6443,13 @@ react-router@^2.4.1:
     loose-envify "^1.2.0"
     warning "^3.0.0"
 
-react-swipeable-views-core@^0.12.11:
-  version "0.12.11"
-  resolved "http://registry.npm.taobao.org/react-swipeable-views-core/download/react-swipeable-views-core-0.12.11.tgz#3cf2b4daffbb36f9d69bd19bf5b2d5370b6b2c1b"
+react-swipeable-views@0.7.7:
+  version "0.7.7"
+  resolved "http://registry.npm.taobao.org/react-swipeable-views/download/react-swipeable-views-0.7.7.tgz#97b88a6c976955544b6b5053199f632842f7052f"
   dependencies:
-    babel-runtime "^6.23.0"
-    warning "^3.0.0"
-
-react-swipeable-views-utils@^0.12.11:
-  version "0.12.11"
-  resolved "http://registry.npm.taobao.org/react-swipeable-views-utils/download/react-swipeable-views-utils-0.12.11.tgz#3c9a6a2b8dbdcc331a5d107419578f57b7e101d6"
-  dependencies:
-    babel-runtime "^6.23.0"
-    fbjs "^0.8.4"
-    keycode "^2.1.7"
-    prop-types "^15.6.0"
-    react-event-listener "^0.5.1"
-    react-swipeable-views-core "^0.12.11"
-
-react-swipeable-views@^0.12.12:
-  version "0.12.12"
-  resolved "http://registry.npm.taobao.org/react-swipeable-views/download/react-swipeable-views-0.12.12.tgz#60cdc8e3682ed082aaf094f7761eaf691ed28a6f"
-  dependencies:
-    babel-runtime "^6.23.0"
-    dom-helpers "^3.2.1"
-    prop-types "^15.5.4"
-    react-swipeable-views-core "^0.12.11"
-    react-swipeable-views-utils "^0.12.11"
+    babel-runtime "^6.11.6"
+    keycode "^2.1.6"
+    react-event-listener "^0.3.0"
     warning "^3.0.0"
 
 react-swipeable-views@^0.7.7:

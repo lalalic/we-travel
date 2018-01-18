@@ -18,6 +18,7 @@ import Empty from "qili/components/empty"
 import Chipper from "components/chipper"
 import Journey, {Title} from "components/journey"
 import {Map, MyTrack} from "components/map"
+import PhotoCleaner from "components/photo-cleaner"
 
 import {withGetWaypoints,withUploadWaypoints} from "components/waypoint"
 
@@ -42,7 +43,10 @@ export class Life extends Component{
 						<Map className="sticky full" ref="map"
 							onReady={map=>this.showJourneyOnMap(map)}
 							style={{opacity:"0.5", zIndex:1}}>
-							<MyTrack onPointClick={(waypoint,map)=>console.log(waypoint)}/>
+							<PhotoCleaner ref="photoCleaner"/>
+							<MyTrack onPointClick={(current, all)=>{
+									this.refs.photoCleaner.setState({current,all})
+								}}/>
 						</Map>
 						<div className="sticky bottom right _2">
 							<Slider axis="y" ref="opacity"

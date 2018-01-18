@@ -57,11 +57,11 @@ export default class extends Component{
                     p.waypoint=waypoint
                     return p
                 })
-                let pc=this.pc=new PointCollection(points, {size:BMAP_POINT_SIZE_SMALL,shape:BMAP_POINT_SHAPE_CIRCLE, color:"red"})
+                let pc=this.pc=new PointCollection(points, {size:BMAP_POINT_SIZE_BIG,shape:BMAP_POINT_SHAPE_CIRCLE, color:"red"})
                 map.addOverlay(pc)
                 if(onPointClick){
                     pc.addEventListener("click",({point})=>{
-                        onPointClick(point.waypoint, map)
+                        onPointClick(point.waypoint, waypoints)
                     })
                 }
                 let delta=Math.round(points.length/5)
