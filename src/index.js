@@ -17,6 +17,7 @@ import IconAccount from 'material-ui/svg-icons/action/account-box'
 import IconExplore from 'material-ui/svg-icons/action/explore'
 import IconLife from 'material-ui/svg-icons/maps/person-pin-circle'
 import {withUploadWaypoints} from "components/waypoint"
+import Offline from "offline"
 
 const DOMAIN='travel'
 function reducer(state={},{type,payload}){
@@ -32,7 +33,17 @@ const WeTravel=compose(
 		appId:"5a15f808429af3002ea0a1c4",
 		reducers:{
 			[DOMAIN]:reducer
-		}
+		},
+		supportOffline: new Offline(
+			"5a15f808429af3002ea0a1c4",
+			require("imports-loader?Cloud=qili/tools/offline/schema!../cloud")
+				.makeSchema(
+					require("text-loader!../schema.graphql"),
+					{
+						
+					}
+				)
+		)
 	})),
 	withUploadWaypoints,
 	withInit(({uploadWaypoints})=>({

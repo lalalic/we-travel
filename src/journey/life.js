@@ -43,7 +43,6 @@ export class Life extends Component{
 						<Map className="sticky full" ref="map"
 							onReady={map=>this.showJourneyOnMap(map)}
 							style={{opacity:"0.5", zIndex:1}}>
-							<PhotoCleaner ref="photoCleaner"/>
 							<MyTrack onPointClick={(current, all)=>{
 									this.refs.photoCleaner.setState({current,all})
 								}}/>
@@ -106,7 +105,7 @@ export class Life extends Component{
 			)
 
 		}
-
+		
 		return (
 			<div>
 				{map}
@@ -114,6 +113,8 @@ export class Life extends Component{
 				{mapToggler}
 
 				{content}
+				
+				<PhotoCleaner ref="photoCleaner"/>
 			</div>
 		)
 	}
