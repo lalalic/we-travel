@@ -11,6 +11,7 @@
     "qili-app": "https://github.com/lalalic/qili-app",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
+    "react-image-gallery": "^0.8.7",
     "react-redux": "^4.4.5",
     "react-router": "^2.4.1",
     "react-swipeable-views": "0.7.7",

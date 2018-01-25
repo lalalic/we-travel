@@ -9,7 +9,7 @@ import {withInit, withQuery, withPagination, withFragment} from "qili/tools/reco
 import {graphql} from "react-relay"
 import {Router, Route, IndexRoute, Direct, IndexRedirect, hashHistory} from "react-router"
 
-import QiliApp, * as qili from "qili-app"
+import QiliApp, * as qili from "qili"
 import CheckUpdate from "qili/components/check-update"
 import CommandBar from "qili/components/command-bar"
 
@@ -26,6 +26,7 @@ function reducer(state={},{type,payload}){
 			return state
 	}
 }
+const Cloud=require("imports-loader?Cloud=qili-app/lib/tools/offline/schema!../cloud")
 
 const WeTravel=compose(
 	withProps(()=>({
@@ -36,13 +37,16 @@ const WeTravel=compose(
 		},
 		supportOffline: new Offline(
 			"5a15f808429af3002ea0a1c4",
-			require("imports-loader?Cloud=qili/tools/offline/schema!../cloud")
-				.makeSchema(
-					require("text-loader!../schema.graphql"),
-					{
-						
+			Cloud.makeSchema(
+				require("../schema.graphql"),
+				{
+					User:{
+						journeys(_,{}, {app,user}){
+							return app.findEntity("journeys")
+						}
 					}
-				)
+				}
+			)
 		)
 	})),
 	withUploadWaypoints,

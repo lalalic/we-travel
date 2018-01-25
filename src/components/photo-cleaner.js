@@ -7,7 +7,7 @@ import IconRemove from "material-ui/svg-icons/action/delete-forever"
 import IconUpload from "material-ui/svg-icons/file/cloud-upload"
 
 export default class extends Component{
-    state={current:null,all:[]}
+    state={current:null,all:this.props.photos}
     render(){
         let {current, all}=this.state
         if(!current)

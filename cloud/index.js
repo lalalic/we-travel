@@ -63,7 +63,7 @@ const relative=d=>Math.floor((Date.now()-d.getTime())/(24*60*60*1000))
 Cloud.resolver=Cloud.merge(
     {
         Journey:{
-            id:({_id})=>`jounerys:${_id}`,
+            id:({_id})=>`journeys:${_id}`,
             status({startedAt, endedAt}){
                 if(startedAt){
             		started=relative(startedAt)
@@ -170,3 +170,5 @@ Cloud.resolver=Cloud.merge(
         }
     }
 )
+
+module.exports=Cloud
