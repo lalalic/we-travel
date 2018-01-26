@@ -109,10 +109,28 @@ import Explore from "explore"
 import Publish from "publish"
 
 import Comment from "qili/components/comment"
+import PhotoManager from "components/photo-manager"
 
 const router=(
 	<Router history={hashHistory}>
 		<Route path="/" component={WithPhotoViewer}>
+			<Route
+						path="photos"
+						component={compose(
+							
+							)(()=><PhotoManager points={[
+								{path:"http://lorempixel.com/1000/600/nature/1/"},
+								{path:"http://lorempixel.com/1000/600/nature/2/"},
+								{path:"http://lorempixel.com/1000/600/nature/3/"},
+								{path:"http://lorempixel.com/1000/600/nature/4/"},
+								{path:"http://lorempixel.com/1000/600/nature/5/"},
+								{path:"http://lorempixel.com/1000/600/nature/6/"},
+								{path:"http://lorempixel.com/1000/600/nature/7/"},
+								{path:"http://lorempixel.com/1000/600/nature/8/"},
+								]}
+								/>
+							)}
+						/>
 			<IndexRoute component={compose(
 				withNavigator(),
 				getContext({
@@ -186,6 +204,7 @@ const router=(
 							)(Comment)
 						}
 						/>
+					
 					{/*
 					<Route path="itinerary">
 						<IndexRoute  component={compose(

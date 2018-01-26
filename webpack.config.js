@@ -34,6 +34,12 @@ module.exports=env=>{
 					'less-loader'
 				]
 			},{
+				test:/.css?$/,
+				use: [
+					'style-loader',
+					{ loader: 'css-loader', options: { importLoaders: 1 } }
+				]
+			},{
 				test:/.graphql?$/,
 				use: 'text-loader'
 			}]
