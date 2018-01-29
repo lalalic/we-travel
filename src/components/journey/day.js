@@ -20,6 +20,7 @@ import Chipper from "components/chipper"
 import PhotosField from "components/photos-field"
 import TransportationField from "components/transportation-field"
 import date from "qili/tools/date"
+import DayPhotos from "./day-photos"
 
 export default compose(
 	withProps(()=>({requiredFields:null})),
@@ -33,7 +34,7 @@ export default compose(
 		`
 	})
 )(({day,date, onEdit, itinerary,label=TransportationField.getLabel})=>(
-	<Step disabled={false}>
+	<Step disabled={false} active={true}>
 		<StepLabel icon={`${day}`} onTouchTap={onEdit}>
 			<span>{date.smartFormat("今天")}</span>
 			<span>
@@ -50,5 +51,8 @@ export default compose(
 			</span>
 			<IconMore/>
 		</StepLabel>
+		<StepContent>
+			<DayPhotos date={date}/>
+		</StepContent>
 	</Step>
 ))
