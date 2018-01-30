@@ -22,6 +22,9 @@ const PhotoPos=window.PhotoPos={
 	},
 	extract(){
 		return Promise.resolve([])
+	},
+	remove(a){
+		
 	}
 }
 

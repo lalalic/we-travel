@@ -4,9 +4,11 @@ import SwipeableViews from 'react-swipeable-views'
 import {Toolbar, IconButton} from "material-ui"
 import {GridList, GridTile} from 'material-ui/GridList'
 
-import StarBorder from 'material-ui/svg-icons/toggle/star-border';
+import IconStar from 'material-ui/svg-icons/toggle/star-border';
+import IconRemove from 'material-ui/svg-icons/action/delete-forever';
 
 import {distance, place} from "components/map/tools"
+import FullPage from "qili/components/full-page"
 
 const styles = {
 	root: {
@@ -29,7 +31,11 @@ const styles = {
 }
 
 export default class extends Component{
-	state={photos:[], places:[], selected:[]}
+	static contextTypes={
+		muiTheme:PropTypes.object
+	}
+	
+	state={photos:[], places:[], selected:[], fullPage:false}
 	componentDidMount(){
 		const {date}=this.props
 		let from=new Date(date).toDate()
@@ -68,7 +74,7 @@ export default class extends Component{
 			.then(places=>this.setState({places}))
 	}
 	
-	render(){
+	renderFullPage(){
 		const {photos,places,selected}=this.state
 		if(photos.length==0)
 			return null
@@ -76,7 +82,85 @@ export default class extends Component{
 		if(typeof(PhotoPos)=="undefined")
 			return null
 		
+		const {muiTheme:{page:{height}}}=this.context
 		
+		return (
+			<FullPage>
+				<SwipeableViews>
+					<div style={styles.root}>
+						<GridList 
+							style={styles.gridList}
+							cellHeight={height*0.7}
+							 >
+						{
+							photos.filter(a=>!selected.includes(a)).map(a=>{
+								let {path,taken,lat,lng}=a
+								return (
+									<GridTile
+										key={path}
+										title={new Date(taken).format("hh:mm")}
+										actionIcon={
+											<div>
+												<IconButton onClick={()=>this.select(a)}>
+													<IconStar color="rgb(0, 188, 212)" />
+												</IconButton>
+												<IconButton onClick={()=>this.remove(a)}>
+													<IconRemove color="rgb(0, 188, 212)" />
+												</IconButton>
+											</div>
+											}
+										titleStyle={styles.titleStyle}
+										titleBackground="linear-gradient(to top, rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.3) 70%,rgba(0,0,0,0) 100%)"
+										>
+										<img src={path} onClick={()=>this.setState({fullPage:false})} style={styles.photo}/>
+									</GridTile>
+								)
+							})
+						}
+						</GridList>		
+					</div>
+				</SwipeableViews>
+				<div className="sticky bottom 1">
+					<div><IconButton></IconButton></div>
+					<div style={styles.root}>
+						<GridList 
+							style={styles.gridList}
+							cellHeight={50}
+							 >
+						{
+							selected.map(a=>{
+								let {path,taken,lat,lng}=a
+								return (
+									<GridTile
+										key={path}
+										>
+										<img 
+											onClick={()=>this.unselect(a)}
+											src={path} 
+											style={styles.photo}
+											/>
+									</GridTile>
+								)
+							})
+						}
+						</GridList>		
+					</div>
+				</div>
+			</FullPage>
+		)
+		
+	}
+	
+	render(){
+		const {photos,places,selected, fullPage}=this.state
+		if(photos.length==0)
+			return null
+		
+		if(typeof(PhotoPos)=="undefined")
+			return null
+		
+		if(fullPage)
+			return this.renderFullPage()
 		
 		return (
 			<div>
@@ -92,12 +176,17 @@ export default class extends Component{
 								return (
 									<GridTile
 										key={path}
-										title={new Date(taken).format("hh:mm")}
-										actionIcon={<IconButton onClick={()=>this.select(a)}><StarBorder color="rgb(0, 188, 212)" /></IconButton>}
+										actionIcon={
+											<div>
+												<IconButton onClick={()=>this.select(a)}>
+													<IconStar color="rgb(0, 188, 212)" />
+												</IconButton>
+											</div>
+											}
 										titleStyle={styles.titleStyle}
 										titleBackground="linear-gradient(to top, rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.3) 70%,rgba(0,0,0,0) 100%)"
 										>
-										<img src={path} style={styles.photo}/>
+										<img src={path} onClick={()=>this.setState({fullPage:true})} style={styles.photo}/>
 									</GridTile>
 								)
 							})
@@ -106,6 +195,7 @@ export default class extends Component{
 					</div>
 				</SwipeableViews>
 				<div>
+					<div><IconButton></IconButton></div>
 					<div style={styles.root}>
 						<GridList 
 							style={styles.gridList}
@@ -143,5 +233,11 @@ export default class extends Component{
 	unselect(a){
 		let {selected}=this.state
 		this.setState({selected:selected.filter(b=>b!==a)})
+	}
+	
+	remove(a){
+		let {photos}=this.state
+		this.setState({photos:photos.filter(b=>a!==b)})
+		PhotoPos.remove(a)
 	}
 }
