@@ -63,7 +63,7 @@ export default compose(
 		`
 	}),
 )(class Journey extends Component{
-	state={editing:null}
+	state={editing:null, active:null}
 	getDayItinerary(dayth){
 		const {journey:{itineraries}}=this.props
 		return itineraries.reduceRight((found,a)=>{
@@ -76,11 +76,17 @@ export default compose(
 			return found
 		},[])
 	}
+	
+	componentWillReceiveProps(next){
+		
+	}
 
 	render(){
 		let {journey:{footprints,startedAt}, id,
 			toJourney, createFootprint, updateFootprint,
 			onMap, publishable}=this.props
+		const {editing,active}=this.state
+		
 		let currentDate=null, lastDay=0
 		let all=[]
 		startedAt=new Date(startedAt)
@@ -97,7 +103,9 @@ export default compose(
 						key={`day${lastDay}`}
 						day={lastDay}
 						date={date}
+						active={active==lastDay}
 						itinerary={this.getDayItinerary(lastDay)}
+						onPhoto={day=>this.setState({active:day})}
 						onEdit={()=>this.editing({when:date})}/>)
 				}
 			}
@@ -135,7 +143,6 @@ export default compose(
 
 		let FootprintEditor=null, editor=null
 
-		const {editing}=this.state
 		if(editing){
 			if(editing.id){
 				FootprintEditor=Updater

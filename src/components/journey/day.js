@@ -1,7 +1,7 @@
 import React, {Component} from "react"
 import PropTypes from "prop-types"
 
-import {compose, withProps, mapProps, getContext} from "recompose"
+import {compose, withProps, mapProps, getContext,withState} from "recompose"
 import {withFragment, withQuery, withMutation} from "qili/tools/recompose"
 
 import {FloatingActionButton, FlatButton, RaisedButton, IconButton, Dialog, Toggle} from "material-ui"
@@ -32,10 +32,10 @@ export default compose(
 				trans
 			}
 		`
-	})
-)(({day,date, onEdit, itinerary,label=TransportationField.getLabel})=>(
-	<Step disabled={false} active={true}>
-		<StepLabel icon={`${day}`} onTouchTap={onEdit}>
+	}),
+)(({day,date, onPhoto, onEdit,active, itinerary,label=TransportationField.getLabel})=>(
+	<Step disabled={!active} active={active}>
+		<StepLabel icon={`${day}`}>
 			<span>{date.smartFormat("今天")}</span>
 			<span>
 			{
@@ -49,10 +49,9 @@ export default compose(
 				},"")
 			}
 			</span>
-			<IconMore/>
+			<IconButton  onTouchTap={onEdit}><IconMore/></IconButton>
+			<IconButton  onTouchTap={()=>onPhoto(day)}><IconCamera/></IconButton>
 		</StepLabel>
-		<StepContent>
-			<DayPhotos date={date}/>
-		</StepContent>
+		<StepContent>{active ? (<DayPhotos date={date}/>) : null}</StepContent>
 	</Step>
 ))
