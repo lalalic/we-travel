@@ -30,7 +30,7 @@ const styles = {
 	}
 }
 
-export default class extends Component{
+export default class DayPhotos extends Component{
 	static contextTypes={
 		muiTheme:PropTypes.object
 	}
@@ -176,6 +176,7 @@ export default class extends Component{
 								return (
 									<GridTile
 										key={path}
+										title={<span style={{fontSize:"xx-small"}}>{new Date(taken).format("hh:mm")}</span>}
 										actionIcon={
 											<div>
 												<IconButton onClick={()=>this.select(a)}>
@@ -195,7 +196,6 @@ export default class extends Component{
 					</div>
 				</SwipeableViews>
 				<div>
-					<div><IconButton></IconButton></div>
 					<div style={styles.root}>
 						<GridList 
 							style={styles.gridList}
